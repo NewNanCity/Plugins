@@ -1,0 +1,8 @@
+name: ${project.name}
+version: ${project.version}
+main: city.newnan.mcron.MCron
+api-version: 1.16
+load: STARTUP
+authors: [ Gk0Wk ]
+description: ${project.description}
+website: https://www.newnan.city/

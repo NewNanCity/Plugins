@@ -1,0 +1,46 @@
+version: ${project.version}
+# GMT time zone offset, supported format:
+# Z - for UTC
+# +h
+# +hh
+# +hh:mm
+# -hh:mm
+# +hhmm
+# -hhmm
+# +hh:mm:ss
+# -hh:mm:ss
+# +hhmmss
+# -hhmmss
+timezone-offset: '+8'
+on-server-ready: []
+# Example:
+#  - 'broadcast §aServer is ready, enjoy your day!'
+#  - 'gamerule keepInventory true'
+on-plugin-ready: []
+# Example:
+#   Essentials:
+#      - 'say the essentials plugin is ready.'
+on-plugin-disable: []
+schedule-tasks:
+  '0 30 8 * * mon-fri':
+    - 'broadcast Enjoy your weekday!'
+  '0 30 8 * * sat,sun':
+    - 'broadcast Enjoy your weekend!'
+  '0 0 0 1 1 *':
+    - 'broadcast Happy new year！'
+#  '0 55 23 * * *':
+#    - 'broadcast Server will restart in §e5§r minutes!'
+#  '0 0 0 * * *':
+#    - 'stop'
+msg:
+  prefix: '§l[MCron]§r '
+  execute: '§a§lExecute Command: §r{0}§r'
+  reload: 'MCron has been reloaded.'
+  invalid_expression: 'The expression is not valid: {0}'
+  list-head: '§3======== §3§l[MCron List] §r§3========'
+  list-cron: '§a§l{0} §r(Next: {1})'
+  list-cron-outdated: '§c§l{0} §r(Next: {1})'
+  list-command: '§6- §r{0}§r'
+  help-head: '§3======== §3§l[MCron Help] §r§3========'
+  help-reload: 'Reload all cron expressions in the config.yml'
+  help-list: 'List all cron expressions, their next execute time and commands.'

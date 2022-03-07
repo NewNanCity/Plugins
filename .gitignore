@@ -119,6 +119,6 @@ test/
 !gradle-wrapper.jar
 
 # Local Test Launch point
-src
+./src/
 
 */build
