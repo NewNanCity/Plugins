@@ -1,5 +1,5 @@
-project.description = 'A death trigger'
-project.version = '0.0.1'
+project.description = 'Make your minecart change max speed on different block.'
+project.version = '1.0.2'
 
 group project.group
 version project.version
@@ -9,6 +9,8 @@ shadowJar {
     exclude 'META-INF/*.SF'
     exclude 'META-INF/*.DSA'
     exclude 'META-INF/*.RSA'
+    relocate 'co.aikar.commands', (project.group + '.' + project.name + '.' + 'acf')
+    relocate 'co.aikar.locales', (project.group + '.' + project.name + '.' + 'locales')
 }
 
 processResources {

@@ -64,4 +64,6 @@ subprojects {
     }
 
     task buildAll(group: 'NewNanPlugins', dependsOn: shadowJar) {}
+
+    task cleanAll(group: 'NewNanPlugins', dependsOn: clean) {}
 }

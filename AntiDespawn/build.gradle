@@ -9,8 +9,6 @@ shadowJar {
     exclude 'META-INF/*.SF'
     exclude 'META-INF/*.DSA'
     exclude 'META-INF/*.RSA'
-    relocate 'co.aikar.commands', (project.group + '.' + project.name + '.' + 'acf')
-    relocate 'co.aikar.locales', (project.group + '.' + project.name + '.' + 'locales')
 }
 
 processResources {
@@ -25,5 +23,5 @@ processResources {
 }
 
 dependencies {
-    implementation 'io.papermc.paper:paper-api:1.17.1-R0.1-SNAPSHOT'
+    compileOnly 'io.papermc.paper:paper-api:1.17.1-R0.1-SNAPSHOT'
 }

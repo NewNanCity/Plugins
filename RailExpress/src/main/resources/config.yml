@@ -1,0 +1,17 @@
+version: ${project.version}
+config:
+  - world: ['world', 'world_nether', 'world_the_end']
+    allow-non-player: false
+    power-rail-only: true
+    block-type:
+      # default speed is 0.4, max is 1.5
+      SOUL_SAND: 0.2
+      STONE_BRICKS: 0.6
+      REDSTONE_BLOCK: 0.9
+      EMERALD_BLOCK: 1.2
+      BARRIER: 1.5
+msg:
+  prefix: '§l[RailExpress]§r '
+  reload: 'RailExpress has been reloaded.'
+  help-head: '§3======== §3§l[RailExpress Help] §r§3========'
+  help-reload: 'Reload all express config in the config.yml'

@@ -1,5 +1,4 @@
 project.description = 'Command scheduler. Just works like cron on Linux.'
-project.group = rootProject.group
 project.version = '1.0.3'
 
 group project.group
