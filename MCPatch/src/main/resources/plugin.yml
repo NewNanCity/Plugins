@@ -1,0 +1,7 @@
+name: ${project.name}
+version: ${project.version}
+main: io.github.gk0wk.mcpatch.MCPatch
+api-version: 1.16
+authors: [ Sttot ]
+description: ${project.description}
+website: https://www.newnan.city/

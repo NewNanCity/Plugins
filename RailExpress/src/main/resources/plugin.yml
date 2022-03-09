@@ -4,5 +4,5 @@ main: io.github.gk0wk.railexpress.RailExpress
 authors: [ Gk0Wk ]
 api-version: 1.16
 load: STARTUP
-description: ${projectdescription}
+description: ${project.description}
 website: https://gk0wk.github.io/
