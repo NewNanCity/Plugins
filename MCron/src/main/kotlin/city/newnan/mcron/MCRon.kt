@@ -75,21 +75,25 @@ open class MCron : ExtendedJavaPlugin() {
         cronManager = CronManager()
         Events.subscribe(ServerLoadEvent::class.java, EventPriority.MONITOR)
             .handler { onServerStartup() }
+            .bindWith(this)
         Events.subscribe(PluginEnableEvent::class.java, EventPriority.MONITOR)
             .handler { e: PluginEnableEvent ->
                 onPluginEnable(
                     e.plugin.description.name
                 )
             }
+            .bindWith(this)
         Events.subscribe(PluginDisableEvent::class.java, EventPriority.MONITOR)
             .handler { e: PluginDisableEvent ->
                 onPluginDisable(
                     e.plugin.description.name
                 )
             }
+            .bindWith(this)
     }
 
-    override fun disable() {}
+    override fun disable() {
+    }
     fun reload() = cronManager!!.reload()
 
     internal fun executeCommandsByConfig(vararg nodePath: Any?) {

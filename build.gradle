@@ -36,16 +36,16 @@ subprojects {
     dependencies {
         // Minecraft
         compileOnly 'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT'
-        implementation 'com.github.NewNanCity:Violet:2.0.1'
+        implementation 'com.github.NewNanCity:Violet:2.0.2'
         implementation 'co.aikar:acf-paper:0.5.1-SNAPSHOT'
         // JDK
-        implementation 'org.jetbrains.kotlin:kotlin-stdlib'
+        implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
     }
 
-    sourceCompatibility = 15
-    targetCompatibility = 15
-    java.sourceCompatibility = JavaVersion.VERSION_15
-    java.targetCompatibility = JavaVersion.VERSION_15
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+    java.sourceCompatibility = JavaVersion.VERSION_1_8
+    java.targetCompatibility = JavaVersion.VERSION_1_8
 
     idea {
         module {
@@ -55,11 +55,11 @@ subprojects {
     }
 
     compileKotlin {
-        kotlinOptions.jvmTarget = '15'
+        kotlinOptions.jvmTarget = '1.8'
         kotlinOptions.javaParameters = true
     }
     compileTestKotlin {
-        kotlinOptions.jvmTarget = '15'
+        kotlinOptions.jvmTarget = '1.8'
         kotlinOptions.javaParameters = true
     }
 
