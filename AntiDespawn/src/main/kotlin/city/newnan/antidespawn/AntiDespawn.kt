@@ -7,7 +7,7 @@ import org.bukkit.event.EventPriority
 
 
 class AntiDespawn : ExtendedJavaPlugin() {
-    public override fun enable() {
+    override fun enable() {
         // Plugin startup logic
         Events.subscribe(
             com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent::class.java,
@@ -18,9 +18,6 @@ class AntiDespawn : ExtendedJavaPlugin() {
             .handler {
                 it.entity.teleport(it.entity.location.world!!.spawnLocation)
             }
-    }
-
-    public override fun disable() {
-        // Plugin shutdown logic
+            .bindWith(this)
     }
 }

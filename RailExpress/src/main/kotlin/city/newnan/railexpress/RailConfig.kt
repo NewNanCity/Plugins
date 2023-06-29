@@ -16,7 +16,7 @@ class RailConfig(
         blockType.childrenMap.forEach { (key: Any, node: ConfigurationNode) ->
             blockSpeedMap[Material.valueOf(
                 (key as String).uppercase(Locale.getDefault())
-            )] = node.getDouble(RailExpress.DEFAULT_SPEED)
+            )] = node.getDouble(DEFAULT_SPEED)
         }
     }
 }

@@ -8,17 +8,14 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventPriority
 import org.bukkit.event.entity.EntityDamageEvent
 
-
 class DeathTrigger : ExtendedJavaPlugin() {
-    public override fun enable() {
+    override fun enable() {
         val world = Bukkit.getWorld("world")
         // Plugin startup logic
         Events.subscribe(EntityDamageEvent::class.java, EventPriority.LOWEST)
-            .filter { event: EntityDamageEvent -> !event.isCancelled }
-            .filter { event: EntityDamageEvent -> event.entityType == EntityType.PLAYER }
-            .filter { event: EntityDamageEvent ->
-                event.entity.location.world == world
-            }
+            .filter { !it.isCancelled }
+            .filter { it.entityType == EntityType.PLAYER }
+            .filter { it.entity.location.world == world }
             .handler { event: EntityDamageEvent ->
                 // 区域筛选
                 val location = event.entity.location
@@ -31,9 +28,6 @@ class DeathTrigger : ExtendedJavaPlugin() {
                 player.teleport(player.bedSpawnLocation!!)
                 event.isCancelled = true
             }
-    }
-
-    public override fun disable() {
-        // Plugin shutdown logic
+            .bindWith(this)
     }
 }

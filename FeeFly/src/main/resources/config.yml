@@ -1,0 +1,4 @@
+tick-per-count: 20
+cost-per-count: 0.3
+fly-speed: 0.05
+target-account:

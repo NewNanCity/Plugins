@@ -1,5 +1,5 @@
 project.description = 'Better book for newnan'
-project.version = '0.0.1'
+project.version = '0.0.2'
 
 group project.group
 version project.version

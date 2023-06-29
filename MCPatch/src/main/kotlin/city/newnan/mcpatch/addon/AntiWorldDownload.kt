@@ -1,5 +1,6 @@
 package city.newnan.mcpatch.addon
 
+import city.newnan.mcpatch.IMCPatchAddon
 import com.google.common.io.ByteStreams
 import city.newnan.mcpatch.MCPatch
 import org.bukkit.Bukkit
@@ -7,7 +8,29 @@ import org.bukkit.entity.Player
 import org.bukkit.plugin.messaging.PluginMessageListener
 
 
-class AntiWorldDownloader private constructor() : PluginMessageListener {
+object AntiWorldDownloader: PluginMessageListener, IMCPatchAddon {
+    override val addonName = "AntiWorldDownloader"
+
+    override fun enable() {
+        MCPatch.INSTANCE.let {
+            Bukkit.getMessenger().also { messenger ->
+                messenger.registerOutgoingPluginChannel(it, "WDL|CONTROL")
+                messenger.registerIncomingPluginChannel(it, "WDL|INIT", this)
+                messenger.registerIncomingPluginChannel(it, "WDL|REQUEST", this)
+            }
+        }
+    }
+
+    override fun close() {
+        MCPatch.INSTANCE.let {
+            Bukkit.getMessenger().also { messenger ->
+                messenger.unregisterOutgoingPluginChannel(it, "WDL|CONTROL")
+                messenger.unregisterIncomingPluginChannel(it, "WDL|INIT", this)
+                messenger.unregisterIncomingPluginChannel(it, "WDL|REQUEST", this)
+            }
+        }
+    }
+
     /**
      * A method that will be thrown when a PluginMessageSource sends a plugin
      * message on a registered channel.
@@ -18,7 +41,7 @@ class AntiWorldDownloader private constructor() : PluginMessageListener {
      */
     override fun onPluginMessageReceived(channel: String, player: Player, message: ByteArray) {
         if ("WDL|INIT" == channel || "WDL|REQUEST" == channel) {
-            MCPatch.INSTANCE?.let {
+            MCPatch.INSTANCE.let {
                 var output = ByteStreams.newDataOutput()
                 output.writeInt(1)
                 output.writeBoolean(false)
@@ -36,23 +59,7 @@ class AntiWorldDownloader private constructor() : PluginMessageListener {
                 player.sendPluginMessage(it, "WDL|CONTROL", output.toByteArray())
             }
             player.kickPlayer("请勿使用WDL插件")
-            MCPatch.messageManager?.printf("玩家 {0} 使用了WDL", player.name)
-        }
-    }
-
-    init {
-        INSTANCE = this
-        MCPatch.INSTANCE?.let {
-            Bukkit.getMessenger().registerOutgoingPluginChannel(it, "WDL|CONTROL")
-            Bukkit.getMessenger().registerIncomingPluginChannel(it, "WDL|INIT", INSTANCE)
-            Bukkit.getMessenger().registerIncomingPluginChannel(it, "WDL|REQUEST", INSTANCE)
-        }
-    }
-
-    companion object {
-        lateinit var INSTANCE: AntiWorldDownloader
-        fun init() {
-            AntiWorldDownloader()
+            MCPatch.INSTANCE.messageManager.printf("玩家 {0} 使用了WDL", player.name)
         }
     }
 }

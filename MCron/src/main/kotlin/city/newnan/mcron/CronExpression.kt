@@ -671,7 +671,7 @@ class CronExpression(expressionString: String) {
          * @param offsetId 时区ID
          */
         internal fun setTimeZoneOffset(offsetId: String?) {
-            localTimezoneOffset = ZoneOffset.of(offsetId)
+            localTimezoneOffset = ZoneOffset.of(offsetId ?: "Z")
         }
     }
 }

@@ -8,22 +8,19 @@ import me.lucko.helper.plugin.ExtendedJavaPlugin
 
 
 class MCPatch : ExtendedJavaPlugin() {
-    public override fun enable() {
-        INSTANCE = this
-        messageManager = MessageManager(this)
-            .setPlayerPrefix("[MCPatch]")
-        // Plugin startup logic
-        DispenserPatch.init()
-        AntiWorldDownloader.init()
-        Contraband.init()
-    }
-
-    public override fun disable() {
-        // Plugin shutdown logic
-    }
-
+    val messageManager: MessageManager by lazy { MessageManager(this) setPlayerPrefix "[MCPatch]" }
     companion object {
-        var INSTANCE: MCPatch? = null
-        var messageManager: MessageManager? = null
+        lateinit var INSTANCE: MCPatch
+    }
+    init { INSTANCE = this }
+
+    private val addons = hashMapOf<IMCPatchAddon, Boolean>(
+        AntiWorldDownloader to true,
+        Contraband to true,
+    )
+
+    override fun enable() {
+        // Plugin startup logic
+        addons.forEach { (addon, enable) -> if (enable) addon.enable() }
     }
 }

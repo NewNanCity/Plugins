@@ -11,22 +11,23 @@ object CronCommands : BaseCommand() {
     @Subcommand("reload")
     @CommandPermission("mcron.reload")
     @Description("{@@msg.help-reload}")
-    fun onReload(sender: CommandSender?) {
-        MCron.instance?.reload()
-        MCron.instance?.messageManager?.printf(sender, "\$msg.reload$")
+    fun reloadCommand(sender: CommandSender?) {
+        MCron.INSTANCE.reload()
+        MCron.INSTANCE.messageManager.printf(sender, "\$msg.reload$")
     }
 
     @Subcommand("ls|list|show")
     @CommandAlias("lscron")
     @CommandPermission("mcron.list")
     @Description("{@@msg.help-list}")
-    fun listCron(sender: CommandSender?) {
-        MCron.instance?.cronManager?.listCron(sender)
+    fun listCronCommand(sender: CommandSender?) {
+        MCron.INSTANCE.cronManager.listCron(sender)
     }
 
     @HelpCommand
+    @Default
     fun onHelp(sender: CommandSender?, help: CommandHelp) {
-        MCron.instance?.messageManager?.printf(sender, "\$msg.help-head$")
+        MCron.INSTANCE.messageManager.printf(sender, "\$msg.help-head$")
         help.showHelp()
     }
 }

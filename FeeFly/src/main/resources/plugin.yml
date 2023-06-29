@@ -1,0 +1,35 @@
+name: ${project.name}
+version: ${project.version}
+main: city.newnan.feefly.FeeFly
+api-version: 1.16
+load: STARTUP
+authors: [ Gk0Wk ]
+description: ${project.description}
+website: https://www.newnan.city/
+# 硬依赖，没有就无法启动
+depend:
+  - 'Vault'
+
+# 权限节点，可选
+permissions:
+  # 模板
+  # 'Example':
+  #  description: '权限的解释'
+  #  default: 玩家权限节点的默认值，true、false、op和not op
+  #  children: #子节点(仅名字)
+  #    'Example2': true会继承父节点的权限，false会与父节点相反
+  'feefly.self':
+    description: '为自己开启付费飞行的权限'
+    default: op
+  'feefly.other':
+    description: '为别人开启付费飞行的权限'
+    default: op
+  'feefly.free':
+    description: '白嫖付费飞行的权限'
+    default: op
+  'feefly.list':
+    description: '显示正在使用付费飞行的玩家的权限'
+    default: op
+  'feefly.reload':
+    description: '重载插件配置'
+    default: op

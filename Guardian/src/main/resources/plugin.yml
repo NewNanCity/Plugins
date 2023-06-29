@@ -1,0 +1,14 @@
+name: ${project.name}
+version: ${project.version}
+main: city.newnan.guardian.Guardian
+api-version: 1.16
+# load: STARTUP 加了这个，depend就不管用，会在 GM 之前启动
+authors: [ Gk0Wk ]
+description: ${project.description}
+website: https://www.newnan.city/
+depend:
+  - GroupManager
+permissions:
+  'guardian.bypass':
+    description: '略过检查权限'
+    default: op

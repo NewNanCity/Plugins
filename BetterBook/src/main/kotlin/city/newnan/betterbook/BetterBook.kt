@@ -20,21 +20,21 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.BookMeta
 
 class BetterBook : ExtendedJavaPlugin() {
-    init { INSTANCE = this }
     companion object {
         lateinit var INSTANCE: BetterBook
             private set
     }
+    init { INSTANCE = this }
 
-    internal val configManager: ConfigManager by lazy { ConfigManager(this).also { it.bindWith(this) } }
-    internal val messageManager: MessageManager by lazy { MessageManager(this).also { it.bindWith(this) } }
+    internal val configManager: ConfigManager by lazy { ConfigManager(this) }
+    internal val messageManager: MessageManager by lazy { MessageManager(this) }
     private val commandManager: PaperCommandManager by lazy { PaperCommandManager(this) }
 
     override fun enable() {
         configManager.startCleanService() touch "config.yml"
         messageManager setPlayerPrefix "[牛腩书局]"
         commandManager.registerCommand(BetterBookCommand)
-        Librarian.enable().bindWith(this)
+        Librarian.enable()
         Events.subscribe(PlayerInteractEvent::class.java, EventPriority.MONITOR)
             .filter { it.hasItem() }
             .filter { it.action == Action.RIGHT_CLICK_AIR || it.action == Action.RIGHT_CLICK_BLOCK }
@@ -42,8 +42,12 @@ class BetterBook : ExtendedJavaPlugin() {
                 if (event.action == Action.RIGHT_CLICK_BLOCK &&
                     event.material == Material.WRITTEN_BOOK &&
                     event.clickedBlock!!.type == Material.LECTERN) return@handler;
-                event.item!!.findBookUUID(writable = false)?.also{
-                    Librarian[it]?.readBook(event.player)?.also { event.isCancelled = true }
+                event.item!!.findBookUUID(writable = false)?.also{ uuid ->
+                    Librarian[uuid]?.readBook(event.player)?.also {
+                        event.isCancelled = true
+                        event.item!!.itemMeta = (event.item!!.itemMeta as BookMeta?)
+                            ?.applyBook(it, toWrittenBook = true, addModifyInfo = false)
+                    }
                 }
             }
             .bindWith(this)
@@ -69,6 +73,6 @@ class BetterBook : ExtendedJavaPlugin() {
     }
 
     override fun disable() {
-        commandManager.unregisterCommand(BetterBookCommand)
+        commandManager.unregisterCommands()
     }
 }

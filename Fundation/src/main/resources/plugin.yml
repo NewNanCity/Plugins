@@ -1,0 +1,23 @@
+name: ${project.name}
+version: ${project.version}
+main: city.newnan.fundation.PluginMain
+api-version: 1.16
+load: STARTUP
+authors: [ Gk0Wk ]
+description: ${project.description}
+website: https://www.newnan.city/
+# 硬依赖，没有就无法启动
+depend:
+  - 'Vault'
+
+# 权限节点，可选
+permissions:
+  # 模板
+  # 'Example':
+  #  description: '权限的解释'
+  #  default: 玩家权限节点的默认值，true、false、op和not op
+  #  children: #子节点(仅名字)
+  #    'Example2': true会继承父节点的权限，false会与父节点相反
+  'deathcost.bypass':
+    description: '死亡不会扣费'
+    default: op

@@ -17,6 +17,7 @@ object Librarian : Terminable {
                 uuidFile.matcher(it).runCatching { if (groupCount() > 1) bookUUIDs.add(UUID.fromString(group(1))) }
             }
         }
+        bindWith(BetterBook.INSTANCE)
         return this
     }
 

@@ -1,0 +1,8 @@
+name: ${project.name}
+version: ${project.version}
+main: city.newnan.findcommandblocks.FindCommandBlocks
+api-version: 1.16
+load: STARTUP
+authors: [ Gk0Wk ]
+description: ${project.description}
+website: https://www.newnan.city/

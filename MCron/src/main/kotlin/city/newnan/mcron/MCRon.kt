@@ -8,123 +8,77 @@ import city.newnan.violet.message.MessageManager
 import me.lucko.helper.Events
 import me.lucko.helper.plugin.ExtendedJavaPlugin
 import org.bukkit.Bukkit
-import org.bukkit.command.CommandSender
-import org.bukkit.configuration.InvalidConfigurationException
 import org.bukkit.event.EventPriority
 import org.bukkit.event.server.PluginDisableEvent
 import org.bukkit.event.server.PluginEnableEvent
 import org.bukkit.event.server.ServerLoadEvent
-import java.io.IOException
 import java.util.*
 
 
-open class MCron : ExtendedJavaPlugin() {
-    internal var configManager: ConfigManager? = null
-    private var languageManager: LanguageManager? = null
-    internal var messageManager: MessageManager? = null
-    internal var cronManager: CronManager? = null
-    override fun load() {
-        // 初始化ConfigManager
-        configManager = ConfigManager(this).apply {
-            touch("config.yml")
-        }
-
-        // 初始化LanguageManager
-        try {
-            val locale = Locale("config")
-            languageManager = LanguageManager(this)
-                .register(locale, "config.yml")
-                .setMajorLanguage(locale)
-        } catch (e: LanguageManager.FileNotFoundException) {
-            e.printStackTrace()
-            onDisable()
-        } catch (e: ConfigManager.UnknownConfigFileFormatException) {
-            e.printStackTrace()
-            onDisable()
-        } catch (e: IOException) {
-            e.printStackTrace()
-            onDisable()
-        }
-
-        // 初始化MessageManager
-        messageManager = languageManager?.let {
-            MessageManager(this).setLanguageProvider(it)
-        }
-        messageManager?.setPlayerPrefix(messageManager!!.sprintf("\$msg.prefix$"))
-        instance = this
+class MCron : ExtendedJavaPlugin() {
+    internal val configManager: ConfigManager by lazy { ConfigManager(this) }
+    private val languageManager: LanguageManager by lazy { LanguageManager(this) }
+    internal val messageManager: MessageManager by lazy { MessageManager(this) }
+    internal val cronManager: CronManager by lazy { CronManager() }
+    private val commandManager: PaperCommandManager by lazy { PaperCommandManager(this) }
+    companion object {
+        lateinit var INSTANCE: MCron
+            private set
+    }
+    init {
+        INSTANCE = this
     }
 
     override fun enable() {
-        // 初始化CommandManager - 不能在load()里面初始化！
-        val commandManager = PaperCommandManager(this)
-        commandManager.usePerIssuerLocale(true, false)
-        try {
-            commandManager.locales.loadYamlLanguageFile("config.yml", Locale("config"))
-        } catch (e: IOException) {
-            e.printStackTrace()
-            onDisable()
-        } catch (e: InvalidConfigurationException) {
-            e.printStackTrace()
-            onDisable()
+        // 初始化ConfigManager
+        configManager touch "config.yml"
+
+        // 初始化LanguageManager
+        Locale("config").also {
+            languageManager.register(it, "config.yml") setMajorLanguage it
         }
 
-        // 注册指令
-        commandManager.registerCommand(CronCommands)
+        // 初始化MessageManager
+        messageManager setLanguageProvider languageManager
+        messageManager setPlayerPrefix messageManager.sprintf("\$msg.prefix$")
 
-        // 注册Cron管理器
-        cronManager = CronManager()
+        // 初始化CommandManager
+        commandManager.run {
+            usePerIssuerLocale(true, false)
+            registerCommand(CronCommands)
+            locales.loadYamlLanguageFile("config.yml", Locale("config"))
+        }
+
+        // 运行Cron
+        cronManager.run()
         Events.subscribe(ServerLoadEvent::class.java, EventPriority.MONITOR)
-            .handler { onServerStartup() }
+            .handler { executeCommandsByConfig("on-server-ready") }
             .bindWith(this)
         Events.subscribe(PluginEnableEvent::class.java, EventPriority.MONITOR)
             .handler { e: PluginEnableEvent ->
-                onPluginEnable(
-                    e.plugin.description.name
-                )
+                executeCommandsByConfig("on-plugin-enable", e.plugin.description.name)
             }
             .bindWith(this)
         Events.subscribe(PluginDisableEvent::class.java, EventPriority.MONITOR)
             .handler { e: PluginDisableEvent ->
-                onPluginDisable(
-                    e.plugin.description.name
-                )
+                executeCommandsByConfig("on-plugin-disable", e.plugin.description.name)
             }
             .bindWith(this)
     }
 
     override fun disable() {
+        commandManager.unregisterCommands()
     }
-    fun reload() = cronManager!!.reload()
+
+    fun reload() = cronManager.reload()
 
     internal fun executeCommandsByConfig(vararg nodePath: Any?) {
-        try {
-            val sender: CommandSender = Bukkit.getConsoleSender()
-            configManager?.get("config.yml")?.getNode(nodePath)?.setListIfNull()
+        Bukkit.getConsoleSender().run {
+            configManager["config.yml"]?.getNode(nodePath)?.setListIfNull()
                 ?.getList { obj: Any -> obj.toString() }?.forEach { command ->
-                    messageManager?.printf("\$msg.execute$", command)
-                    Bukkit.dispatchCommand(sender, command)
+                    messageManager.printf("\$msg.execute$", command)
+                    Bukkit.dispatchCommand(this, command)
                 }
-        } catch (e: IOException) {
-            e.printStackTrace()
-        } catch (e: ConfigManager.UnknownConfigFileFormatException) {
-            e.printStackTrace()
         }
-    }
-
-    private fun onServerStartup() {
-        executeCommandsByConfig("on-server-ready")
-    }
-
-    private fun onPluginEnable(pluginName: String) {
-        executeCommandsByConfig("on-plugin-enable", pluginName)
-    }
-
-    private fun onPluginDisable(pluginName: String) {
-        executeCommandsByConfig("on-plugin-disable", pluginName)
-    }
-
-    companion object {
-        var instance: MCron? = null
-            private set
     }
 }

@@ -13,63 +13,50 @@ import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.World
 import org.bukkit.block.BlockFace
-import org.bukkit.configuration.InvalidConfigurationException
 import org.bukkit.entity.Minecart
 import org.bukkit.entity.Player
 import org.bukkit.event.EventPriority
 import org.bukkit.event.vehicle.VehicleExitEvent
 import org.bukkit.event.vehicle.VehicleMoveEvent
-import java.io.IOException
 import java.util.*
 
+/**
+ * 游戏默认矿车极速为0.4，最高为1.5
+ */
+internal const val DEFAULT_SPEED = 0.4
 
 class RailExpress : ExtendedJavaPlugin() {
-    internal var configManager: ConfigManager? = null
-    private var languageManager: LanguageManager? = null
-    internal var messageManager: MessageManager? = null
-    override fun load() {
+    private val configManager: ConfigManager by lazy { ConfigManager(this) }
+    private val languageManager: LanguageManager by lazy { LanguageManager(this) }
+    internal val messageManager: MessageManager by lazy { MessageManager(this) }
+    private val commandManager: PaperCommandManager by lazy { PaperCommandManager(this) }
+    companion object {
+        lateinit var INSTANCE: RailExpress
+            private set
+    }
+
+    init { INSTANCE = this }
+
+    override fun enable() {
         // 初始化ConfigManager
-        configManager = ConfigManager(this)
-        configManager!!.touch("config.yml")
+        configManager touch "config.yml"
+
+        // 载入配置
+        reload()
 
         // 初始化LanguageManager
-        try {
-            val locale = Locale("config")
-            languageManager = LanguageManager(this)
-                .register(locale, "config.yml")
-                .setMajorLanguage(locale)
-        } catch (e: LanguageManager.FileNotFoundException) {
-            e.printStackTrace()
-            onDisable()
-        } catch (e: ConfigManager.UnknownConfigFileFormatException) {
-            e.printStackTrace()
-            onDisable()
-        } catch (e: IOException) {
-            e.printStackTrace()
-            onDisable()
+        Locale("config").also {
+            languageManager.register(it, "config.yml") setMajorLanguage it
         }
 
         // 初始化MessageManager
-        messageManager = languageManager?.let {
-            MessageManager(this)
-                .setLanguageProvider(it)
-        }
-        messageManager?.sprintf("\$msg.prefix$")?.let { messageManager?.setPlayerPrefix(it) }
-        instance = this
-    }
+        messageManager setLanguageProvider languageManager
+        messageManager setPlayerPrefix(messageManager.sprintf("\$msg.prefix$"))
 
-    override fun enable() {
-        // 初始化CommandManager - 不能在load()里面初始化！
-        val commandManager = PaperCommandManager(this)
-        commandManager.usePerIssuerLocale(true, false)
-        try {
-            commandManager.locales.loadYamlLanguageFile("config.yml", Locale("config"))
-        } catch (e: IOException) {
-            e.printStackTrace()
-            onDisable()
-        } catch (e: InvalidConfigurationException) {
-            e.printStackTrace()
-            onDisable()
+        // 初始化CommandManager
+        commandManager.run {
+            usePerIssuerLocale(true, false)
+            locales.loadYamlLanguageFile("config.yml", Locale("config"))
         }
 
         // 注册指令
@@ -90,6 +77,7 @@ class RailExpress : ExtendedJavaPlugin() {
             .handler { event: VehicleExitEvent ->
                 (event.vehicle as Minecart).maxSpeed = DEFAULT_SPEED
             }
+            .bindWith(this)
         Events.subscribe(VehicleMoveEvent::class.java, EventPriority.HIGHEST)
             .filter { event: VehicleMoveEvent -> event.vehicle is Minecart }
             .filter { event: VehicleMoveEvent ->
@@ -127,40 +115,20 @@ class RailExpress : ExtendedJavaPlugin() {
                     )
                 } else (event.vehicle as Minecart).maxSpeed = DEFAULT_SPEED
             }
-
-        // 载入配置
-        reload()
+            .bindWith(this)
     }
 
     private val railConfigMap: MutableMap<World, RailConfig> = HashMap()
     internal fun reload() {
         railConfigMap.clear()
-        try {
-            configManager?.get("config.yml")?.getNode("config")?.let { node ->
-                node.childrenList.forEach { config: ConfigurationNode ->
-                    val powerRailOnly = config.getNode("power-rail-only").getBoolean(true)
-                    val allowNonPlayer = config.getNode("allow-non-player").getBoolean(false)
-                    val railConfig = RailConfig(powerRailOnly, allowNonPlayer, config.getNode("block-type"))
-                    config.getNode("world").setListIfNull().getList { obj: Any -> obj.toString() }
-                        .forEach { world -> Bukkit.getWorld(world)?.let { railConfigMap[it] = railConfig } }
-                }
+        configManager["config.yml"]?.getNode("config")?.let { node ->
+            node.childrenList.forEach { config: ConfigurationNode ->
+                val powerRailOnly = config.getNode("power-rail-only").getBoolean(true)
+                val allowNonPlayer = config.getNode("allow-non-player").getBoolean(false)
+                val railConfig = RailConfig(powerRailOnly, allowNonPlayer, config.getNode("block-type"))
+                config.getNode("world").setListIfNull().getList { obj: Any -> obj.toString() }
+                    .forEach { world -> Bukkit.getWorld(world)?.let { railConfigMap[it] = railConfig } }
             }
-        } catch (e: IOException) {
-            e.printStackTrace()
-            onDisable()
-        } catch (e: ConfigManager.UnknownConfigFileFormatException) {
-            e.printStackTrace()
-            onDisable()
         }
-    }
-
-    companion object {
-        var instance: RailExpress? = null
-            private set
-
-        /**
-         * 游戏默认矿车极速为0.4，最高为1.5
-         */
-        internal const val DEFAULT_SPEED = 0.4
     }
 }

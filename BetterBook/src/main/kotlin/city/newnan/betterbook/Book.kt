@@ -82,7 +82,7 @@ class Book(var title: String,
         }
     }
 
-    internal fun readBook(player: Player) {
+    internal fun readBook(player: Player): Book {
         val bookItem = ItemStack(Material.WRITTEN_BOOK)
         bookItem.itemMeta = (bookItem.itemMeta as BookMeta?)?.also {
             it.title = title
@@ -91,6 +91,7 @@ class Book(var title: String,
             it.pages = pages
         }
         player.openBook(bookItem)
+        return this
     }
 
     fun clone(): Book {

@@ -36,7 +36,7 @@ subprojects {
     dependencies {
         // Minecraft
         compileOnly 'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT'
-        implementation 'com.github.NewNanCity:Violet:2.0.2'
+        implementation 'com.github.NewNanCity:Violet:2.0.7'
         implementation 'co.aikar:acf-paper:0.5.1-SNAPSHOT'
         // JDK
         implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
@@ -61,6 +61,10 @@ subprojects {
     compileTestKotlin {
         kotlinOptions.jvmTarget = '1.8'
         kotlinOptions.javaParameters = true
+    }
+
+    shadowJar {
+        minimize()
     }
 
     task buildAll(group: 'NewNanPlugins', dependsOn: shadowJar) {}

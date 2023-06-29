@@ -12,13 +12,13 @@ object RailExpressCommand : BaseCommand() {
     @CommandPermission("railexpress.reload")
     @Description("{@@msg.help-reload}")
     fun onReload(sender: CommandSender?) {
-        RailExpress.instance?.reload()
-        RailExpress.instance?.messageManager?.printf(sender, "\$msg.reload$")
+        RailExpress.INSTANCE.reload()
+        RailExpress.INSTANCE.messageManager.printf(sender, "\$msg.reload$")
     }
 
     @HelpCommand
     fun onHelp(sender: CommandSender?, help: CommandHelp) {
-        RailExpress.instance?.messageManager?.printf(sender, "\$msg.help-head$")
+        RailExpress.INSTANCE.messageManager.printf(sender, "\$msg.help-head$")
         help.showHelp()
     }
 }

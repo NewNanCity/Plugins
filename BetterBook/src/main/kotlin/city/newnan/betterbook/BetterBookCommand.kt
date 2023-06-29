@@ -2,6 +2,8 @@ package city.newnan.betterbook
 
 import co.aikar.commands.BaseCommand
 import co.aikar.commands.annotation.CommandAlias
+import co.aikar.commands.annotation.CommandPermission
+import co.aikar.commands.annotation.Private
 import co.aikar.commands.annotation.Subcommand
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -17,6 +19,10 @@ object BetterBookCommand : BaseCommand() {
     fun publishCommand(player: Player) {
         player.inventory.itemInMainHand.findBookUUID(written = false)?.also {
             val book = Librarian[it] ?: return@also
+            if (book.creator != player.uniqueId && !player.hasPermission("betterbook.bypass")) {
+                BetterBook.INSTANCE.messageManager.printf(player, "只有原作者/OP/特别授权者能够出版原书！")
+                return@publishCommand
+            }
             if (player.inventory.addItem(ItemStack(Material.WRITTEN_BOOK).apply {
                     itemMeta = (itemMeta as BookMeta?)?.applyBook(book, toWrittenBook = true, addModifyInfo = false)
                 }).size > 0) {
@@ -57,7 +63,7 @@ object BetterBookCommand : BaseCommand() {
             val bookMeta = player.inventory.itemInMainHand.itemMeta as BookMeta
             val me = bookMeta.author?.let { Bukkit.getPlayer(it)?.uniqueId } ?: player.uniqueId
             book!!.apply {
-                title = bookMeta.title ?: bookMeta.displayName
+                title = if (bookMeta.hasDisplayName()) bookMeta.displayName else bookMeta.title ?: title
                 modifier = me
                 modified = now
                 pages.clear()
@@ -109,15 +115,58 @@ object BetterBookCommand : BaseCommand() {
         BetterBook.INSTANCE.messageManager.printf(player, "请用主手拿书与笔或者成书！")
     }
 
-    // @Subcommand("test")
-    fun testCommand(player: Player) {
-        player.inventory.addItem(ItemStack(Material.WRITABLE_BOOK).apply {
-            itemMeta = (itemMeta as BookMeta?)?.apply {
-                persistentDataContainer.set(
-                    NamespacedKey(BetterBook.INSTANCE, "book-uuid"), UUIDDataType(), UUID.randomUUID()
-                )
-                setDisplayName("Test")
+    @Private
+    @Subcommand("uuid")
+    @CommandPermission("betterbook.bypass")
+    fun uuidCommand(player: Player, uuidString: String) {
+        kotlin.runCatching { UUID.fromString(uuidString) }
+            .onFailure{ BetterBook.INSTANCE.messageManager.printf(player, "UUID无效！") }
+            .onSuccess {
+                val book = Librarian[it]
+                if (book == null) {
+                    BetterBook.INSTANCE.messageManager.printf(player, "书目不存在！")
+                } else {
+                    if (player.inventory.addItem(ItemStack(Material.WRITTEN_BOOK).apply {
+                            itemMeta = (itemMeta as BookMeta?)?.applyBook(book, toWrittenBook = true, addModifyInfo = false)
+                        }).size > 0) {
+                        BetterBook.INSTANCE.messageManager.printf(player, "背包已满，无法获得成书！")
+                    } else {
+                        BetterBook.INSTANCE.messageManager.printf(player, "成书已放至背包！")
+                    }
+                }
             }
-        })
+    }
+
+    @Private
+    @Subcommand("writable")
+    fun editCommand(player: Player) {
+        if (player.inventory.itemInMainHand.type != Material.WRITTEN_BOOK) {
+            BetterBook.INSTANCE.messageManager.printf(player, "请拿成书！")
+            return
+        }
+        if (player.inventory.itemInMainHand.findBookUUID() != null) {
+            player.performCommand("book edit")
+            return
+        }
+        (player.inventory.itemInMainHand.itemMeta as BookMeta).also {
+            if (it.author?.equals(player.displayName) != true && !player.hasPermission("betterbook.bypass")) {
+                BetterBook.INSTANCE.messageManager.printf(player, "只有原作者/Op/有权限者能够将原书变成成书！")
+                return@editCommand
+            }
+            if (player.inventory.addItem(ItemStack(Material.WRITABLE_BOOK).apply {
+                    itemMeta = (itemMeta as BookMeta?)?.also { newMeta ->
+                        newMeta.author = it.author
+                        newMeta.title = it.title
+                        newMeta.setDisplayName(it.title)
+                        newMeta.generation = BookMeta.Generation.ORIGINAL
+                        newMeta.lore = it.lore
+                        newMeta.pages = ArrayList(it.pages)
+                    }
+                }).size > 0) {
+                BetterBook.INSTANCE.messageManager.printf(player, "背包已满，无法获得书！")
+            } else {
+                BetterBook.INSTANCE.messageManager.printf(player, "书已放至背包！")
+            }
+        }
     }
 }

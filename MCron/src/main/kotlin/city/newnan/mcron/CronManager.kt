@@ -12,7 +12,7 @@ import java.util.*
 import java.util.function.Consumer
 
 
-open class CronManager : me.lucko.helper.terminable.Terminable {
+class CronManager : me.lucko.helper.terminable.Terminable {
     private val tasks = ArrayList<CronCommand>()
     private val outdatedTasks: MutableList<CronCommand> = ArrayList()
 
@@ -23,39 +23,40 @@ open class CronManager : me.lucko.helper.terminable.Terminable {
     // 有一个缓冲池，在1s~60s后即将执行的命令也会在这里，这样如果这些任务过期了会立即执行
     // p.s. 不会有人写每秒都会运行的程序吧...
     private val cacheInTimeTasks: MutableList<CronCommand> = ArrayList()
-    private val cronTask: me.lucko.helper.scheduler.Task
+    private var cronTask: me.lucko.helper.scheduler.Task? = null
+
+    init {
+        reload()
+        bindWith(MCron.INSTANCE)
+    }
+
+    fun run() {
+        cronTask = Schedulers.async().runRepeating(Runnable { this.runCheck() }, 0, 20)
+    }
+
     fun reload() {
-        try {
-            // 清空
-            tasks.clear()
-            cacheInTimeTasks.clear()
-            inTimeTasks.clear()
-            outdatedTasks.clear()
+        // 清空
+        tasks.clear()
+        cacheInTimeTasks.clear()
+        inTimeTasks.clear()
+        outdatedTasks.clear()
 
+        MCron.INSTANCE.configManager["config.yml"]?.also {
             // 设置时区
-            CronExpression.setTimeZoneOffset(
-                MCron.instance?.configManager?.get("config.yml")?.getNode("timezone-offset")?.getString("Z")
-            )
-
+            CronExpression.setTimeZoneOffset(it.getNode("timezone-offset").getString("Z"))
             // 重载
-            MCron.instance?.configManager?.get("config.yml")?.getNode("schedule-tasks")?.childrenMap
-                ?.forEach { (key, value) ->
+            it.getNode("schedule-tasks").childrenMap
+                .forEach { (key, value) ->
                     if (key is String) {
-                        val commands: List<String> =
-                            value.setListIfNull().getList { obj: Any -> obj.toString() }
-                        addTask(key, commands.toTypedArray())
+                        addTask(key, value.setListIfNull().getList { obj: Any -> obj.toString() }.toTypedArray())
                     }
                 }
-        } catch (e: IOException) {
-            e.printStackTrace()
-        } catch (e: ConfigManager.UnknownConfigFileFormatException) {
-            e.printStackTrace()
         }
     }
 
     private var dateFormatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
     internal fun listCron(sender: CommandSender?) {
-        MCron.instance?.messageManager?.run {
+        MCron.INSTANCE.messageManager.run {
             printf(sender, "\$msg.list-head$")
             tasks.forEach(Consumer { task: CronCommand ->
                 printf(
@@ -93,7 +94,7 @@ open class CronManager : me.lucko.helper.terminable.Terminable {
     /**
      * 定时任务检查，每秒运行
      */
-    private fun run() {
+    private fun runCheck() {
         // 小于计数上限，继续休眠
         if (secondsCounter < counterBorder) {
             secondsCounter++
@@ -174,11 +175,6 @@ open class CronManager : me.lucko.helper.terminable.Terminable {
         secondsCounter = 1
     }
 
-    init {
-        reload()
-        cronTask = Schedulers.async().runRepeating(Runnable { this.run() }, 0, 20)
-    }
-
     /**
      * 根据毫秒差获得合适的休眠间隔(秒为单位)
      * @param delta 毫秒差
@@ -226,10 +222,10 @@ open class CronManager : me.lucko.helper.terminable.Terminable {
      */
     private fun runInSecond() {
         val sender: CommandSender = Bukkit.getConsoleSender()
-        val messageManager: MessageManager? = MCron.instance?.messageManager
+        val messageManager: MessageManager = MCron.INSTANCE.messageManager
         inTimeTasks.forEach(Consumer { task: CronCommand ->
             for (command in task.commands) {
-                messageManager?.info("§a§lRun Command: §r$command")
+                messageManager info "§a§lRun Command: §r$command"
                 Bukkit.dispatchCommand(sender, command)
             }
         })
@@ -237,7 +233,7 @@ open class CronManager : me.lucko.helper.terminable.Terminable {
     }
 
     override fun close() {
-        cronTask.stop()
+        cronTask?.stop()
     }
 
     /**
@@ -250,7 +246,7 @@ open class CronManager : me.lucko.helper.terminable.Terminable {
             val task = CronCommand(cronExpression, commands)
             tasks.add(task)
         } catch (e: Exception) {
-            MCron.instance!!.messageManager?.apply {
+            MCron.INSTANCE.messageManager.apply {
                 warn(sprintf("\$msg.invalid_expression$", cronExpression))
             }
         }
