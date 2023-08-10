@@ -1,6 +1,8 @@
 package city.newnan.deathcost
 
-import city.newnan.violet.config.ConfigManager
+import city.newnan.deathcost.config.ConfigFile
+import city.newnan.deathcost.config.CostStage
+import city.newnan.violet.config.ConfigManager2
 import city.newnan.violet.message.MessageManager
 import me.lucko.helper.Events
 import me.lucko.helper.plugin.ExtendedJavaPlugin
@@ -8,12 +10,16 @@ import net.milkbowl.vault.economy.Economy
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
+import org.bukkit.event.EventPriority
 import org.bukkit.event.entity.PlayerDeathEvent
 
 class PluginMain : ExtendedJavaPlugin() {
-
-    private var costStages: List<CostStage> = listOf()
-    private val configManager: ConfigManager by lazy { ConfigManager(this) }
+    private var costStages: List<CostStage> = emptyList()
+    private val configManager: ConfigManager2 by lazy {
+        ConfigManager2(this).apply {
+            setCache(ConfigManager2.CacheType.None)
+        }
+    }
     private val messageManager: MessageManager by lazy { MessageManager(this) }
     private lateinit var economy: Economy
     private var targetAccount: OfflinePlayer? = null
@@ -29,8 +35,8 @@ class PluginMain : ExtendedJavaPlugin() {
             ?: throw Exception("Vault economy service not found!")
 
         reload()
-        messageManager setPlayerPrefix "[牛腩小镇]"
-        Events.subscribe(PlayerDeathEvent::class.java)
+        messageManager setPlayerPrefix "§7[§6牛腩小镇§7] §f"
+        Events.subscribe(PlayerDeathEvent::class.java, EventPriority.MONITOR)
             .handler {
                 val player = it.entity
                 val cost = fineMoney(player)
@@ -50,42 +56,45 @@ class PluginMain : ExtendedJavaPlugin() {
     }
 
     private fun reload() {
+        configManager.cache?.clear()
         configManager touch "config.yml"
-        configManager["config.yml"]!!.let { rootNode ->
-            rootNode.getNode("cash-cost").let { costNode ->
-                if (costNode.getNode("use-simple-mode").getBoolean(true)) {
-                    // 简单扣费模式
+        configManager.parse<ConfigFile>("config.yml").also {
+            if (it.deathCost.useSimpleMode) {
+                // 简单扣费模式
+                if (it.deathCost.simpleMode == null) {
+                    messageManager.warn("简单扣费模式启用, 但是没有设置扣费模式, 将不会有任何扣费.")
+                    costStages = emptyList()
+                } else {
                     costStages = listOf(CostStage(
                         -1.0,
-                        costNode.getNode("simple-mode", "cost").double,
-                        costNode.getNode("simple-mode", "if-percent").boolean
+                        it.deathCost.simpleMode.cost,
+                        it.deathCost.simpleMode.ifPercent
                     ))
+                }
+            } else {
+                if (it.deathCost.complexMode == null) {
+                    messageManager.warn("复杂扣费模式启用, 但是没有设置扣费模式, 将不会有任何扣费.")
+                    costStages = emptyList()
                 } else {
-                    // 复杂扣费模式
-                    costStages = costNode.getNode("complex-mode").childrenList.map {
-                        CostStage(
-                            it.getNode("max").double,
-                            it.getNode("cost").double,
-                            it.getNode("if-percent").boolean
-                        )
-
-                    }
+                    costStages = it.deathCost.complexMode
                 }
-                targetAccount = null
-                costNode.getNode("target-account").string?.also {
-                    Bukkit.getOfflinePlayers().forEach { player ->
-                        if (player.name == it) {
-                            targetAccount = player
-                            return@also
+            }
+            targetAccount = it.deathCost.targetAccount?.let { name ->
+                if (name.isBlank()) return@let null
+                Bukkit.getOfflinePlayers().forEach { player ->
+                    if (player.name == name) {
+                        if (!economy.hasAccount(player)) {
+                            economy.createPlayerAccount(player)
                         }
+                        messageManager.info("设置扣费转账账户为: ${player.name}")
+                        return@let player
                     }
                 }
+                null
             }
-            rootNode.getNode("death-message").let {
-                sendDeathMessageToPlayer = it.getNode("player-enable").getBoolean(false)
-                sendDeathMessageToBroadcast = it.getNode("broadcast-enable").getBoolean(false)
-                sendDeathMessageToConsole = it.getNode("console-enable").getBoolean(false)
-            }
+            sendDeathMessageToPlayer = it.deathMessage.playerEnable
+            sendDeathMessageToBroadcast = it.deathMessage.broadcastEnable
+            sendDeathMessageToConsole = it.deathMessage.consoleEnable
         }
     }
 
@@ -127,6 +136,4 @@ class PluginMain : ExtendedJavaPlugin() {
         }
         return cost
     }
-
-    internal class CostStage(var max: Double, var cost: Double, var ifPercent: Boolean)
 }

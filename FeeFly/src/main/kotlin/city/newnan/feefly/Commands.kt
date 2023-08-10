@@ -1,6 +1,7 @@
 package city.newnan.feefly
 
 import co.aikar.commands.BaseCommand
+import co.aikar.commands.CommandHelp
 import co.aikar.commands.annotation.*
 import co.aikar.commands.bukkit.contexts.OnlinePlayer
 import org.bukkit.command.CommandSender
@@ -8,6 +9,12 @@ import org.bukkit.entity.Player
 
 @CommandAlias("feefly")
 object Commands : BaseCommand() {
+    @HelpCommand
+    @Subcommand("help")
+    fun help(sender: CommandSender, help: CommandHelp) {
+        help.showHelp()
+    }
+
     @Default
     @CommandCompletion("@players")
     fun toggleFly(sender: Player, @Optional target: OnlinePlayer?) {

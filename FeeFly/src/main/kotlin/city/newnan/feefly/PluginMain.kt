@@ -1,25 +1,28 @@
 package city.newnan.feefly
 
-import city.newnan.violet.config.ConfigManager
+import city.newnan.feefly.config.ConfigFile
+import city.newnan.feefly.config.FlyingPlayer
+import city.newnan.feefly.config.PlayerCache
+import city.newnan.violet.config.ConfigManager2
+import city.newnan.violet.config.put
 import city.newnan.violet.message.MessageManager
 import co.aikar.commands.PaperCommandManager
 import me.lucko.helper.Events
 import me.lucko.helper.Schedulers
+import me.lucko.helper.event.filter.EventFilters
 import me.lucko.helper.plugin.ExtendedJavaPlugin
 import net.md_5.bungee.api.ChatMessageType
 import net.md_5.bungee.api.chat.TextComponent
 import net.milkbowl.vault.economy.Economy
-import org.bukkit.Bukkit
-import org.bukkit.ChatColor
-import org.bukkit.GameMode
-import org.bukkit.OfflinePlayer
-import org.bukkit.Sound
+import org.bukkit.*
 import org.bukkit.entity.Player
+import org.bukkit.event.EventPriority
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.PlayerChangedWorldEvent
 import org.bukkit.event.player.PlayerGameModeChangeEvent
+import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
-import java.util.Vector
+import kotlin.math.roundToInt
 
 class PluginMain : ExtendedJavaPlugin() {
     companion object {
@@ -34,7 +37,11 @@ class PluginMain : ExtendedJavaPlugin() {
     private var costPerSecond = 0.0
     private lateinit var economy: Economy
     private var targetAccount: OfflinePlayer? = null
-    private val configManager: ConfigManager by lazy { ConfigManager(this) }
+    private val configManager: ConfigManager2 by lazy {
+        ConfigManager2(this).apply {
+            setCache(ConfigManager2.CacheType.LRU, 4)
+        }
+    }
     internal val messageManager: MessageManager by lazy { MessageManager(this) }
     private val commandManager: PaperCommandManager by lazy { PaperCommandManager(this) }
     internal val flyingPlayers: HashMap<Player, FlyingPlayer> = HashMap()
@@ -47,32 +54,38 @@ class PluginMain : ExtendedJavaPlugin() {
             ?: throw Exception("Vault economy service not found!")
 
         reload()
-        messageManager setPlayerPrefix "[牛腩小镇]"
+        messageManager setPlayerPrefix "§7[§6牛腩小镇§7] §f"
+        commandManager.enableUnstableAPI("help")
         commandManager.registerCommand(Commands)
 
         // 玩家死亡则取消飞行模式
-        Events.subscribe(PlayerDeathEvent::class.java)
+        Events.subscribe(PlayerDeathEvent::class.java, EventPriority.MONITOR)
             .handler { cancelFly(it.entity, false) }
             .bindWith(this)
         // 如果玩家切换成创造或者旁观者模式，就取消玩家的飞行
-        Events.subscribe(PlayerGameModeChangeEvent::class.java)
+        Events.subscribe(PlayerGameModeChangeEvent::class.java, EventPriority.MONITOR)
+            .filter(EventFilters.ignoreCancelled())
             .filter { !listOf(GameMode.CREATIVE, GameMode.SPECTATOR).contains(it.newGameMode) }
             .handler { cancelFly(it.player, false) }
             .bindWith(this)
         // 玩家切换世界，如果新的世界没有该权限，就取消玩家的飞行
-        Events.subscribe(PlayerChangedWorldEvent::class.java)
+        Events.subscribe(PlayerChangedWorldEvent::class.java, EventPriority.MONITOR)
             .filter { !it.player.hasPermission("fly.self") }
             .handler { cancelFly(it.player, false) }
             .bindWith(this)
         // 玩家退出，则取消飞行
-        Events.subscribe(PlayerQuitEvent::class.java)
+        Events.subscribe(PlayerQuitEvent::class.java, EventPriority.MONITOR)
+            .handler { cancelFly(it.player, false) }
+            .bindWith(this)
+        // 解释：加入服务器/插件崩溃，玩家的飞行状态不会被清除，所以需要在玩家加入服务器的时候检查一下
+        Events.subscribe(PlayerJoinEvent::class.java, EventPriority.MONITOR)
             .handler { cancelFly(it.player, false) }
             .bindWith(this)
 
         Schedulers.async().runRepeating( Runnable {
             if (flyingPlayers.size > 0) {
                 // 不能在遍历的时候删除元组，所以需要暂时记录
-                val toDeleteFlyingPlayer = Vector<Player>()
+                val toDeleteFlyingPlayer = ArrayList<Player>()
 
                 // 遍历飞行玩家
                 flyingPlayers.forEach { (player) ->
@@ -85,7 +98,7 @@ class PluginMain : ExtendedJavaPlugin() {
                     val balance: Double = economy.getBalance(player)
                     // 如果玩家还有现金
                     if (balance > 0.0) {
-                        val remainSecond = (balance / costPerSecond).toInt()
+                        val remainSecond = (balance / costPerSecond).roundToInt()
                         val cost = balance.coerceAtMost(costPerCount)
                         economy.withdrawPlayer(player, cost)
                         targetAccount?.let { economy.depositPlayer(it, cost) }
@@ -113,33 +126,47 @@ class PluginMain : ExtendedJavaPlugin() {
 
                 // 删掉刚才需要踢除的
                 toDeleteFlyingPlayer.forEach { player -> cancelFly(player, true) }
-                toDeleteFlyingPlayer.clear()
             }
         }, 0, tickPerCount)
+
+        // 恢复之前的信息
+        flyingPlayers.clear()
+        configManager.parse<PlayerCache>("player-cache.yml").players.forEach {
+            server.getPlayer(it.key)?.let { player ->
+                flyingPlayers[player] = FlyingPlayer(it.value.flyStartTimestamp, it.value.previousFlyingSpeed)
+            }
+        }
     }
 
     override fun disable() {
         commandManager.unregisterCommands()
+        flyingPlayers.forEach { (player) -> cancelFly(player, true) }
+        configManager.remove("player-cache.yml")
     }
 
     internal fun reload() {
+        configManager.cache?.clear()
         configManager touch "config.yml"
-        configManager["config.yml"]!!.also {
-            // 加载配置内容
-            flySpeed = it.getNode("fly-speed").float
-            costPerCount = it.getNode("cost-per-count").double
-            tickPerCount = it.getNode("tick-per-count").long
+        configManager.parse<ConfigFile>("config.yml").also {
+            flySpeed = it.flySpeed
+            costPerCount = it.costPerCount
+            tickPerCount = it.tickPerCount
             costPerSecond = (20.0 / tickPerCount) * costPerCount
-            targetAccount = null
-            it.getNode("target-account").string?.let {
+            targetAccount = it.targetAccount?.let { name ->
+                if (name.isBlank()) return@let null
                 Bukkit.getOfflinePlayers().forEach { player ->
-                    if (player.name == it) {
-                        targetAccount = player
-                        return@let
+                    if (player.name == name) {
+                        if (!economy.hasAccount(player)) {
+                            economy.createPlayerAccount(player)
+                        }
+                        messageManager.info("设置扣费转账账户为: ${player.name}")
+                        return@let player
                     }
                 }
+                null
             }
         }
+        configManager.touch("player-cache.yml", PlayerCache())
     }
 
     /**
@@ -202,6 +229,7 @@ class PluginMain : ExtendedJavaPlugin() {
                 // 发送消息并播放声音
                 messageManager.printf(player, "已允许飞行, 双击空格键开启飞行模式!")
                 player.playSound(player.location, Sound.UI_BUTTON_CLICK, 1.0f, 0.0f)
+                flushFlyingCache()
             } else {
                 // 不大于零就提示不能飞
                 messageManager.printf(player, "&c余额不足, 无法飞行!")
@@ -228,6 +256,7 @@ class PluginMain : ExtendedJavaPlugin() {
         }
         // 删除玩家
         flyingPlayers.remove(player)
+        flushFlyingCache()
         // 发送飞行结束通知
         messageManager.printf(player, "飞行结束!")
         player.spigot().sendMessage(
@@ -236,5 +265,18 @@ class PluginMain : ExtendedJavaPlugin() {
             )
         )
         return true
+    }
+
+    /**
+     * 保存玩家信息，断电恢复
+     */
+    private fun flushFlyingCache() {
+        val tmpMap = HashMap<String, Float>()
+        flyingPlayers.forEach { (player, flyingPlayer) ->
+            tmpMap[player.uniqueId.toString()] = flyingPlayer.previousFlyingSpeed
+        }
+        configManager["player-cache.yml"].save {
+            it.put("players", tmpMap)
+        }
     }
 }

@@ -1,7 +1,12 @@
 name: ${project.name}
 version: ${project.version}
-main: io.github.gk0wk.mcpatch.MCPatch
-api-version: 1.16
-authors: [ Sttot ]
+main: ${project.group}.PluginMain
+api-version: ${project.apiVersion}
+load: ${project.load}
+authors: ${project.authors}
 description: ${project.description}
-website: https://www.newnan.city/
+website: ${project.url}
+# 硬依赖，没有就无法启动
+depend: ${project.depend}
+loadbefore: ${project.loadBefore}
+softdepend: ${project.softDepend}

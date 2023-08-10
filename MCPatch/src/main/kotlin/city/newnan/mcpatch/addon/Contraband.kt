@@ -1,7 +1,6 @@
 package city.newnan.mcpatch.addon
 
-import city.newnan.mcpatch.IMCPatchAddon
-import city.newnan.mcpatch.MCPatch
+import city.newnan.mcpatch.PluginMain
 import me.lucko.helper.Events
 import org.bukkit.GameMode
 import org.bukkit.Material
@@ -24,13 +23,13 @@ object Contraband: IMCPatchAddon {
                 for (i in 0 until size) {
                     val itemStack = inventory.getItem(i)
                     if (!materials.contains(itemStack!!.type)) continue
-                    MCPatch.INSTANCE.messageManager.let {
+                    PluginMain.INSTANCE.messageManager.let {
                         it.printf(event.player, "违禁品 {0} 会被删除", itemStack.type.name)
                         it.printf("玩家 {0} 的违禁品 {1} 会被删除", event.player, itemStack.type.name)
                     }
                 }
             }
-            .bindWith(MCPatch.INSTANCE)
+            .bindWith(PluginMain.INSTANCE)
     }
 
     override fun close() {}

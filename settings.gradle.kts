@@ -1,0 +1,10 @@
+rootProject.name = "NewNanPlugins"
+include(":RailArea")
+include(":BetterBook")
+include(":RailExpress")
+include(":FeeFly")
+include(":DeathCost")
+include(":MCron")
+include(":MCPatch")
+include(":Guardian")
+include(":Foundation")

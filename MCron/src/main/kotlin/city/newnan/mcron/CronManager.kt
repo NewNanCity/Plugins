@@ -1,12 +1,10 @@
 package city.newnan.mcron
 
+import city.newnan.mcron.config.ConfigFile
 import city.newnan.violet.message.MessageManager
-import city.newnan.violet.config.ConfigManager
-import city.newnan.violet.config.setListIfNull
 import me.lucko.helper.Schedulers
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
-import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.function.Consumer
@@ -27,7 +25,7 @@ class CronManager : me.lucko.helper.terminable.Terminable {
 
     init {
         reload()
-        bindWith(MCron.INSTANCE)
+        bindWith(PluginMain.INSTANCE)
     }
 
     fun run() {
@@ -41,22 +39,19 @@ class CronManager : me.lucko.helper.terminable.Terminable {
         inTimeTasks.clear()
         outdatedTasks.clear()
 
-        MCron.INSTANCE.configManager["config.yml"]?.also {
+        PluginMain.INSTANCE.configManager.parse<ConfigFile>("config.yml").also {
             // 设置时区
-            CronExpression.setTimeZoneOffset(it.getNode("timezone-offset").getString("Z"))
+            CronExpression.setTimeZoneOffset(it.timezoneOffset)
             // 重载
-            it.getNode("schedule-tasks").childrenMap
-                .forEach { (key, value) ->
-                    if (key is String) {
-                        addTask(key, value.setListIfNull().getList { obj: Any -> obj.toString() }.toTypedArray())
-                    }
-                }
+            it.scheduleTasks.forEach { (key, value) ->
+                addTask(key, value.toTypedArray())
+            }
         }
     }
 
     private var dateFormatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
     internal fun listCron(sender: CommandSender?) {
-        MCron.INSTANCE.messageManager.run {
+        PluginMain.INSTANCE.messageManager.run {
             printf(sender, "\$msg.list-head$")
             tasks.forEach(Consumer { task: CronCommand ->
                 printf(
@@ -222,7 +217,7 @@ class CronManager : me.lucko.helper.terminable.Terminable {
      */
     private fun runInSecond() {
         val sender: CommandSender = Bukkit.getConsoleSender()
-        val messageManager: MessageManager = MCron.INSTANCE.messageManager
+        val messageManager: MessageManager = PluginMain.INSTANCE.messageManager
         inTimeTasks.forEach(Consumer { task: CronCommand ->
             for (command in task.commands) {
                 messageManager info "§a§lRun Command: §r$command"
@@ -246,7 +241,7 @@ class CronManager : me.lucko.helper.terminable.Terminable {
             val task = CronCommand(cronExpression, commands)
             tasks.add(task)
         } catch (e: Exception) {
-            MCron.INSTANCE.messageManager.apply {
+            PluginMain.INSTANCE.messageManager.apply {
                 warn(sprintf("\$msg.invalid_expression$", cronExpression))
             }
         }

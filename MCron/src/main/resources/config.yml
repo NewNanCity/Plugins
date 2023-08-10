@@ -16,11 +16,11 @@ on-server-ready: []
 # Example:
 #  - 'broadcast §aServer is ready, enjoy your day!'
 #  - 'gamerule keepInventory true'
-on-plugin-ready: []
+on-plugin-ready: {}
 # Example:
 #   Essentials:
 #      - 'say the essentials plugin is ready.'
-on-plugin-disable: []
+on-plugin-disable: {}
 schedule-tasks:
   '0 30 8 * * mon-fri':
     - 'broadcast Enjoy your weekday!'
@@ -36,7 +36,7 @@ msg:
   prefix: '§l[MCron]§r '
   execute: '§a§lExecute Command: §r{0}§r'
   reload: 'MCron has been reloaded.'
-  invalid_expression: 'The expression is not valid: {0}'
+  invalid-expression: 'The expression is not valid: {0}'
   list-head: '§3======== §3§l[MCron List] §r§3========'
   list-cron: '§a§l{0} §r(Next: {1})'
   list-cron-outdated: '§c§l{0} §r(Next: {1})'

@@ -12,3 +12,4 @@ mysql:
     characterEncoding: "UTF-8"
     useSSL: "false"
     allowPublicKeyRetrieval: "true"
+    serverTimezone: "Asia/Shanghai"

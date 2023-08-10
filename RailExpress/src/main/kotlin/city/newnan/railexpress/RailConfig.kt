@@ -1,6 +1,5 @@
 package city.newnan.railexpress
 
-import me.lucko.helper.config.ConfigurationNode
 import org.bukkit.Material
 import java.util.*
 
@@ -8,15 +7,8 @@ import java.util.*
 class RailConfig(
     val powerRailOnly: Boolean,
     val allowNonPlayer: Boolean,
-    blockType: ConfigurationNode
+    blockType: Map<String, Double>
 ) {
-    val blockSpeedMap = HashMap<Material, Double>()
-
-    init {
-        blockType.childrenMap.forEach { (key: Any, node: ConfigurationNode) ->
-            blockSpeedMap[Material.valueOf(
-                (key as String).uppercase(Locale.getDefault())
-            )] = node.getDouble(DEFAULT_SPEED)
-        }
-    }
+    val blockSpeedMap =
+        blockType.mapKeys { Material.valueOf(it.key.uppercase(Locale.getDefault())) }
 }

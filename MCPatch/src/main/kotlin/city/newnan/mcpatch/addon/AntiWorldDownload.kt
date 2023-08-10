@@ -1,8 +1,7 @@
 package city.newnan.mcpatch.addon
 
-import city.newnan.mcpatch.IMCPatchAddon
 import com.google.common.io.ByteStreams
-import city.newnan.mcpatch.MCPatch
+import city.newnan.mcpatch.PluginMain
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.plugin.messaging.PluginMessageListener
@@ -12,7 +11,7 @@ object AntiWorldDownloader: PluginMessageListener, IMCPatchAddon {
     override val addonName = "AntiWorldDownloader"
 
     override fun enable() {
-        MCPatch.INSTANCE.let {
+        PluginMain.INSTANCE.let {
             Bukkit.getMessenger().also { messenger ->
                 messenger.registerOutgoingPluginChannel(it, "WDL|CONTROL")
                 messenger.registerIncomingPluginChannel(it, "WDL|INIT", this)
@@ -22,7 +21,7 @@ object AntiWorldDownloader: PluginMessageListener, IMCPatchAddon {
     }
 
     override fun close() {
-        MCPatch.INSTANCE.let {
+        PluginMain.INSTANCE.let {
             Bukkit.getMessenger().also { messenger ->
                 messenger.unregisterOutgoingPluginChannel(it, "WDL|CONTROL")
                 messenger.unregisterIncomingPluginChannel(it, "WDL|INIT", this)
@@ -41,7 +40,7 @@ object AntiWorldDownloader: PluginMessageListener, IMCPatchAddon {
      */
     override fun onPluginMessageReceived(channel: String, player: Player, message: ByteArray) {
         if ("WDL|INIT" == channel || "WDL|REQUEST" == channel) {
-            MCPatch.INSTANCE.let {
+            PluginMain.INSTANCE.let {
                 var output = ByteStreams.newDataOutput()
                 output.writeInt(1)
                 output.writeBoolean(false)
@@ -59,7 +58,7 @@ object AntiWorldDownloader: PluginMessageListener, IMCPatchAddon {
                 player.sendPluginMessage(it, "WDL|CONTROL", output.toByteArray())
             }
             player.kickPlayer("请勿使用WDL插件")
-            MCPatch.INSTANCE.messageManager.printf("玩家 {0} 使用了WDL", player.name)
+            PluginMain.INSTANCE.messageManager.printf("玩家 {0} 使用了WDL", player.name)
         }
     }
 }

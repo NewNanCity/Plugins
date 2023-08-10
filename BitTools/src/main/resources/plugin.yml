@@ -1,8 +1,0 @@
-name: ${project.name}
-version: ${project.version}
-main: city.newnan.bittools.BitTools
-api-version: 1.16
-load: POSTWORLD
-authors: [ Gk0Wk ]
-description: ${project.description}
-website: https://www.newnan.city/

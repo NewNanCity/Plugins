@@ -1,14 +1,15 @@
 name: ${project.name}
 version: ${project.version}
-main: city.newnan.deathcost.PluginMain
-api-version: 1.16
-load: STARTUP
-authors: [ Gk0Wk ]
+main: ${project.group}.PluginMain
+api-version: ${project.apiVersion}
+load: ${project.load}
+authors: ${project.authors}
 description: ${project.description}
-website: https://www.newnan.city/
+website: ${project.url}
 # 硬依赖，没有就无法启动
-depend:
-  - 'Vault'
+depend: ${project.depend}
+loadbefore: ${project.loadBefore}
+softdepend: ${project.softDepend}
 
 # 权限节点，可选
 permissions:

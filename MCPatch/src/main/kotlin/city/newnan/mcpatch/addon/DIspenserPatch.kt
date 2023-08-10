@@ -1,13 +1,10 @@
 package city.newnan.mcpatch.addon
 
-import city.newnan.mcpatch.IMCPatchAddon
-import city.newnan.mcpatch.MCPatch
+import city.newnan.mcpatch.PluginMain
 import me.lucko.helper.Events
-import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.event.EventPriority
 import org.bukkit.event.block.BlockPlaceEvent
-import org.bukkit.event.inventory.InventoryOpenEvent
 
 
 /**
@@ -23,10 +20,10 @@ object DispenserPatch: IMCPatchAddon {
             .filter { it.block.y % 255 == 0 }
             .handler { event: BlockPlaceEvent ->
                 event.isCancelled = true
-                MCPatch.INSTANCE.messageManager.printf(event.player, "此处不可放置发射器!")
+                PluginMain.INSTANCE.messageManager.printf(event.player, "此处不可放置发射器!")
                 event.block.type = Material.AIR
             }
-            .bindWith(MCPatch.INSTANCE)
+            .bindWith(PluginMain.INSTANCE)
     }
 
     override fun close() {}

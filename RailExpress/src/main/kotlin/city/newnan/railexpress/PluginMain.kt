@@ -1,0 +1,141 @@
+package city.newnan.railexpress
+
+import city.newnan.railexpress.config.ConfigFile
+import city.newnan.violet.config.ConfigManager2
+import city.newnan.violet.i18n.LanguageManager
+import city.newnan.violet.message.MessageManager
+import co.aikar.commands.PaperCommandManager
+import me.lucko.helper.Events
+import me.lucko.helper.event.filter.EventFilters
+import me.lucko.helper.plugin.ExtendedJavaPlugin
+import org.bukkit.Bukkit
+import org.bukkit.Material
+import org.bukkit.World
+import org.bukkit.block.BlockFace
+import org.bukkit.entity.Minecart
+import org.bukkit.entity.Player
+import org.bukkit.event.EventPriority
+import org.bukkit.event.vehicle.VehicleExitEvent
+import org.bukkit.event.vehicle.VehicleMoveEvent
+import org.bukkit.event.world.WorldLoadEvent
+import org.bukkit.event.world.WorldUnloadEvent
+import java.util.*
+
+/**
+ * 游戏默认矿车极速为0.4，最高为1.5
+ */
+internal const val DEFAULT_SPEED = 0.4
+
+class PluginMain : ExtendedJavaPlugin() {
+    private val configManager: ConfigManager2 by lazy {
+        ConfigManager2(this).apply {
+            setCache(ConfigManager2.CacheType.None)
+        }
+    }
+    private val languageManager: LanguageManager by lazy { LanguageManager(this) }
+    internal val messageManager: MessageManager by lazy { MessageManager(this) }
+    private val commandManager: PaperCommandManager by lazy { PaperCommandManager(this) }
+    companion object {
+        lateinit var INSTANCE: PluginMain
+            private set
+    }
+
+    init { INSTANCE = this }
+
+    override fun enable() {
+        // 初始化ConfigManager
+        configManager touch "config.yml"
+
+        // 载入配置
+        reload()
+
+        // 初始化LanguageManager
+        Locale("config").also {
+            languageManager.register(it, "config.yml") setMajorLanguage it
+        }
+
+        // 初始化MessageManager
+        messageManager setLanguageProvider languageManager
+        messageManager setPlayerPrefix(messageManager.sprintf("\$msg.prefix$"))
+
+        // 初始化CommandManager
+        commandManager.run {
+            usePerIssuerLocale(true, false)
+            locales.loadYamlLanguageFile("config.yml", Locale("config"))
+        }
+
+        // 注册指令
+        commandManager.enableUnstableAPI("help")
+        commandManager.registerCommand(Commands)
+
+        // 注册事件
+        Events.subscribe(WorldLoadEvent::class.java, EventPriority.MONITOR)
+            .filter { worldName2RailConfig.containsKey(it.world.name) }
+            .handler { world2RailConfig[it.world] = worldName2RailConfig[it.world.name]!! }
+            .bindWith(this)
+
+        Events.subscribe(WorldUnloadEvent::class.java, EventPriority.MONITOR)
+            .handler { world2RailConfig.remove(it.world) }
+            .bindWith(this)
+
+        Events.subscribe(VehicleExitEvent::class.java, EventPriority.MONITOR)
+            .filter(EventFilters.ignoreCancelled())
+            .filter { it.vehicle is Minecart }
+            .filter { it.vehicle.isEmpty }
+            .filter { world2RailConfig.containsKey(it.vehicle.world) }
+            .handler { (it.vehicle as Minecart).maxSpeed = DEFAULT_SPEED }
+            .bindWith(this)
+
+        Events.subscribe(VehicleMoveEvent::class.java, EventPriority.MONITOR)
+            .filter { it.vehicle is Minecart }
+            .filter { !it.vehicle.isEmpty }
+            .filter { world2RailConfig.containsKey(it.vehicle.world) }
+            .filter { it.from.blockX != it.to.blockX || it.from.blockZ != it.to.blockZ ||
+                      it.from.blockY != it.to.blockY || it.from.world != it.to.world }
+            .handler { event: VehicleMoveEvent ->
+                val curBlock = event.vehicle.location.block
+                val material = curBlock.type
+                val config = world2RailConfig[event.vehicle.world]
+                var flag = material == Material.POWERED_RAIL
+                if (!flag && !config!!.powerRailOnly) {
+                    flag =
+                        material == Material.RAIL || material == Material.DETECTOR_RAIL || material == Material.ACTIVATOR_RAIL
+                }
+                if (flag && config?.allowNonPlayer != true) {
+                    for (entity in event.vehicle.passengers) {
+                        if (entity is Player) {
+                            continue
+                        }
+                        flag = false
+                        break
+                    }
+                }
+                if (flag) {
+                    // 看看铁轨下面的方块是什么，赋予相应的速度
+                    val belowBlock = curBlock.getRelative(BlockFace.DOWN)
+                    (event.vehicle as Minecart).maxSpeed = config!!.blockSpeedMap.getOrDefault(
+                        belowBlock.type,
+                        DEFAULT_SPEED
+                    )
+                } else (event.vehicle as Minecart).maxSpeed = DEFAULT_SPEED
+            }
+            .bindWith(this)
+    }
+
+    private val world2RailConfig = mutableMapOf<World, RailConfig>()
+    private val worldName2RailConfig = mutableMapOf<String, RailConfig>()
+    internal fun reload() {
+        configManager.cache?.clear()
+        world2RailConfig.clear()
+        configManager touch "config.yml"
+        configManager.parse<ConfigFile>("config.yml").also {
+            it.config.forEach { worldGroup ->
+                val config = RailConfig(worldGroup.powerRailOnly, worldGroup.allowNonPlayer, worldGroup.blockType)
+                worldGroup.world.forEach { worldName ->
+                    Bukkit.getWorld(worldName)?.let { w -> world2RailConfig[w] = config }
+                    worldName2RailConfig[worldName] = config
+                }
+            }
+        }
+    }
+}

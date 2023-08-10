@@ -1,13 +1,16 @@
 name: ${project.name}
 version: ${project.version}
-main: city.newnan.guardian.Guardian
-api-version: 1.16
-# load: STARTUP 加了这个，depend就不管用，会在 GM 之前启动
-authors: [ Gk0Wk ]
+main: ${project.group}.PluginMain
+api-version: ${project.apiVersion}
+load: ${project.load}
+authors: ${project.authors}
 description: ${project.description}
-website: https://www.newnan.city/
-depend:
-  - GroupManager
+website: ${project.url}
+# 硬依赖，没有就无法启动
+depend: ${project.depend}
+loadbefore: ${project.loadBefore}
+softdepend: ${project.softDepend}
+
 permissions:
   'guardian.bypass':
     description: '略过检查权限'

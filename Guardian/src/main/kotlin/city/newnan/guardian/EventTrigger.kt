@@ -14,16 +14,16 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 fun org.bukkit.entity.Player.inPlayerGroup() =
-    Guardian.INSTANCE.workWorldsPermissionHandler.getUser(uniqueId.toString())
-    .group.equals(Guardian.INSTANCE.playersGroup)
+    PluginMain.INSTANCE.workWorldsPermissionHandler.getUser(uniqueId.toString())
+    .group.equals(PluginMain.INSTANCE.playersGroup)
 fun org.bukkit.entity.Player.inNewbieGroup() =
-    Guardian.INSTANCE.workWorldsPermissionHandler.getUser(uniqueId.toString())
-        .group.equals(Guardian.INSTANCE.newbiesGroup)
+    PluginMain.INSTANCE.workWorldsPermissionHandler.getUser(uniqueId.toString())
+        .group.equals(PluginMain.INSTANCE.newbiesGroup)
 fun org.bukkit.entity.Player.toPlayerGroup() {
-    Guardian.INSTANCE.workWorldsPermissionHandler.getUser(uniqueId.toString()).group = Guardian.INSTANCE.newbiesGroup
+    PluginMain.INSTANCE.workWorldsPermissionHandler.getUser(uniqueId.toString()).group = PluginMain.INSTANCE.newbiesGroup
 }
 fun org.bukkit.entity.Player.kickAsync(msg: String) =
-    Schedulers.bukkit().runTask(Guardian.INSTANCE, Runnable { kickPlayer(msg) })
+    Schedulers.bukkit().runTask(PluginMain.INSTANCE, Runnable { kickPlayer(msg) })
 
 val expireFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy年MM月dd日", Locale.CHINA)
 
@@ -36,7 +36,7 @@ fun handleBanMode(player: Player, gamePlayer: org.bukkit.entity.Player, banList:
             if (gamePlayer.inNewbieGroup()) {
                 gamePlayer.toPlayerGroup()
                 // 迎新横幅
-                Schedulers.bukkit().runTask(Guardian.INSTANCE,
+                Schedulers.bukkit().runTask(PluginMain.INSTANCE,
                     Runnable {
                         gamePlayer.sendTitle(
                             "§c欢迎来到牛腩小镇", "§b恭喜你正式获得玩家资格！",
@@ -92,7 +92,7 @@ object EventTrigger {
                         player.curServer = DBManager.serverId
                         val banList = Bukkit.getBanList(BanList.Type.NAME)
                         // 是否开启群检查模式
-                        if (Guardian.INSTANCE.checkGroup) {
+                        if (PluginMain.INSTANCE.checkGroup) {
                             // 群检查模式
                             // 有记录
                             // 检查是否在群里
@@ -132,7 +132,7 @@ object EventTrigger {
                 }
             }
 
-        Events.subscribe(PlayerQuitEvent::class.java, EventPriority.LOWEST)
+        Events.subscribe(PlayerQuitEvent::class.java, EventPriority.MONITOR)
             .handler { it.player.lockServer() }
     }
 }
