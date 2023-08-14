@@ -1,4 +1,4 @@
-package city.newnan.railarea
+package city.newnan.railarea.octree
 
 data class Point3D(val x: Int, val y: Int, val z: Int)
 

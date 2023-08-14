@@ -1,41 +1,50 @@
 package city.newnan.railarea.config
 
-import city.newnan.railarea.Range3D
+import city.newnan.railarea.octree.Point3D
+import city.newnan.railarea.octree.Range3D
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.bukkit.World
+import org.bukkit.block.BlockFace
 
 
 class RailArea(
-    val name: String,
     val world: World,
     val range3D: Range3D,
-    val title: String,
-    val subTitle: String?,
-    val actionBar: String?,
+    val direction: Direction,
+    val stopPoint: Point3D,
+    val station: Station,
+    val line: RailLine,
+    val reverse: Boolean,
 )
+
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class RailAreaConfig(
     @JsonProperty("area")
     val areaString: String, // (x,y,z)+(dx,dy,dz)
-    val title: String,
-    @JsonProperty("subtitle")
-    val subTitle: String?,
-    @JsonProperty("actionbar")
-    val actionBar: String?,
+    val direction: Direction,
+    @JsonProperty("stop")
+    val stopPointString: String, // (x,y,z)
+    val station: String,
+    val line: String,
+    val reverse: Boolean,
 ) {
     companion object {
         fun valueOf(railArea: RailArea): RailAreaConfig {
             return RailAreaConfig(
                 railArea.range3D.toAreaString(),
-                railArea.title,
-                railArea.subTitle,
-                railArea.actionBar
+                railArea.direction,
+                railArea.stopPoint.toStopPointString(),
+                railArea.station.name,
+                railArea.line.name,
+                railArea.reverse,
             )
         }
     }
 
+    @get:JsonIgnore
     val range3D: Range3D
         get() {
             // (x,y,z)+(dx,dy,dz) to 6 numbers
@@ -55,15 +64,36 @@ data class RailAreaConfig(
             return Range3D(minX, minY, minZ, maxX, maxY, maxZ)
         }
 
-    fun toRailArea(name: String, world: World): RailArea {
-        return RailArea(name, world, range3D, title, subTitle, actionBar)
+    @get:JsonIgnore
+    val stopPoint: Point3D
+        get() {
+            // (x,y,z) to 3 numbers
+            val k = stopPointString.split("(", ")", ",").filterNot { it.isEmpty() }.map { it.toInt() }
+            val x = k[0]
+            val y = k[1]
+            val z = k[2]
+            return Point3D(x, y, z)
+        }
+}
+
+fun Range3D.toAreaString(): String =
+    "($minX,$minY,$minZ)+(${maxX - minX},${maxY - minY},${maxZ - minZ})"
+
+fun Point3D.toStopPointString(): String = "($x,$y,$z)"
+
+
+enum class Direction {
+    NORTH, SOUTH, EAST, WEST;
+
+    companion object {
+        fun valueOf(value: BlockFace): Direction {
+            return when (value) {
+                BlockFace.NORTH_NORTH_EAST, BlockFace.NORTH_NORTH_WEST, BlockFace.NORTH -> NORTH
+                BlockFace.SOUTH_SOUTH_EAST, BlockFace.SOUTH_SOUTH_WEST, BlockFace.SOUTH -> SOUTH
+                BlockFace.EAST_NORTH_EAST, BlockFace.EAST_SOUTH_EAST, BlockFace.EAST -> EAST
+                BlockFace.WEST_NORTH_WEST, BlockFace.WEST_SOUTH_WEST, BlockFace.WEST -> WEST
+                else -> throw IllegalArgumentException("Cannot decide: $value")
+            }
+        }
     }
 }
-
-fun Range3D.toAreaString(): String {
-    return "($minX,$minY,$minZ)+(${maxX - minX},${maxY - minY},${maxZ - minZ})"
-}
-
-typealias AreasWorld = LinkedHashMap<String, RailAreaConfig>
-
-typealias AreasWorlds = LinkedHashMap<String, AreasWorld>
