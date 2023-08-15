@@ -27,8 +27,8 @@ data class RailAreaConfig(
     val direction: Direction,
     @JsonProperty("stop")
     val stopPointString: String, // (x,y,z)
-    val station: String,
-    val line: String,
+    val station: Int,
+    val line: Int,
     val reverse: Boolean,
 ) {
     companion object {
@@ -37,8 +37,8 @@ data class RailAreaConfig(
                 railArea.range3D.toAreaString(),
                 railArea.direction,
                 railArea.stopPoint.toStopPointString(),
-                railArea.station.name,
-                railArea.line.name,
+                railArea.station.id,
+                railArea.line.id,
                 railArea.reverse,
             )
         }

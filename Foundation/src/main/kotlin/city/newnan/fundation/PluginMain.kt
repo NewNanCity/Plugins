@@ -1,5 +1,6 @@
 package city.newnan.fundation
 
+import city.newnan.fundation.config.ConfigFile
 import city.newnan.violet.config.ConfigManager2
 import city.newnan.violet.message.MessageManager
 import me.lucko.helper.Events
@@ -32,7 +33,11 @@ class PluginMain : ExtendedJavaPlugin() {
     }
 
     private fun reload() {
-        configManager.cache?.clear()
         configManager touch "config.yml"
+        configManager.parse<ConfigFile>("config.yml").also {
+            if (it.target != null)
+                targetAccount = server.offlinePlayers.find { p -> p.name == it.target }?.also { p ->
+                    if (!economy.hasAccount(p)) economy.createPlayerAccount(p) }
+        }
     }
 }

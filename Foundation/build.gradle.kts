@@ -25,7 +25,7 @@ tasks.shadowJar {
 dependencies {
     // API
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
-    compileOnly("net.essentialsx:EssentialsX:2.20.1")
+    compileOnly("net.essentialsx:EssentialsX:2.19.4")
 
     // Utils
     implementation("me.lucko:helper:5.6.14")

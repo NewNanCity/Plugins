@@ -15,6 +15,7 @@ import me.lucko.helper.event.filter.EventFilters
 import me.lucko.helper.plugin.ExtendedJavaPlugin
 import me.lucko.helper.terminable.Terminable
 import net.md_5.bungee.api.ChatMessageType
+import net.md_5.bungee.api.chat.ComponentBuilder
 import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.*
 import org.bukkit.entity.Minecart
@@ -69,32 +70,41 @@ class PluginMain : ExtendedJavaPlugin() {
     var nextLineId = 1
 
     private fun onAreaEnter(player: Player, area: RailArea) {
-        if (!player.isInsideVehicle || player.vehicle !is Minecart) {
-            player.sendTitle(area.station, area.line, area.reverse, RailTitleMode.UNDER_BOARD, 5, 30, 0)
-            if (!area.line.isCycle && area.line.stations.last() == area.station) {
+        if (player.isInsideVehicle && player.vehicle is Minecart) {
+            player.sendTitle(area.station, area.line, area.reverse, RailTitleMode.ARRIVE, 5, 200, 0)
+        } else {
+            player.sendTitle(area.station, area.line, area.reverse, RailTitleMode.UNDER_BOARD, 5, 40, 0)
+            if (!area.line.isCycle && area.line.stations.size > 0 && area.line.stations.last() == area.station) {
                 player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent("§c本站为终点站, 请到对侧站台乘车"))
             } else {
-                player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent("§c请右击铁轨，自动搭乘列车"))
+                player.spigot().sendMessage(ChatMessageType.ACTION_BAR, *ComponentBuilder()
+                    .append("请右击铁轨, 自动搭乘 ").color(net.md_5.bungee.api.ChatColor.RED)
+                    .append(area.line.name).bold(true).color(net.md_5.bungee.api.ChatColor.of(area.line.color.toHexString()))
+                    .append(" 列车").color(net.md_5.bungee.api.ChatColor.RED).bold(false).create()
+                )
             }
-        } else {
-            val area = inAreaMinecartMap[player.vehicle as Minecart] ?: return
-            player.sendTitle(area.station, area.line, area.reverse, RailTitleMode.ARRIVE, 5, 200, 0)
         }
     }
 
     private fun onAreaExit(player: Player, area: RailArea) {}
 
     private fun onAreaStay(player: Player, area: RailArea) {
-        if (!player.isInsideVehicle || player.vehicle !is Minecart) {
-            player.sendTitle(area.station, area.line, area.reverse, RailTitleMode.UNDER_BOARD, 0, 30, 0)
-            if (!area.line.isCycle && area.line.stations.last() == area.station) {
+        if (player.isInsideVehicle && player.vehicle is Minecart) {
+            if (waitingMinecartMap.containsKey(player.vehicle as Minecart)) {
+                player.sendTitle(area.station, area.line, area.reverse, RailTitleMode.ARRIVE, 0, 40, 0)
+            }
+            // Or do noting
+        } else {
+            player.sendTitle(area.station, area.line, area.reverse, RailTitleMode.UNDER_BOARD, 0, 40, 0)
+            if (!area.line.isCycle && area.line.stations.size > 0 && area.line.stations.last() == area.station) {
                 player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent("§c本站为终点站, 请到对侧站台乘车"))
             } else {
-                player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent("§c请右击铁轨，自动搭乘列车"))
+                player.spigot().sendMessage(ChatMessageType.ACTION_BAR, *ComponentBuilder()
+                    .append("请右击铁轨, 自动搭乘 ").color(net.md_5.bungee.api.ChatColor.RED)
+                    .append(area.line.name).bold(true).color(net.md_5.bungee.api.ChatColor.of(area.line.color.toHexString()))
+                    .append(" 列车").color(net.md_5.bungee.api.ChatColor.RED).bold(false).create()
+                )
             }
-        } else if (waitingMinecartMap.containsKey(player.vehicle as Minecart)) {
-            val area = inAreaMinecartMap[player.vehicle as Minecart] ?: return
-            player.sendTitle(area.station, area.line, area.reverse, RailTitleMode.ARRIVE, 0, 30, 0)
         }
     }
 
@@ -118,6 +128,8 @@ class PluginMain : ExtendedJavaPlugin() {
             }
         }, 20, 20).bindWith(this)
 
+        server.onlinePlayers.forEach { checkPlayer(it) }
+
         // 用户移动
         Events.subscribe(PlayerMoveEvent::class.java, EventPriority.MONITOR)
             .filter(EventFilters.ignoreCancelled())
@@ -132,7 +144,9 @@ class PluginMain : ExtendedJavaPlugin() {
             .bindWith(this)
         Events.subscribe(PlayerQuitEvent::class.java, EventPriority.MONITOR)
             .handler {
-                if (hasBoardPlayers.remove(it.player)) it.player.scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard
+                if (hasBoardPlayers.remove(it.player)) {
+                    it.player.scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard
+                }
             }
             .bindWith(this)
         Events.subscribe(PlayerInteractEvent::class.java, EventPriority.MONITOR)
@@ -151,6 +165,7 @@ class PluginMain : ExtendedJavaPlugin() {
                 minecart.addPassenger(player)
                 inAreaMinecartMap[minecart] = area
                 waitMinecart(minecart, area)
+                it.setCancelled(true)
             }
             .bindWith(this)
 
@@ -186,8 +201,9 @@ class PluginMain : ExtendedJavaPlugin() {
                     waitingMinecartMap.remove(minecart)?.close()
                 }
                 if (it.exited is Player) {
-                    if (hasBoardPlayers.remove(it.exited as Player))
-                            (it.exited as Player).scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard
+                    if (hasBoardPlayers.remove(it.exited as Player)) {
+                        (it.exited as Player).scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard
+                    }
                     checkPlayer(it.exited as Player)
                 }
             }
@@ -321,9 +337,11 @@ class PluginMain : ExtendedJavaPlugin() {
                     if (!config.areas.containsKey(world.name)) return@handler
                     val octree = getWorldOctree(world) ?: return@handler
                     areaRangeMap[world] = mutableMapOf()
+                    val stationIdMap = stations.mapKeys { it.value.id }
+                    val lineIdMap = lines.mapKeys { it.value.id }
                     config.areas[world.name]!!.map {
-                        val station = stations[it.station] ?: unknownStation
-                        val line = lines[it.line] ?: unknownLine
+                        val station = stationIdMap[it.station] ?: unknownStation
+                        val line = lineIdMap[it.line] ?: unknownLine
                         RailArea(world, it.range3D, it.direction, it.stopPoint, station, line, it.reverse)
                     }.onEach {
                         areaRangeMap[it.world]!![it.range3D] = it
@@ -379,6 +397,7 @@ class PluginMain : ExtendedJavaPlugin() {
 
     override fun disable() {
         commandManager.unregisterCommands()
+        save()
     }
 
     fun reload() {
@@ -431,18 +450,20 @@ class PluginMain : ExtendedJavaPlugin() {
         val railConfig = configManager.parse<RailsConfig>("rails.yml")
         // Stations and lines
         val stationIdMap = mutableMapOf<Int, Station>()
+        val lineIdMap = mutableMapOf<Int, RailLine>()
         railConfig.stations.forEach { (id, station) ->
             nextStationId = maxOf(nextStationId, id + 1)
             stations[station.name] = Station(id, station.name)
             stationIdMap[id] = stations[station.name]!!
         }
-        railConfig.railLines.forEach { (id, line) ->
-            val stations = line.stations.mapNotNull { stationIdMap[it] }.toMutableList()
-            val color = line.color.toColor()
+        railConfig.railLines.forEach { (id, lineC) ->
+            val stations = lineC.stations.mapNotNull { stationIdMap[it] }.toMutableList()
+            val color = lineC.color.toColor()
             nextLineId = maxOf(nextLineId, id + 1)
-            val line = RailLine(id, line.name, stations, color, line.isCycle, line.colorMaterial)
+            val line = RailLine(id, lineC.name, stations, color, lineC.isCycle, lineC.colorMaterial)
             stations.forEach { station -> station.lines.add(line) }
             lines[line.name] = line
+            lineIdMap[id] = line
         }
         // Rail areas
         for ((worldName, areas) in railConfig.areas) {
@@ -450,8 +471,8 @@ class PluginMain : ExtendedJavaPlugin() {
             val octree = getWorldOctree(world) ?: continue
             areaRangeMap[world] = mutableMapOf()
             areas.map {
-                val station = stations[it.station] ?: unknownStation
-                val line = lines[it.line] ?: unknownLine
+                val station = stationIdMap[it.station] ?: unknownStation
+                val line = lineIdMap[it.line] ?: unknownLine
                 RailArea(world, it.range3D, it.direction, it.stopPoint, station, line, it.reverse)
             }.onEach {
                 areaRangeMap[it.world]!![it.range3D] = it
@@ -519,63 +540,96 @@ class PluginMain : ExtendedJavaPlugin() {
             return
         }
         // 列车站台
-        Schedulers.sync().run {
-            Bukkit.getScoreboardManager()?.newScoreboard?.also {
-                val n = "rail.l${area.line.id}.s${area.station.id}"
-                val board = it.registerNewObjective(n.substring(0, n.length.coerceAtMost(16)),
-                    "dummy", "${area.line.color.toFMString()}${area.line.name} §r行驶路线")
-                board.displaySlot = DisplaySlot.SIDEBAR
-                val dots = area.line.stations.size > 7
-                val maxStations = if (dots) 4 else 5
-                val index = area.line.stations.indexOf(area.station)
-                val nextStations: MutableList<Station> = mutableListOf()
-                var terminal: Station? = null
-                if (area.reverse) {
-                    for (i in index-1 downTo 1) {
-                        if (nextStations.size > maxStations) break
-                        nextStations.add(area.line.stations[i])
-                    }
-                    if (area.line.isCycle) {
-                        for (i in area.line.stations.size-1 downTo index+1) {
+        fun showBoard(wait: Boolean) {
+             Schedulers.sync().run {
+                Bukkit.getScoreboardManager()?.newScoreboard?.also {
+                    val n = "rail.${if (wait) "w" else "g"}.l${area.line.id}.s${area.station.id}"
+                    val name = n.substring(0, n.length.coerceAtMost(16))
+                    it.getObjective(n)?.unregister()
+                    val board = it.registerNewObjective(name, "dummy",
+                        " §8==§r    ${area.line.color.toFMString()}§n§l${area.line.name}§r    §8==§r ")
+                    board.displaySlot = DisplaySlot.SIDEBAR
+                    val dots = area.line.stations.size > 9
+                    val maxStations = if (dots) 7 else 8
+                    val index = area.line.stations.indexOf(area.station)
+                    val nextStations: MutableList<Station> = mutableListOf()
+                    var terminal: Station? = null
+                    if (area.reverse) {
+                        for (i in index - 1 downTo 0) {
                             if (nextStations.size > maxStations) break
                             nextStations.add(area.line.stations[i])
                         }
+                        if (area.line.isCycle) {
+                            for (i in area.line.stations.size - 1 downTo index + 1) {
+                                if (nextStations.size > maxStations) break
+                                nextStations.add(area.line.stations[i])
+                            }
+                        } else {
+                            terminal = area.line.stations.first()
+                        }
                     } else {
-                        terminal = area.line.stations.first()
-                    }
-                } else {
-                    for (i in index+1 until area.line.stations.size) {
-                        if (nextStations.size > maxStations) break
-                        nextStations.add(area.line.stations[i])
-                    }
-                    if (area.line.isCycle) {
-                        for (i in 0 until index) {
+                        for (i in index + 1 until area.line.stations.size) {
                             if (nextStations.size > maxStations) break
                             nextStations.add(area.line.stations[i])
                         }
+                        if (area.line.isCycle) {
+                            for (i in 0 until index) {
+                                if (nextStations.size > maxStations) break
+                                nextStations.add(area.line.stations[i])
+                            }
+                        } else {
+                            terminal = area.line.stations.last()
+                        }
+                    }
+                    if (nextStations.size > 0 && terminal == nextStations.last()) terminal = null
+                    if (nextStations.size == 0) terminal = null
+                    var scoreIndex = nextStations.size + (if (dots) 1 else 0) + (if (terminal == null) 0 else 1)
+                    fun intersection(text: String, colors: List<Color>) {
+                        if (colors.isNotEmpty()) {
+                            val team = it.getTeam(text) ?: it.registerNewTeam(text)
+                            var suffix = " "
+                            colors.forEach { color ->
+                                suffix += net.md_5.bungee.api.ChatColor.of(color.toHexString()).toString() + "●"
+                            }
+                            team.suffix = suffix
+                            team.addEntry(text)
+                        }
+                        board.getScore(text).score = scoreIndex--
+                    }
+                    if (wait) {
+                        intersection(" §6☛ §l${area.station.name}§r", area.station.lines.filter { l -> l != area.line }.map { l -> l.color })
                     } else {
-                        terminal = area.line.stations.last()
+                        intersection(" §8▼§7 §o${area.station.name}§r", area.station.lines.filter { l -> l != area.line }.map { l -> l.color })
                     }
-                }
-                var scoreIndex = 9
-                nextStations.forEach { station ->
-                    val s = if (station.lines.size < 2) "" else station.lines.filter { l -> l != area.line }.joinToString { l ->
-                        "${l.color.toFMString()}●§r"
+                    var first = true
+                    nextStations.forEach { station ->
+                        if (first) {
+                            if (wait) {
+                                intersection(" §f▽ §l${station.name}§r", station.lines.filter { l -> l != area.line }.map { l -> l.color })
+                            } else {
+                                intersection(" §6☛ §l${station.name}§r", station.lines.filter { l -> l != area.line }.map { l -> l.color })
+                            }
+                            first = false
+                        } else {
+                            intersection(" §f▽ ${station.name}§r", station.lines.filter { l -> l != area.line }.map { l -> l.color })
+                        }
                     }
-                    board.getScore("§f${station.name}§r $s").score = scoreIndex--
-                }
-                if (dots) {
-                    board.getScore("§8...§r").score = scoreIndex--
-                }
-                if (terminal != null) board.getScore("§f${terminal.name}§r").score = scoreIndex
-                minecart.passengers.forEach { p ->
-                    if (p is Player) {
-                        p.scoreboard = it
-                        hasBoardPlayers.add(p)
+                    if (terminal != null) {
+                        if (dots && nextStations.size >= maxStations)
+                            board.getScore("     §8...§r     ").score = scoreIndex--
+                        intersection(" ◇ §f§n${terminal.name}§r", terminal.lines.filter { l -> l != area.line }.map { l -> l.color })
+                    }
+
+                    minecart.passengers.forEach { p ->
+                        if (p is Player) {
+                            p.scoreboard = it
+                            hasBoardPlayers.add(p)
+                        }
                     }
                 }
             }
         }
+        showBoard(true)
 
         // 发车倒计时
         var countDown = WAITING_COUNT_DOWN
@@ -595,6 +649,7 @@ class PluginMain : ExtendedJavaPlugin() {
             }
             countDown--
             if (countDown <= 0) {
+                showBoard(false)
                 task.close()
                 waitingMinecartMap.remove(minecart)
                 when (area.direction) {

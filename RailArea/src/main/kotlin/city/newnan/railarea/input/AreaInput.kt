@@ -1,12 +1,14 @@
-package city.newnan.railarea.utils
+package city.newnan.railarea.input
 
 import city.newnan.railarea.PluginMain
 import city.newnan.railarea.config.Direction
 import city.newnan.railarea.config.RailArea
 import city.newnan.railarea.config.RailLine
 import city.newnan.railarea.config.Station
+import city.newnan.railarea.gui.showLineStationGui
 import city.newnan.railarea.octree.Point3D
 import city.newnan.railarea.octree.Range3D
+import city.newnan.railarea.utils.*
 import dev.triumphteam.gui.builder.item.ItemBuilder
 import dev.triumphteam.gui.guis.Gui
 import me.lucko.helper.Schedulers
@@ -19,9 +21,10 @@ import org.bukkit.Particle
 import org.bukkit.World
 import org.bukkit.entity.Player
 
-fun handleAreaInput (sender: Player, oldArea: RailArea?, done: (area: RailArea?) -> Unit): (String) -> Boolean {
-    var station: Station? = oldArea?.station
-    var railLine: RailLine? = oldArea?.line
+fun handleAreaInput (sender: Player, oldArea: RailArea?, iStation: Station? = null, iLine: RailLine? = null,
+                     done: (area: RailArea?) -> Unit) {
+    var station: Station? = oldArea?.station ?: iStation
+    var railLine: RailLine? = oldArea?.line ?: iLine
     var area: Range3D? = oldArea?.range3D
     var world: World? = oldArea?.world
     var stopPoint: Point3D? = oldArea?.stopPoint
@@ -29,37 +32,58 @@ fun handleAreaInput (sender: Player, oldArea: RailArea?, done: (area: RailArea?)
     var reverse: Boolean? = oldArea?.reverse
     if (station == PluginMain.INSTANCE.unknownStation) station = null
     if (railLine == PluginMain.INSTANCE.unknownLine) railLine = null
-    val preview = fun (p: String?) {
+    fun preview(p: String?) {
         if (station != null && reverse != null && railLine != null) {
             sender.sendTitle(station!!, railLine!!, reverse!!, RailTitleMode.UNDER_BOARD, 1, 70, 2)
             sender.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent("列车已到站停靠，您可下车，或留在车上待自动发车"))
         }
         area?.also {
-            // spawn paticales to visualize area
-            for (x in it.minX..(it.maxX+1)) {
-                val xv = x.toDouble()
-                sender.world.spawnParticle(Particle.FLAME, xv, it.minY.toDouble(), it.minZ.toDouble(), 1)
-                sender.world.spawnParticle(Particle.FLAME, xv, it.minY.toDouble(), it.maxZ.toDouble(), 1)
-                sender.world.spawnParticle(Particle.FLAME, xv, it.maxY.toDouble(), it.minZ.toDouble(), 1)
-                sender.world.spawnParticle(Particle.FLAME, xv, it.maxY.toDouble(), it.maxZ.toDouble(), 1)
-            }
-            for (y in it.minY..(it.maxY+1)) {
-                val yv = y.toDouble()
-                sender.world.spawnParticle(Particle.FLAME, it.minX.toDouble(), yv, it.minZ.toDouble(), 1)
-                sender.world.spawnParticle(Particle.FLAME, it.minX.toDouble(), yv, it.maxZ.toDouble(), 1)
-                sender.world.spawnParticle(Particle.FLAME, it.maxX.toDouble(), yv, it.minZ.toDouble(), 1)
-                sender.world.spawnParticle(Particle.FLAME, it.maxX.toDouble(), yv, it.maxZ.toDouble(), 1)
-            }
-            for (z in it.minZ..(it.maxZ+1)) {
-                val zv = z.toDouble()
-                sender.world.spawnParticle(Particle.FLAME, it.minX.toDouble(), it.minY.toDouble(), zv, 1)
-                sender.world.spawnParticle(Particle.FLAME, it.minX.toDouble(), it.maxY.toDouble(), zv, 1)
-                sender.world.spawnParticle(Particle.FLAME, it.maxX.toDouble(), it.minY.toDouble(), zv, 1)
-                sender.world.spawnParticle(Particle.FLAME, it.maxX.toDouble(), it.maxY.toDouble(), zv, 1)
-            }
+            var counter = 20
+            Schedulers.sync().runRepeating({ task ->
+                // spawn paticales to visualize area
+                for (x in it.minX..(it.maxX+1)) {
+                    val xv = x.toDouble()
+                    world!!.spawnParticle(Particle.FLAME, xv, it.minY.toDouble(), it.minZ.toDouble(), 5, 0.0, 0.0, 0.0, 0.0)
+                    world!!.spawnParticle(Particle.FLAME, xv, it.minY.toDouble(), it.maxZ.toDouble(), 5, 0.0, 0.0, 0.0, 0.0)
+                    world!!.spawnParticle(Particle.FLAME, xv, it.maxY.toDouble(), it.minZ.toDouble(), 5, 0.0, 0.0, 0.0, 0.0)
+                    world!!.spawnParticle(Particle.FLAME, xv, it.maxY.toDouble(), it.maxZ.toDouble(), 5, 0.0, 0.0, 0.0, 0.0)
+                }
+                for (y in it.minY..(it.maxY+1)) {
+                    val yv = y.toDouble()
+                    world!!.spawnParticle(Particle.FLAME, it.minX.toDouble(), yv, it.minZ.toDouble(), 5, 0.0, 0.0, 0.0, 0.0)
+                    world!!.spawnParticle(Particle.FLAME, it.minX.toDouble(), yv, it.maxZ.toDouble(), 5, 0.0, 0.0, 0.0, 0.0)
+                    world!!.spawnParticle(Particle.FLAME, it.maxX.toDouble(), yv, it.minZ.toDouble(), 5, 0.0, 0.0, 0.0, 0.0)
+                    world!!.spawnParticle(Particle.FLAME, it.maxX.toDouble(), yv, it.maxZ.toDouble(), 5, 0.0, 0.0, 0.0, 0.0)
+                }
+                for (z in it.minZ..(it.maxZ+1)) {
+                    val zv = z.toDouble()
+                    world!!.spawnParticle(Particle.FLAME, it.minX.toDouble(), it.minY.toDouble(), zv, 5, 0.0, 0.0, 0.0, 0.0)
+                    world!!.spawnParticle(Particle.FLAME, it.minX.toDouble(), it.maxY.toDouble(), zv, 5, 0.0, 0.0, 0.0, 0.0)
+                    world!!.spawnParticle(Particle.FLAME, it.maxX.toDouble(), it.minY.toDouble(), zv, 5, 0.0, 0.0, 0.0, 0.0)
+                    world!!.spawnParticle(Particle.FLAME, it.maxX.toDouble(), it.maxY.toDouble(), zv, 5, 0.0, 0.0, 0.0, 0.0)
+                }
+                if (--counter < 0) task.close()
+            }, 0, 10)
         }
         stopPoint?.also {
-            sender.world.spawnParticle(Particle.PORTAL, it.x.toDouble(), it.y.toDouble(), it.z.toDouble(), 10)
+            var counter = 20
+            val xO = it.x.toDouble()
+            val yO = it.y.toDouble()
+            val zO = it.z.toDouble()
+            val xs = listOf(xO, xO+0.5, xO+1.0)
+            val ys = listOf(yO, yO+0.5, yO+1.0)
+            val zs = listOf(zO, zO+0.5, zO+1.0)
+            Schedulers.sync().runRepeating({ task ->
+                // Draw a cube fire framework
+                for (x in xs) {
+                    for (y in ys) {
+                        for (z in zs) {
+                            world!!.spawnParticle(Particle.PORTAL, x, y, z, 3, 0.0, 0.0, 0.0, 0.0)
+                        }
+                    }
+                }
+                if (--counter < 0) task.close()
+            }, 0, 10)
         }
         if (p == null) {
             PluginMain.INSTANCE.messageManager.printf(sender, "效果预览已显示")
@@ -67,11 +91,11 @@ fun handleAreaInput (sender: Player, oldArea: RailArea?, done: (area: RailArea?)
             PluginMain.INSTANCE.messageManager.printf(sender, "&2$p&r 已设定, 效果预览已显示，请继续设置其他属性!")
         }
     }
-    return fun (input: String): Boolean {
-        when {
-            input.startsWith("station:") -> {
-                getLineStation(sender, false) { l, s, _ ->
-                    println("[4]")
+    PluginMain.INSTANCE.messageManager.gets(sender) { input ->
+        val argv = input.split(" ").filter { it.isNotEmpty() }
+        when (argv[0].lowercase()) {
+            "station" -> {
+                showLineStationGui(sender, false) { l, s, _ ->
                     val gui = Gui.gui()
                         .title(Component.text("选择方向"))
                         .rows(6)
@@ -94,16 +118,15 @@ fun handleAreaInput (sender: Player, oldArea: RailArea?, done: (area: RailArea?)
                     Schedulers.sync().runLater({ gui.open(sender) }, 1)
                 }
             }
-            input.startsWith("area:") -> {
-                val areaStr = input.substring(5).trim()
-                if (areaStr.isEmpty()) {
+            "area" -> {
+                if (argv.size < 2) {
                     val areaw = sender.getSelection()
                     if (areaw == null) {
                         PluginMain.INSTANCE.messageManager.printf(sender, "&c请先用小木斧选择一个区域!")
                     } else {
                         if (areaw.world != sender.world) {
                             PluginMain.INSTANCE.messageManager.printf(sender, "&c请先切换到选择区域所在的世界!")
-                            return false
+                            return@gets false
                         }
                         if (world != areaw.world) {
                             stopPoint = null
@@ -118,25 +141,24 @@ fun handleAreaInput (sender: Player, oldArea: RailArea?, done: (area: RailArea?)
                         }
                     }
                 } else {
-                    val range = areaStr.split(" ")
-                    if (range.size != 7) {
+                    if (argv.size != 8) {
                         PluginMain.INSTANCE.messageManager.printf(sender, "&c区域范围格式错误! 请使用 world x1 y1 z1 x2 y2 z2 的格式!")
                     } else {
                         try {
-                            val worldt = Bukkit.getWorld(range[0])
+                            val worldt = Bukkit.getWorld(argv[1])
                             if (worldt == null) {
-                                PluginMain.INSTANCE.messageManager.printf(sender, "&c世界 ${range[0]} 不存在!")
+                                PluginMain.INSTANCE.messageManager.printf(sender, "&c世界 ${argv[1]} 不存在!")
                             } else {
                                 if (world != worldt) {
                                     stopPoint = null
                                     direction = null
                                 }
-                                val minX = range[1].toInt()
-                                val minY = range[2].toInt()
-                                val minZ = range[3].toInt()
-                                val maxX = range[4].toInt()
-                                val maxY = range[5].toInt()
-                                val maxZ = range[6].toInt()
+                                val minX = argv[2].toInt()
+                                val minY = argv[3].toInt()
+                                val minZ = argv[4].toInt()
+                                val maxX = argv[5].toInt()
+                                val maxY = argv[6].toInt()
+                                val maxZ = argv[7].toInt()
                                 area = Range3D(minX, minY, minZ, maxX, maxY, maxZ)
                                 area?.also { a ->
                                     world = worldt
@@ -151,37 +173,36 @@ fun handleAreaInput (sender: Player, oldArea: RailArea?, done: (area: RailArea?)
                     }
                 }
             }
-            input.startsWith("direction:") -> {
+            "dir" -> {
                 if (world != null && world != sender.world) {
                     PluginMain.INSTANCE.messageManager.printf(sender, "&c你必须在范围所在世界!")
-                    return false
+                    return@gets false
                 }
                 try {
                     direction = Direction.valueOf(sender.facing)
                     PluginMain.INSTANCE.messageManager.printf(sender, "已设定方向为: &2${direction!!.name}")
                 } catch (e: Exception) {
                     PluginMain.INSTANCE.messageManager.printf(sender, "&c请面向正东西南北!")
-                    return false
+                    return@gets false
                 }
             }
-            input.startsWith("stop:") -> {
-                val stopStr = input.substring(5).trim()
-                if (stopStr.isEmpty()) {
+            "stop" -> {
+                if (argv.size < 2) {
                     val pointw = sender.getPoint()
                     if (pointw == null) {
                         PluginMain.INSTANCE.messageManager.printf(sender, "&c请先用小木斧选择一个铁轨, 注意是边长为1的范围!")
                     } else {
                         if (pointw.world != sender.world) {
                             PluginMain.INSTANCE.messageManager.printf(sender, "&c请先切换到选择铁轨所在的世界!")
-                            return false
+                            return@gets false
                         }
                         if (world != null && world != pointw.world) {
                             PluginMain.INSTANCE.messageManager.printf(sender, "&c停靠点必须在区域内!")
-                            return false
+                            return@gets false
                         }
                         if (pointw.world.getBlockAt(pointw.point.x, pointw.point.y, pointw.point.z).type != Material.RAIL) {
                             PluginMain.INSTANCE.messageManager.printf(sender, "&c请先用小木斧选择一个铁轨, 注意是边长为1的范围!")
-                            return false
+                            return@gets false
                         }
                         world = pointw.world
                         stopPoint = pointw.point
@@ -189,14 +210,13 @@ fun handleAreaInput (sender: Player, oldArea: RailArea?, done: (area: RailArea?)
                             stopPoint!!.x}, ${stopPoint!!.y}, ${stopPoint!!.z})")
                     }
                 } else {
-                    val stop = stopStr.split(" ")
-                    if (stop.size != 3) {
+                    if (argv.size != 4) {
                         PluginMain.INSTANCE.messageManager.printf(sender, "&c方块格式错误! 请使用 x y z 的格式!")
                     } else {
                         try {
-                            val x = stop[1].toInt()
-                            val y = stop[2].toInt()
-                            val z = stop[3].toInt()
+                            val x = argv[1].toInt()
+                            val y = argv[2].toInt()
+                            val z = argv[3].toInt()
                             stopPoint = Point3D(x, y, z)
                             PluginMain.INSTANCE.messageManager.printf(sender, "已设定停靠点(铁轨)为: &2($x, $y, $z)")
                         } catch (e: NumberFormatException) {
@@ -205,15 +225,15 @@ fun handleAreaInput (sender: Player, oldArea: RailArea?, done: (area: RailArea?)
                     }
                 }
             }
-            input == "preview" -> {
+            "preview" -> {
                 preview(null)
             }
-            input == "cancel" -> {
+            "cancel" -> {
                 PluginMain.INSTANCE.messageManager.printf(sender, "已取消!")
                 done(null)
-                return true
+                return@gets true
             }
-            input == "ok" -> {
+            "ok" -> {
                 if (station == null || railLine == null || reverse == null) {
                     PluginMain.INSTANCE.messageManager.printf(sender, "&c请先设定站点!")
                 } else if (area == null || world == null) {
@@ -225,13 +245,16 @@ fun handleAreaInput (sender: Player, oldArea: RailArea?, done: (area: RailArea?)
                 } else {
                     if (!area!!.contains(stopPoint!!)) {
                         PluginMain.INSTANCE.messageManager.printf(sender, "&c停靠点必须在区域内!")
-                        return false
+                        return@gets false
                     }
                     done(RailArea(world!!, area!!, direction!!, stopPoint!!, station!!, railLine!!, reverse!!))
-                    return true
+                    return@gets true
                 }
             }
+            else -> {
+                PluginMain.INSTANCE.messageManager.printf(sender, "&c未知指令! 你现在正处于区域设置模式，可用指令有: station, area, dir, stop, preview, cancel, ok")
+            }
         }
-        return false
+        return@gets false
     }
 }

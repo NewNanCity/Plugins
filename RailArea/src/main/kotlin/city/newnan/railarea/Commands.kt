@@ -1,9 +1,9 @@
 package city.newnan.railarea
 
 import city.newnan.railarea.config.toFMString
-import city.newnan.railarea.utils.getLineStation
-import city.newnan.railarea.utils.handleAreaInput
-import city.newnan.railarea.utils.pageGui
+import city.newnan.railarea.gui.pageGui
+import city.newnan.railarea.gui.showLineStationGui
+import city.newnan.railarea.input.handleAreaInput
 import co.aikar.commands.BaseCommand
 import co.aikar.commands.CommandHelp
 import co.aikar.commands.annotation.*
@@ -29,7 +29,7 @@ object Commands : BaseCommand() {
     @Subcommand("gui")
     @Description("显示所有区域")
     fun showGui(sender: Player) {
-        getLineStation(sender, true) { line, station, back ->
+        showLineStationGui(sender, true) { line, station, back ->
             val gui = pageGui(Component.text("铁路区域列表"))
             fun update() {
                 gui.clearPageItems()
@@ -67,7 +67,7 @@ object Commands : BaseCommand() {
                                 gui.close(sender)
                                 val oldArea = area
                                 PluginMain.INSTANCE.messageManager.printf(sender, "开始设置区域 &2$name&r，接下来请设定区域的属性:")
-                                PluginMain.INSTANCE.messageManager.gets(sender, handleAreaInput(sender, oldArea) { area ->
+                                handleAreaInput(sender, oldArea) { area ->
                                     if (area != null) {
                                         PluginMain.INSTANCE.updateArea(oldArea, area)
                                         PluginMain.INSTANCE.messageManager.printf(sender, "区域 &2$name&r 已更新!")
@@ -75,7 +75,7 @@ object Commands : BaseCommand() {
                                     } else {
                                         Schedulers.sync().runLater({ gui.open(sender) }, 1)
                                     }
-                                })
+                                }
                             } else if (it.isRightClick) {
                                 gui.close(sender)
                                 PluginMain.INSTANCE.messageManager.printf(sender, "&c确认删除线路? 回复Y确认, 回复其他取消")
@@ -104,8 +104,7 @@ object Commands : BaseCommand() {
             gui.setItem(6, 1, ItemBuilder.from(Material.EMERALD_BLOCK).name(Component.text("添加区域")).asGuiItem {
                 gui.close(sender)
                 PluginMain.INSTANCE.messageManager.printf(sender, "开始设置区域，接下来请设定区域的属性:")
-                PluginMain.INSTANCE.messageManager.gets(sender, handleAreaInput(sender, null) { area ->
-                    println(area)
+                handleAreaInput(sender, null, iStation = station, iLine = line) { area ->
                     if (area != null) {
                         PluginMain.INSTANCE.addArea(area)
                         PluginMain.INSTANCE.messageManager.printf(sender, "区域已创建!")
@@ -113,7 +112,7 @@ object Commands : BaseCommand() {
                     } else {
                         Schedulers.sync().runLater({ gui.open(sender) }, 1)
                     }
-                })
+                }
             })
 
             Schedulers.sync().runLater({ update(); gui.open(sender) }, 1)

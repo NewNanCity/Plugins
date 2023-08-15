@@ -21,13 +21,12 @@ fun Player.sendTitle(station: Station, line: RailLine, reverse: Boolean, mode: R
         RailTitleMode.UNDER_BOARD -> {
             var st = "开往 §9${if (reverse) line.stations.first().name else line.stations.last().name}§r 方向"
             st += if (next != null) "§8 | §r下一站: §6${next.name}§r" else "§8 | §r§6终点站"
-            if (next != null && next.lines.size > 1) st += "§8 | §r下一站可换乘 ${linesToString(next)}"
             sendTitle("§e§b${station.name}§r", st, fadeInt, stay, fadeOut)
         }
         RailTitleMode.ARRIVE -> {
             var st = "开往 §9${if (reverse) line.stations.first().name else line.stations.last().name}§r 方向"
-            st += if (next != null) "§8 | §r下一站: §6${next.name}§r" else "§8 | §r§6终点站"
             if (station.lines.size > 1) st += "§8 | §r可换乘 ${linesToString(station)}"
+            st += if (next != null) "§8 | §r下一站: §6${next.name}§r" else "§8 | §r§6终点站"
             sendTitle("§b${station.name}§r §7到了", st, fadeInt, stay, fadeOut)
         }
         RailTitleMode.START -> {

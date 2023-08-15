@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.bukkit.Color
 import org.bukkit.Material
-import kotlin.math.abs
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class StationConfig(val name: String)
@@ -61,30 +60,38 @@ fun String.toColor() = Color.fromRGB(substring(1).toInt(16))
 fun Color.toFMString() = "§x${Integer.toHexString(asRGB()).toCharArray().joinToString("") { "§$it" }}"
 
 val colorMaterials = arrayOf(
-    Color.fromRGB(0x000000) to Material.BLACK_CONCRETE,
-    Color.fromRGB(0x0000AA) to Material.BLUE_CONCRETE,
-    Color.fromRGB(0x00AA00) to Material.GREEN_CONCRETE,
-    Color.fromRGB(0x00AAAA) to Material.CYAN_CONCRETE,
-    Color.fromRGB(0xAA0000) to Material.RED_CONCRETE,
-    Color.fromRGB(0xAA00AA) to Material.PURPLE_CONCRETE,
-    Color.fromRGB(0xFFAA00) to Material.ORANGE_CONCRETE,
-    Color.fromRGB(0xAAAAAA) to Material.LIGHT_GRAY_CONCRETE,
-    Color.fromRGB(0x555555) to Material.GRAY_CONCRETE,
-    Color.fromRGB(0x5555FF) to Material.LIGHT_BLUE_CONCRETE,
-    Color.fromRGB(0x55FF55) to Material.LIME_CONCRETE,
-    Color.fromRGB(0x55FFFF) to Material.LIGHT_BLUE_CONCRETE,
-    Color.fromRGB(0xFF5555) to Material.MAGENTA_CONCRETE,
-    Color.fromRGB(0xFF55FF) to Material.PINK_CONCRETE,
-    Color.fromRGB(0xFFFF55) to Material.YELLOW_CONCRETE,
-    Color.fromRGB(0xFFFFFF) to Material.WHITE_CONCRETE,
+    Color.fromRGB(0xcdd3d4) to Material.WHITE_CONCRETE,
+    Color.fromRGB(0xdd5700) to Material.ORANGE_CONCRETE,
+    Color.fromRGB(0xa32699) to Material.MAGENTA_CONCRETE,
+    Color.fromRGB(0x1983c4) to Material.LIGHT_BLUE_CONCRETE,
+    Color.fromRGB(0xf2ac0b) to Material.YELLOW_CONCRETE,
+    Color.fromRGB(0x54a20c) to Material.LIME_CONCRETE,
+    Color.fromRGB(0xd35d89) to Material.PINK_CONCRETE,
+    Color.fromRGB(0x2c3034) to Material.GRAY_CONCRETE,
+    Color.fromRGB(0x75756b) to Material.LIGHT_GRAY_CONCRETE,
+    Color.fromRGB(0x0b7082) to Material.CYAN_CONCRETE,
+    Color.fromRGB(0x5b1495) to Material.PURPLE_CONCRETE,
+    Color.fromRGB(0x212388) to Material.BLUE_CONCRETE,
+    Color.fromRGB(0x583215) to Material.BROWN_CONCRETE,
+    Color.fromRGB(0x3f5219) to Material.GREEN_CONCRETE,
+    Color.fromRGB(0x871515) to Material.RED_CONCRETE,
+    Color.fromRGB(0x010103) to Material.BLACK_CONCRETE,
 )
 
 fun Color.toMaterial(): Material {
     // find nearest Manhattan distance of this color and colorMaterials
     var minDistance = 0xFFFFFF
     var minMaterial = Material.WHITE_CONCRETE
+    val r = red
+    val g = green
+    val b = blue
     for ((color, material) in colorMaterials) {
-        val distance = abs(color.red) + abs(color.green) + abs(color.blue)
+        val dr = color.red - r
+        val dg = color.green - g
+        val db = color.blue - b
+        // Lab distance
+        val rmean = (color.red + r) shr 1
+        val distance = (512 + rmean) * dr * dr + (dg * dg shl 10) + (767 - rmean) * db * db
         if (distance == 0) {
             return material
         }
