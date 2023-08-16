@@ -5,7 +5,6 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.temporal.TemporalAdjusters
 import java.util.*
-import kotlin.collections.HashMap
 
 
 /**
@@ -69,14 +68,12 @@ class CronExpression(expressionString: String) {
      * 获取该表达式在未来的最近一次执行时间
      * @return 未来最近一次执行的毫秒时间戳(本地时间，考虑时区)；如果表达式已失效，即不存在未来满足条件的执行时刻，则返回0
      */
-    fun getNextTime(): Long {
+    fun getNextTime(now: Long): Long {
         // 失效的表达式，没有下一次了
         if (nextTime == 0L) return 0
-        // 获得当前时间
-        val curTime = System.currentTimeMillis()
         // 如果当前时间已晚于上次预计执行的时间，那么就计算下一次执行时间
         // 或者，表达式失效
-        while (curTime >= nextTime || nextTime == 0L) {
+        while (now >= nextTime || nextTime == 0L) {
             tickNext(false)
         }
         return nextTime
@@ -664,7 +661,8 @@ class CronExpression(expressionString: String) {
             "0" to 7,
             "7" to 7,
         )
-        private var localTimezoneOffset = ZoneOffset.of("Z")
+        var localTimezoneOffset: ZoneOffset = ZoneOffset.of("Z")
+            private set
 
         /**
          * 重新设置时区

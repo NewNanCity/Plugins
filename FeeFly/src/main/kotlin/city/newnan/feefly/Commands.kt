@@ -7,7 +7,7 @@ import co.aikar.commands.bukkit.contexts.OnlinePlayer
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-@CommandAlias("feefly")
+@CommandAlias("fly|feefly")
 object Commands : BaseCommand() {
     @HelpCommand
     @Subcommand("help")
@@ -19,12 +19,20 @@ object Commands : BaseCommand() {
     @CommandCompletion("@players")
     fun toggleFly(sender: Player, @Optional target: OnlinePlayer?) {
         if (target == null) {
+            if (sender.hasPermission("essentials.fly")) {
+                sender.performCommand("essentials:fly")
+                return
+            }
             if (sender.hasPermission("feefly.self")) {
                 PluginMain.INSTANCE.toggleFly(sender)
             } else {
                 PluginMain.INSTANCE.messageManager.printf(sender, "&c你没有权限这样做!")
             }
         } else {
+            if (sender.hasPermission("essentials.fly.others")) {
+                sender.performCommand("essentials:fly ${target.player.name}")
+                return
+            }
             if (sender.hasPermission("feefly.other")) {
                 PluginMain.INSTANCE.toggleFly(target.player)
             } else {

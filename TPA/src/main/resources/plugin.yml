@@ -19,9 +19,12 @@ permissions:
   #  default: 玩家权限节点的默认值，true、false、op和not op
   #  children: #子节点(仅名字)
   #    'Example2': true会继承父节点的权限，false会与父节点相反
-  rail-area.edit:
-    description: '可以编辑铁路区域'
-    default: op
-  rail-area.reload:
-    description: '可以重载插件'
+  tpa.no-cool-down:
+    description: 无冷却
     default: false
+  tpa.user:
+    description: 普通玩家, 可以使用tpa, tpahere
+    default: false
+  tpa.reload:
+    description: 重载插件
+    default: op

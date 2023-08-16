@@ -32,7 +32,6 @@ class PluginMain : ExtendedJavaPlugin() {
             setCache(ConfigManager2.CacheType.None)
         }
     }
-    private val languageManager: LanguageManager by lazy { LanguageManager(this) }
     internal val messageManager: MessageManager by lazy { MessageManager(this) }
     private val commandManager: PaperCommandManager by lazy { PaperCommandManager(this) }
     companion object {
@@ -49,20 +48,8 @@ class PluginMain : ExtendedJavaPlugin() {
         // 载入配置
         reload()
 
-        // 初始化LanguageManager
-        Locale("config").also {
-            languageManager.register(it, "config.yml") setMajorLanguage it
-        }
-
         // 初始化MessageManager
-        messageManager setLanguageProvider languageManager
-        messageManager setPlayerPrefix(messageManager.sprintf("\$msg.prefix$"))
-
-        // 初始化CommandManager
-        commandManager.run {
-            usePerIssuerLocale(true, false)
-            locales.loadYamlLanguageFile("config.yml", Locale("config"))
-        }
+        messageManager setPlayerPrefix "§7[§6牛腩小镇§7] §f"
 
         // 注册指令
         commandManager.enableUnstableAPI("help")
@@ -86,6 +73,26 @@ class PluginMain : ExtendedJavaPlugin() {
             .handler { (it.vehicle as Minecart).maxSpeed = DEFAULT_SPEED }
             .bindWith(this)
 
+        val allowedRailType = hashSetOf(
+            Material.POWERED_RAIL,
+            Material.RAIL,
+            Material.DETECTOR_RAIL,
+            Material.ACTIVATOR_RAIL
+        )
+
+        fun checkSpeed(vehicle: Minecart): Double {
+            val curBlock = vehicle.location.block
+            val config = world2RailConfig[vehicle.world] ?: return DEFAULT_SPEED
+            if (config.powerRailOnly) {
+                if (curBlock.type != Material.POWERED_RAIL) return DEFAULT_SPEED
+            } else {
+                if (!allowedRailType.contains(curBlock.type)) return DEFAULT_SPEED
+            }
+            if (!config.allowNonPlayer && !vehicle.passengers.any { it is Player }) return DEFAULT_SPEED
+            // 看看铁轨下面的方块是什么，赋予相应的速度
+            return config.blockSpeedMap.getOrDefault(curBlock.getRelative(BlockFace.DOWN).type, DEFAULT_SPEED)
+        }
+
         Events.subscribe(VehicleMoveEvent::class.java, EventPriority.MONITOR)
             .filter { it.vehicle is Minecart }
             .filter { !it.vehicle.isEmpty }
@@ -93,31 +100,7 @@ class PluginMain : ExtendedJavaPlugin() {
             .filter { it.from.blockX != it.to.blockX || it.from.blockZ != it.to.blockZ ||
                       it.from.blockY != it.to.blockY || it.from.world != it.to.world }
             .handler { event: VehicleMoveEvent ->
-                val curBlock = event.vehicle.location.block
-                val material = curBlock.type
-                val config = world2RailConfig[event.vehicle.world]
-                var flag = material == Material.POWERED_RAIL
-                if (!flag && !config!!.powerRailOnly) {
-                    flag =
-                        material == Material.RAIL || material == Material.DETECTOR_RAIL || material == Material.ACTIVATOR_RAIL
-                }
-                if (flag && config?.allowNonPlayer != true) {
-                    for (entity in event.vehicle.passengers) {
-                        if (entity is Player) {
-                            continue
-                        }
-                        flag = false
-                        break
-                    }
-                }
-                if (flag) {
-                    // 看看铁轨下面的方块是什么，赋予相应的速度
-                    val belowBlock = curBlock.getRelative(BlockFace.DOWN)
-                    (event.vehicle as Minecart).maxSpeed = config!!.blockSpeedMap.getOrDefault(
-                        belowBlock.type,
-                        DEFAULT_SPEED
-                    )
-                } else (event.vehicle as Minecart).maxSpeed = DEFAULT_SPEED
+                (event.vehicle as Minecart).also { it.maxSpeed = checkSpeed(it) }
             }
             .bindWith(this)
     }
@@ -129,7 +112,7 @@ class PluginMain : ExtendedJavaPlugin() {
         world2RailConfig.clear()
         configManager touch "config.yml"
         configManager.parse<ConfigFile>("config.yml").also {
-            it.config.forEach { worldGroup ->
+            it.groups.forEach { worldGroup ->
                 val config = RailConfig(worldGroup.powerRailOnly, worldGroup.allowNonPlayer, worldGroup.blockType)
                 worldGroup.world.forEach { worldName ->
                     Bukkit.getWorld(worldName)?.let { w -> world2RailConfig[w] = config }

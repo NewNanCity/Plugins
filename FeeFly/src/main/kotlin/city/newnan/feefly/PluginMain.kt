@@ -91,7 +91,7 @@ class PluginMain : ExtendedJavaPlugin() {
                 flyingPlayers.forEach { (player) ->
                     if (player.hasPermission("feefly.free")) {
                         player.spigot().sendMessage(
-                            ChatMessageType.ACTION_BAR, TextComponent("&6&l#飞行中# &7祝 ${player.name} 白嫖快乐"))
+                            ChatMessageType.ACTION_BAR, TextComponent("§6§l#飞行中# §7祝 ${player.name} 白嫖快乐"))
                         return@forEach
                     }
                     // 获取玩家现金金额
@@ -104,17 +104,14 @@ class PluginMain : ExtendedJavaPlugin() {
                         targetAccount?.let { economy.depositPlayer(it, cost) }
                         player.spigot().sendMessage(
                             ChatMessageType.ACTION_BAR, TextComponent(
-                                messageManager.sprintf("&6&l#飞行中# &7剩余飞行时长: {0} (余额 {1,number,#.##} ₦)",
+                                messageManager.sprintf("§6§l#飞行中# §7剩余飞行时长: {0} (余额 {1,number,#.##} ₦)",
                                     formatSecond(remainSecond), balance)
                             )
                         )
 
                         // 如果只能飞一分钟以内，就警告
                         if (remainSecond <= 60.0) {
-                            player.sendTitle(
-                                ChatColor.translateAlternateColorCodes(
-                                    '&', "&c余额即将耗尽, 请尽快结束飞行!"),
-                                null, 1, 7, 2)
+                            player.sendTitle("§c余额即将耗尽, 请尽快结束飞行!", null, 1, 7, 2)
                         }
                         player.flySpeed = flySpeed
                     } else {
@@ -131,10 +128,9 @@ class PluginMain : ExtendedJavaPlugin() {
 
         // 恢复之前的信息
         flyingPlayers.clear()
+        configManager.touch("player-cache.yml", PlayerCache())
         configManager.parse<PlayerCache>("player-cache.yml").players.forEach {
-            server.getPlayer(it.key)?.let { player ->
-                flyingPlayers[player] = FlyingPlayer(it.value.flyStartTimestamp, it.value.previousFlyingSpeed)
-            }
+            server.getPlayer(it.key)?.let { player -> flyingPlayers[player] = it.value }
         }
     }
 
@@ -154,19 +150,11 @@ class PluginMain : ExtendedJavaPlugin() {
             costPerSecond = (20.0 / tickPerCount) * costPerCount
             targetAccount = it.targetAccount?.let { name ->
                 if (name.isBlank()) return@let null
-                Bukkit.getOfflinePlayers().forEach { player ->
-                    if (player.name == name) {
-                        if (!economy.hasAccount(player)) {
-                            economy.createPlayerAccount(player)
-                        }
-                        messageManager.info("设置扣费转账账户为: ${player.name}")
-                        return@let player
-                    }
+                server.offlinePlayers.find { p -> p.name == name }?.also { p ->
+                    messageManager.info("设置扣费转账账户为: ${p.name}")
                 }
-                null
             }
         }
-        configManager.touch("player-cache.yml", PlayerCache())
     }
 
     /**
@@ -210,7 +198,8 @@ class PluginMain : ExtendedJavaPlugin() {
             }
             // 原本就能飞的不能进入付费飞行
             if (player.allowFlight) {
-                messageManager.printf(player, "你本来就能飞, 不用付费飞行")
+                // messageManager.printf(player, "你本来就能飞, 不用付费飞行")
+                player.isFlying = !player.isFlying
                 return
             }
             if (player.isFlying) {
@@ -232,7 +221,7 @@ class PluginMain : ExtendedJavaPlugin() {
                 flushFlyingCache()
             } else {
                 // 不大于零就提示不能飞
-                messageManager.printf(player, "&c余额不足, 无法飞行!")
+                messageManager.printf(player, "§c余额不足, 无法飞行!")
             }
         }
     }
@@ -271,12 +260,6 @@ class PluginMain : ExtendedJavaPlugin() {
      * 保存玩家信息，断电恢复
      */
     private fun flushFlyingCache() {
-        val tmpMap = HashMap<String, Float>()
-        flyingPlayers.forEach { (player, flyingPlayer) ->
-            tmpMap[player.uniqueId.toString()] = flyingPlayer.previousFlyingSpeed
-        }
-        configManager["player-cache.yml"].save {
-            it.put("players", tmpMap)
-        }
+        configManager.save(flyingPlayers.mapKeys { it.key.uniqueId }, "player-cache.yml")
     }
 }

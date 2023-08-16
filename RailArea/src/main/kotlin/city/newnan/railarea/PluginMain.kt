@@ -584,6 +584,7 @@ class PluginMain : ExtendedJavaPlugin() {
                     if (nextStations.size > 0 && terminal == nextStations.last()) terminal = null
                     if (nextStations.size == 0) terminal = null
                     var scoreIndex = nextStations.size + (if (dots) 1 else 0) + (if (terminal == null) 0 else 1)
+                    // https://www.spigotmc.org/threads/1-16-1-19-scoreboard-objective-score-with-rgb-hex-color.468079/
                     fun intersection(text: String, colors: List<Color>) {
                         if (colors.isNotEmpty()) {
                             val team = it.getTeam(text) ?: it.registerNewTeam(text)

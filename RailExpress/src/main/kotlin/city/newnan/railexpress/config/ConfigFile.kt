@@ -5,9 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class ConfigFile(
-    val version: String,
-    val config: List<ExpressWorldGroup> = emptyList(),
-    val msg: Map<String, String> = emptyMap(),
+    val groups: List<ExpressWorldGroup> = emptyList(),
 )
 
 @JsonInclude(JsonInclude.Include.NON_NULL)

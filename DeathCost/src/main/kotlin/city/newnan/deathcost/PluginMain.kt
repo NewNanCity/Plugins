@@ -41,8 +41,7 @@ class PluginMain : ExtendedJavaPlugin() {
                 val player = it.entity
                 val cost = fineMoney(player)
                 if (sendDeathMessageToPlayer) {
-                    messageManager.printf(player, "&c你重生了, 消耗 {1,number,#.##} ₦, 使用/back可快速回到死亡地点.",
-                        cost)
+                    messageManager.printf(player, "&c你重生了, 消耗 {0,number,#.##} ₦, 使用/back可快速回到死亡地点.", cost)
                 }
                 if (sendDeathMessageToBroadcast) {
                     server.broadcastMessage(messageManager.sprintf(
@@ -81,16 +80,9 @@ class PluginMain : ExtendedJavaPlugin() {
             }
             targetAccount = it.deathCost.targetAccount?.let { name ->
                 if (name.isBlank()) return@let null
-                Bukkit.getOfflinePlayers().forEach { player ->
-                    if (player.name == name) {
-                        if (!economy.hasAccount(player)) {
-                            economy.createPlayerAccount(player)
-                        }
-                        messageManager.info("设置扣费转账账户为: ${player.name}")
-                        return@let player
-                    }
+                server.offlinePlayers.find { p -> p.name == name }?.also { p ->
+                    messageManager.info("设置扣费转账账户为: ${p.name}")
                 }
-                null
             }
             sendDeathMessageToPlayer = it.deathMessage.playerEnable
             sendDeathMessageToBroadcast = it.deathMessage.broadcastEnable

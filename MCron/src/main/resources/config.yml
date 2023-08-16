@@ -12,10 +12,11 @@ version: ${project.version}
 # +hhmmss
 # -hhmmss
 timezone-offset: '+8'
-on-server-ready: []
+on-server-ready: {}
 # Example:
-#  - 'broadcast §aServer is ready, enjoy your day!'
-#  - 'gamerule keepInventory true'
+#  '* * * * * *':
+#    - 'broadcast §aServer is ready, enjoy your day!'
+#    - 'gamerule keepInventory true'
 on-plugin-ready: {}
 # Example:
 #   Essentials:
@@ -32,15 +33,3 @@ schedule-tasks:
 #    - 'broadcast Server will restart in §e5§r minutes!'
 #  '0 0 0 * * *':
 #    - 'stop'
-msg:
-  prefix: '§l[MCron]§r '
-  execute: '§a§lExecute Command: §r{0}§r'
-  reload: 'MCron has been reloaded.'
-  invalid-expression: 'The expression is not valid: {0}'
-  list-head: '§3======== §3§l[MCron List] §r§3========'
-  list-cron: '§a§l{0} §r(Next: {1})'
-  list-cron-outdated: '§c§l{0} §r(Next: {1})'
-  list-command: '§6- §r{0}§r'
-  help-head: '§3======== §3§l[MCron Help] §r§3========'
-  help-reload: 'Reload all cron expressions in the config.yml'
-  help-list: 'List all cron expressions, their next execute time and commands.'

@@ -7,20 +7,22 @@ import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 
 
 class CronManager : me.lucko.helper.terminable.Terminable {
-    private val tasks = ArrayList<CronCommand>()
-    private val outdatedTasks: MutableList<CronCommand> = ArrayList()
+    val dateFormatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+    internal val tasks = mutableListOf<CronCommand>()
+    internal val outdatedTasks = mutableListOf<CronCommand>()
 
     // 1秒内即将执行的任务
-    private val inTimeTasks: MutableList<CronCommand> = ArrayList()
+    private val inTimeTasks = mutableListOf<CronCommand>()
 
     // 为防止卡顿导致错过一些任务(没有执行，但是错过了判断，被误认为是已过期任务)
     // 有一个缓冲池，在1s~60s后即将执行的命令也会在这里，这样如果这些任务过期了会立即执行
     // p.s. 不会有人写每秒都会运行的程序吧...
-    private val cacheInTimeTasks: MutableList<CronCommand> = ArrayList()
+    private val cacheInTimeTasks = mutableListOf<CronCommand>()
     private var cronTask: me.lucko.helper.scheduler.Task? = null
 
     init {
@@ -42,6 +44,7 @@ class CronManager : me.lucko.helper.terminable.Terminable {
         PluginMain.INSTANCE.configManager.parse<ConfigFile>("config.yml").also {
             // 设置时区
             CronExpression.setTimeZoneOffset(it.timezoneOffset)
+            dateFormatter.timeZone = TimeZone.getTimeZone(CronExpression.localTimezoneOffset)
             // 重载
             it.scheduleTasks.forEach { (key, value) ->
                 addTask(key, value.toTypedArray())
@@ -49,42 +52,15 @@ class CronManager : me.lucko.helper.terminable.Terminable {
         }
     }
 
-    private var dateFormatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-    internal fun listCron(sender: CommandSender?) {
-        PluginMain.INSTANCE.messageManager.run {
-            printf(sender, "\$msg.list-head$")
-            tasks.forEach(Consumer { task: CronCommand ->
-                printf(
-                    sender, "\$msg.list-cron$",
-                    task.expression.expressionString, dateFormatter.format(Date(task.expression.getNextTime()))
-                )
-                for (command in task.commands) {
-                    printf(sender, "\$msg.list-command$", command)
-                }
-                printf(sender, "")
-            })
-            outdatedTasks.forEach(Consumer { task: CronCommand ->
-                printf(
-                    sender, "\$msg.list-cron-outdated$",
-                    task.expression.expressionString, dateFormatter.format(Date(task.expression.getNextTime()))
-                )
-                for (command in task.commands) {
-                    printf(sender, "\$msg.list-command$", command)
-                }
-                printf(sender, "")
-            })
-        }
-    }
-
     /**
      * 定时检查模块的计时器
      */
-    private var secondsCounter = 1
+    private var secondsCounter = 1L
 
     /**
      * 计时器的动态上限
      */
-    private var counterBorder = 1
+    private var counterBorder = 1L
 
     /**
      * 定时任务检查，每秒运行
@@ -105,7 +81,7 @@ class CronManager : me.lucko.helper.terminable.Terminable {
 
         // 遍历所有任务
         for (task in tasks) {
-            var tmp = task.expression.getNextTime()
+            var tmp = task.expression.getNextTime(curMillisecond)
 
             // 忽略失效的，并清理之
             if (tmp == 0L) {
@@ -175,7 +151,7 @@ class CronManager : me.lucko.helper.terminable.Terminable {
      * @param delta 毫秒差
      * @return 休眠间隔(秒为单位)
      */
-    private fun getIntervalSeconds(delta: Long): Int {
+    private fun getIntervalSeconds(delta: Long): Long {
         // 小于30秒   - 每秒
         if (delta < MILLISECOND_OF_30SEC) return SECONDS_OF_SECOND
 
@@ -236,7 +212,7 @@ class CronManager : me.lucko.helper.terminable.Terminable {
      * @param cronExpression cron表达式
      * @param commands 任务要执行的指令
      */
-    internal fun addTask(cronExpression: String?, commands: Array<String>) {
+    private fun addTask(cronExpression: String?, commands: Array<String>) {
         try {
             val task = CronCommand(cronExpression, commands)
             tasks.add(task)
@@ -261,32 +237,32 @@ class CronManager : me.lucko.helper.terminable.Terminable {
         /**
          * 一段时间所对应的秒数
          */
-        private const val SECONDS_OF_12HOUR = 43200
-        private const val SECONDS_OF_6HOUR = 21600
-        private const val SECONDS_OF_3HOUR = 10800
-        private const val SECONDS_OF_1HOUR = 3600
-        private const val SECONDS_OF_30MIN = 1800
-        private const val SECONDS_OF_15MIN = 900
-        private const val SECONDS_OF_8MIN = 480
-        private const val SECONDS_OF_4MIN = 240
-        private const val SECONDS_OF_MINUTE = 60
-        private const val SECONDS_OF_15SEC = 15
-        private const val SECONDS_OF_5SEC = 5
-        private const val SECONDS_OF_SECOND = 1
+        private val SECONDS_OF_12HOUR = TimeUnit.HOURS.toSeconds(12)
+        private val SECONDS_OF_6HOUR = TimeUnit.HOURS.toSeconds(6)
+        private val SECONDS_OF_3HOUR = TimeUnit.HOURS.toSeconds(3)
+        private val SECONDS_OF_1HOUR = TimeUnit.HOURS.toSeconds(1)
+        private val SECONDS_OF_30MIN = TimeUnit.MINUTES.toSeconds(30)
+        private val SECONDS_OF_15MIN = TimeUnit.MINUTES.toSeconds(15)
+        private val SECONDS_OF_8MIN = TimeUnit.MINUTES.toSeconds(8)
+        private val SECONDS_OF_4MIN = TimeUnit.MINUTES.toSeconds(4)
+        private val SECONDS_OF_MINUTE = TimeUnit.MINUTES.toSeconds(1)
+        private val SECONDS_OF_15SEC = TimeUnit.SECONDS.toSeconds(15)
+        private val SECONDS_OF_5SEC = TimeUnit.SECONDS.toSeconds(5)
+        private val SECONDS_OF_SECOND = TimeUnit.SECONDS.toSeconds(1)
 
         /**
          * 一段时间所对应的毫秒数
          */
-        private const val MILLISECOND_OF_2DAY: Long = 172800000
-        private const val MILLISECOND_OF_1DAY: Long = 86400000
-        private const val MILLISECOND_OF_12HOUR: Long = 43200000
-        private const val MILLISECOND_OF_4HOUR: Long = 14400000
-        private const val MILLISECOND_OF_2HOUR: Long = 7200000
-        private const val MILLISECOND_OF_HOUR: Long = 3600000
-        private const val MILLISECOND_OF_30MIN: Long = 1800000
-        private const val MILLISECOND_OF_15MIN: Long = 900000
-        private const val MILLISECOND_OF_5MIN: Long = 300000
-        private const val MILLISECOND_OF_MINUTE: Long = 60000
-        private const val MILLISECOND_OF_30SEC: Long = 30000
+        private val MILLISECOND_OF_2DAY: Long = TimeUnit.DAYS.toMillis(2)
+        private val MILLISECOND_OF_1DAY: Long = TimeUnit.DAYS.toMillis(1)
+        private val MILLISECOND_OF_12HOUR: Long = TimeUnit.HOURS.toMillis(12)
+        private val MILLISECOND_OF_4HOUR: Long = TimeUnit.HOURS.toMillis(4)
+        private val MILLISECOND_OF_2HOUR: Long = TimeUnit.HOURS.toMillis(2)
+        private val MILLISECOND_OF_HOUR: Long = TimeUnit.HOURS.toMillis(1)
+        private val MILLISECOND_OF_30MIN: Long = TimeUnit.MINUTES.toMillis(30)
+        private val MILLISECOND_OF_15MIN: Long = TimeUnit.MINUTES.toMillis(15)
+        private val MILLISECOND_OF_5MIN: Long = TimeUnit.MINUTES.toMillis(5)
+        private val MILLISECOND_OF_MINUTE: Long = TimeUnit.MINUTES.toMillis(1)
+        private val MILLISECOND_OF_30SEC: Long = TimeUnit.SECONDS.toMillis(30)
     }
 }

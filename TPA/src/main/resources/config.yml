@@ -1,0 +1,5 @@
+enable: true
+cool-down-second: 15
+delay-second: 3
+expired-second: 60
+exclude-world: []

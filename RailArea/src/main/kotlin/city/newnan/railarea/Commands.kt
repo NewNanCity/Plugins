@@ -17,7 +17,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
 
-@CommandAlias("rail|railmanager")
+@CommandAlias("rail")
 object Commands : BaseCommand() {
     @HelpCommand
     @Subcommand("help")
@@ -28,6 +28,7 @@ object Commands : BaseCommand() {
     @Default
     @Subcommand("gui")
     @Description("显示所有区域")
+    @CommandPermission("rail-area.edit")
     fun showGui(sender: Player) {
         showLineStationGui(sender, true) { line, station, back ->
             val gui = pageGui(Component.text("铁路区域列表"))
@@ -120,8 +121,8 @@ object Commands : BaseCommand() {
     }
 
     @Subcommand("reload")
-    @CommandPermission("rail-area.reload")
     @Description("重载插件")
+    @CommandPermission("rail-area.reload")
     fun reloadConfig(sender: CommandSender) {
         PluginMain.INSTANCE.reload()
         PluginMain.INSTANCE.messageManager.printf(sender, "插件重载完毕!")
