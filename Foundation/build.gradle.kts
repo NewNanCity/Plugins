@@ -1,8 +1,7 @@
 version = "0.0.1"
-group = "city.newnan.fundation"
-description = "Fundation for newnan"
-project.ext["depend"] = listOf("Vault")
-project.ext["loadBefore"] = listOf("Vault")
+group = "city.newnan.foundation"
+description = "Foundation for newnan"
+project.ext["depend"] = listOf("Vault", "Essentials")
 
 tasks.shadowJar {
     // Violet
@@ -24,8 +23,8 @@ tasks.shadowJar {
 
 dependencies {
     // API
-    compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
     compileOnly("net.essentialsx:EssentialsX:2.19.4")
+    listOf("com.github.MilkBowl:VaultAPI:1.7.1").forEach { compileOnly(it); testImplementation(it) }
 
     // Utils
     implementation("me.lucko:helper:5.6.14")
@@ -36,4 +35,5 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.2")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.15.2")
 }

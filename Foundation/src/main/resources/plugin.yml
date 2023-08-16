@@ -12,10 +12,22 @@ loadbefore: ${project.loadBefore}
 softdepend: ${project.softDepend}
 
 # 权限节点，可选
-permissions: {}
+permissions:
   # 模板
   # 'Example':
   #  description: '权限的解释'
   #  default: 玩家权限节点的默认值，true、false、op和not op
   #  children: #子节点(仅名字)
   #    'Example2': true会继承父节点的权限，false会与父节点相反
+  foundation.reload:
+    description: '重载插件'
+    default: false
+  foundation.donate:
+    description: '捐赠'
+    default: false
+  foundation.allocate:
+    description: '分配'
+    default: false
+  foundation.top:
+    description: '排行榜'
+    default: false

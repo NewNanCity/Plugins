@@ -11,7 +11,7 @@ import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
 import java.util.*
-import java.util.ArrayDeque
+import kotlin.collections.ArrayDeque
 import java.util.concurrent.TimeUnit
 
 class PluginMain : ExtendedJavaPlugin() {
@@ -46,7 +46,6 @@ class PluginMain : ExtendedJavaPlugin() {
 
     override fun disable() {
         commandManager.unregisterCommands()
-
     }
 
     fun reload() {
@@ -66,8 +65,8 @@ class PluginMain : ExtendedJavaPlugin() {
 
     private fun flushSessions() {
         val now = System.currentTimeMillis()
-        while (sessionQueue.isNotEmpty() && sessionQueue.first.expired < now) {
-            sessions.remove(sessionQueue.pollFirst().id)
+        while (sessionQueue.isNotEmpty() && sessionQueue.first().expired < now) {
+            sessions.remove(sessionQueue.removeFirst().id)
         }
     }
 
@@ -151,8 +150,8 @@ class PluginMain : ExtendedJavaPlugin() {
             val to = if (it.targetToRequester) requester else target
             var counter = waitSeconds
             Schedulers.async().runRepeating({ task ->
-                from.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent("你将在 $counter 秒后传送到对方身边!"))
-                to.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent("对方将在 $counter 秒后传送到你身边!"))
+                from.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent("你将在 §6$counter§r 秒后传送到对方身边!"))
+                to.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent("对方将在 §6$counter§r 秒后传送到你身边!"))
                 if (counter-- <= 0) {
                     task.close()
                     if (!from.isOnline) {
@@ -175,7 +174,7 @@ class PluginMain : ExtendedJavaPlugin() {
                         task.close()
                         return@runRepeating
                     }
-                    from.teleport(to)
+                    Schedulers.sync().run { from.teleport(to) }
                     messageManager.printf(from, "§a你已传送到对方身边!")
                     messageManager.printf(to, "§a对方已传送到你身边!")
                     task.close()

@@ -1,4 +1,4 @@
-package city.newnan.fundation.config
+package city.newnan.foundation.config
 
 import com.fasterxml.jackson.annotation.JsonInclude
 

@@ -3,6 +3,7 @@ package city.newnan.tpa
 import co.aikar.commands.BaseCommand
 import co.aikar.commands.CommandHelp
 import co.aikar.commands.annotation.*
+import co.aikar.commands.bukkit.contexts.OnlinePlayer
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -71,18 +72,18 @@ object Commands : BaseCommand() {
     @CommandAlias("there")
     @Description("向某玩家发送传送请求, 使自己传送至对方所在位置")
     @CommandPermission("tpa.user")
-    fun tpa(sender: Player, target: Player) {
-        if (sender == target) PluginMain.INSTANCE.messageManager.printf(sender, "?啥")
-        else PluginMain.INSTANCE.request(sender, target, false)
+    fun tpa(sender: Player, target: OnlinePlayer) {
+        if (sender == target.player) PluginMain.INSTANCE.messageManager.printf(sender, "?啥")
+        else PluginMain.INSTANCE.request(sender, target.player, false)
     }
 
     @Subcommand("here")
     @CommandAlias("tpahere")
     @Description("向某玩家发送传送请求, 使对方传送至自己所在位置")
     @CommandPermission("tpa.user")
-    fun tpaHere(sender: Player, target: Player) {
-        if (sender == target) PluginMain.INSTANCE.messageManager.printf(sender, "?啥")
-        else PluginMain.INSTANCE.request(sender, target, true)
+    fun tpaHere(sender: Player, target: OnlinePlayer) {
+        if (sender == target.player) PluginMain.INSTANCE.messageManager.printf(sender, "?啥")
+        else PluginMain.INSTANCE.request(sender, target.player, true)
     }
 
     @Private

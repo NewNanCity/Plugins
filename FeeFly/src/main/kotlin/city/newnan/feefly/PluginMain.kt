@@ -4,7 +4,6 @@ import city.newnan.feefly.config.ConfigFile
 import city.newnan.feefly.config.FlyingPlayer
 import city.newnan.feefly.config.PlayerCache
 import city.newnan.violet.config.ConfigManager2
-import city.newnan.violet.config.put
 import city.newnan.violet.message.MessageManager
 import co.aikar.commands.PaperCommandManager
 import me.lucko.helper.Events
