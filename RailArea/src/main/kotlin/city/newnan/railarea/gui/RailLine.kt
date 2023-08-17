@@ -167,6 +167,7 @@ fun showLineStationGui (player: Player, editable: Boolean, done: (line: RailLine
         if (editable) {
             railGui.setItem(6, 1, ItemBuilder.from(Material.ACACIA_SIGN).name(Component.text("添加线路")).asGuiItem {
                 if (it.whoClicked != player && it.inventory != railGui.inventory) return@asGuiItem
+                railGui.close(player)
                 PluginMain.INSTANCE.messageManager.printf(player, "&c请设定线路名称和颜色")
                 handleRailLineInput(player, null) { line ->
                     PluginMain.INSTANCE.addRailLine(line)

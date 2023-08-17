@@ -21,13 +21,9 @@ permissions:
   #    'Example2': true会继承父节点的权限，false会与父节点相反
   foundation.reload:
     description: '重载插件'
-    default: false
   foundation.donate:
     description: '捐赠'
-    default: false
   foundation.allocate:
     description: '分配'
-    default: false
   foundation.top:
     description: '排行榜'
-    default: false

@@ -4,6 +4,7 @@ import city.newnan.railarea.config.toFMString
 import city.newnan.railarea.gui.pageGui
 import city.newnan.railarea.gui.showLineStationGui
 import city.newnan.railarea.input.handleAreaInput
+import city.newnan.railarea.utils.visualize
 import co.aikar.commands.BaseCommand
 import co.aikar.commands.CommandHelp
 import co.aikar.commands.annotation.*
@@ -12,6 +13,7 @@ import me.lucko.helper.Schedulers
 import net.kyori.adventure.text.Component
 import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.Particle
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -67,11 +69,13 @@ object Commands : BaseCommand() {
                             if (it.isLeftClick) {
                                 gui.close(sender)
                                 val oldArea = area
-                                PluginMain.INSTANCE.messageManager.printf(sender, "开始设置区域 &2$name&r，接下来请设定区域的属性:")
+                                PluginMain.INSTANCE.messageManager.printf(sender,
+                                    "开始设置区域 &2${area.station.name}(${area.line.name})&r，接下来请设定区域的属性:")
                                 handleAreaInput(sender, oldArea) { area ->
                                     if (area != null) {
                                         PluginMain.INSTANCE.updateArea(oldArea, area)
-                                        PluginMain.INSTANCE.messageManager.printf(sender, "区域 &2$name&r 已更新!")
+                                        PluginMain.INSTANCE.messageManager.printf(sender,
+                                            "区域 &2${area.station.name}(${area.line.name})&r 已更新!")
                                         Schedulers.sync().runLater({ update(); gui.update(); gui.open(sender) }, 1)
                                     } else {
                                         Schedulers.sync().runLater({ gui.open(sender) }, 1)
@@ -79,11 +83,12 @@ object Commands : BaseCommand() {
                                 }
                             } else if (it.isRightClick) {
                                 gui.close(sender)
-                                PluginMain.INSTANCE.messageManager.printf(sender, "&c确认删除线路? 回复Y确认, 回复其他取消")
+                                PluginMain.INSTANCE.messageManager.printf(sender, "&c确认删除区域? 回复Y确认, 回复其他取消")
                                 PluginMain.INSTANCE.messageManager.gets(sender) { input ->
                                     if (input == "Y") {
                                         PluginMain.INSTANCE.removeArea(area)
-                                        PluginMain.INSTANCE.messageManager.printf(sender, "区域 &2$name&r 已删除!")
+                                        PluginMain.INSTANCE.messageManager.printf(sender,
+                                            "区域 &2${area.station.name}(${area.line.name})&r 已删除!")
                                         Schedulers.sync().runLater({ update(); gui.update(); gui.open(sender) }, 1)
                                     } else {
                                         Schedulers.sync().runLater({ gui.open(sender) }, 1)
@@ -92,7 +97,9 @@ object Commands : BaseCommand() {
                                 }
                             }
                         } else if (it.isRightClick) {
-                            sender.teleport(Location(area.world, area.stopPoint.x.toDouble()+0.5, area.stopPoint.y.toDouble()+0.1, area.stopPoint.z.toDouble()+0.5))
+                            area.range3D.visualize(area.world, Particle.FLAME, 10)
+                            area.stopPoint.visualize(area.world, Particle.BARRIER, 10)
+                            sender.teleport(Location(area.world, area.stopPoint.x.toDouble()+0.5, area.stopPoint.y.toDouble()+0.3, area.stopPoint.z.toDouble()+0.5))
                             PluginMain.INSTANCE.messageManager.printf(sender, "&a传送成功!")
                             gui.close(sender)
                         }
@@ -117,6 +124,19 @@ object Commands : BaseCommand() {
             })
 
             Schedulers.sync().runLater({ update(); gui.open(sender) }, 1)
+        }
+    }
+
+    @Subcommand("new-area")
+    @Description("创建区域")
+    @CommandPermission("rail-area.edit")
+    fun newArea(sender: Player) {
+        PluginMain.INSTANCE.messageManager.printf(sender, "开始设置区域，接下来请设定区域的属性:")
+        handleAreaInput(sender, null) { area ->
+            if (area != null) {
+                PluginMain.INSTANCE.addArea(area)
+                PluginMain.INSTANCE.messageManager.printf(sender, "区域已创建!")
+            }
         }
     }
 

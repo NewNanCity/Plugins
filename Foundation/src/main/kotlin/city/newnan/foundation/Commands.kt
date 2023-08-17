@@ -52,19 +52,21 @@ object Commands : BaseCommand() {
     @CommandAlias("sudo-donate")
     @Description("使用选择器选择玩家, 使其捐赠一定数额给基金会, 用于命令方块")
     @CommandPermission("foundation.donate.selector")
-    fun sudoDonate(sender: BlockCommandSender, selector: String, amount: Double) {
+    fun sudoDonate(sender: CommandSender, selector: String, amount: Double) {
+        println(sender::class.java.canonicalName)
+        if (sender !is BlockCommandSender) {
+            PluginMain.INSTANCE.messageManager.printf(sender, "只能在命令方块中使用!")
+            return
+        }
         if (selector != "@p") {
-            PluginMain.INSTANCE.messageManager.printf(sender, "只能用@p!")
+            PluginMain.INSTANCE.messageManager.printf(sender, "暂时只能用@p!")
             return
         }
         // find nearest player
-        sender.block.world.getNearbyEntities(sender.block.location, 5.0, 5.0, 5.0).filterIsInstance<Player>()
-            .minByOrNull { entity -> entity.location.distance(sender.block.location) }?.let { entity ->
+        sender.block.world.players.minByOrNull { entity -> entity.location.distance(sender.block.location) }?.let { entity ->
                 PluginMain.INSTANCE.messageManager.printf(sender, "已选择玩家 §a${entity.name} §r捐赠!")
                 donate(entity, amount)
-            } ?: run {
-            PluginMain.INSTANCE.messageManager.printf(sender, "附近没有玩家!")
-        }
+            } ?: run { PluginMain.INSTANCE.messageManager.printf(sender, "附近没有玩家!") }
     }
 
     @Subcommand("query")
@@ -126,13 +128,23 @@ object Commands : BaseCommand() {
         }
         val start = (page - 1) * 10
         val end = (start + 10).coerceAtMost(list.size)
-        PluginMain.INSTANCE.messageManager.printf(sender, "§8 ========= §6牛腩基金会慈善榜 §r§7- §a第 §l$page §r§7/ §a§l$maxPage §r§a页§r§8 ========= ")
+        PluginMain.INSTANCE.messageManager.printf(sender, "§8======================== §6牛腩基金会慈善榜§r§8 =========================")
+        val pageStart = "§8".padEnd(30 - page.toString().length, '=')
+        val pageEnd = "§8".padEnd(30 - maxPage.toString().length, '=')
         for (i in start until end) {
             val record = list[i]
-            PluginMain.INSTANCE.messageManager.printf(sender, "§8[§a${i + 1}§8] §7§l${record.name} §r§7-              §a${record.active}₦§ 9(+${record.passive}₦)§r")
+            val s1 = "§8[§a${i + 1}§8] §f§l${record.name}"
+            val s2 = "§r§7-  §a§l${record.active} §r§2(+${record.passive}被动)§r"
+            val paddings = "".padEnd(80 - s1.length - s2.length, ' ')
+            PluginMain.INSTANCE.messageManager.printf(sender, "$s1$paddings$s2")
         }
-        PluginMain.INSTANCE.messageManager.printf(sender, "§8 ========= §6牛腩基金会慈善榜 §r§7- §a第 §l$page §r§7/ §a§l$maxPage §r§a页§r§8 ========= ")
+        PluginMain.INSTANCE.messageManager.printf(sender, "$pageStart §f第§a§l $page §r§7/§a§l $maxPage §r§f页§r $pageEnd")
         val indexOfSender = list.indexOfFirst { record -> record.name == sender.name }
-        PluginMain.INSTANCE.messageManager.printf(sender, "您目前位于 §a第 §l${indexOfSender + 1} §r§a名§r   您可以使用 §a/fundtop <页码> §r查看更多!")
+        if (indexOfSender < 0) {
+            PluginMain.INSTANCE.messageManager.printf(sender, "§7您还没有捐赠过, 暂时无法显示您的排名!")
+        } else {
+            PluginMain.INSTANCE.messageManager.printf(sender, "您目前位于 §a第 §l${indexOfSender + 1} §r§a名§r!")
+        }
+        PluginMain.INSTANCE.messageManager.printf(sender, "您可以使用 §a/fundtop <页码> §r查看更多! 使用 §a/donate <数额> §r捐赠!")
     }
 }

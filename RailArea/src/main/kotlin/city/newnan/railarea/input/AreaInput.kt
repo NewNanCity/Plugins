@@ -8,10 +8,7 @@ import city.newnan.railarea.config.Station
 import city.newnan.railarea.gui.showLineStationGui
 import city.newnan.railarea.octree.Point3D
 import city.newnan.railarea.octree.Range3D
-import city.newnan.railarea.utils.RailTitleMode
-import city.newnan.railarea.utils.getPoint
-import city.newnan.railarea.utils.getSelection
-import city.newnan.railarea.utils.sendTitle
+import city.newnan.railarea.utils.*
 import dev.triumphteam.gui.builder.item.ItemBuilder
 import dev.triumphteam.gui.guis.Gui
 import me.lucko.helper.Schedulers
@@ -40,54 +37,8 @@ fun handleAreaInput (sender: Player, oldArea: RailArea?, iStation: Station? = nu
             sender.sendTitle(station!!, railLine!!, reverse!!, RailTitleMode.UNDER_BOARD, 1, 70, 2)
             sender.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent("列车已到站停靠，您可下车，或留在车上待自动发车"))
         }
-        area?.also {
-            var counter = 20
-            Schedulers.sync().runRepeating({ task ->
-                // spawn paticales to visualize area
-                for (x in it.minX..(it.maxX+1)) {
-                    val xv = x.toDouble()
-                    world!!.spawnParticle(Particle.FLAME, xv, it.minY.toDouble(), it.minZ.toDouble(), 5, 0.0, 0.0, 0.0, 0.0)
-                    world!!.spawnParticle(Particle.FLAME, xv, it.minY.toDouble(), it.maxZ.toDouble(), 5, 0.0, 0.0, 0.0, 0.0)
-                    world!!.spawnParticle(Particle.FLAME, xv, it.maxY.toDouble(), it.minZ.toDouble(), 5, 0.0, 0.0, 0.0, 0.0)
-                    world!!.spawnParticle(Particle.FLAME, xv, it.maxY.toDouble(), it.maxZ.toDouble(), 5, 0.0, 0.0, 0.0, 0.0)
-                }
-                for (y in it.minY..(it.maxY+1)) {
-                    val yv = y.toDouble()
-                    world!!.spawnParticle(Particle.FLAME, it.minX.toDouble(), yv, it.minZ.toDouble(), 5, 0.0, 0.0, 0.0, 0.0)
-                    world!!.spawnParticle(Particle.FLAME, it.minX.toDouble(), yv, it.maxZ.toDouble(), 5, 0.0, 0.0, 0.0, 0.0)
-                    world!!.spawnParticle(Particle.FLAME, it.maxX.toDouble(), yv, it.minZ.toDouble(), 5, 0.0, 0.0, 0.0, 0.0)
-                    world!!.spawnParticle(Particle.FLAME, it.maxX.toDouble(), yv, it.maxZ.toDouble(), 5, 0.0, 0.0, 0.0, 0.0)
-                }
-                for (z in it.minZ..(it.maxZ+1)) {
-                    val zv = z.toDouble()
-                    world!!.spawnParticle(Particle.FLAME, it.minX.toDouble(), it.minY.toDouble(), zv, 5, 0.0, 0.0, 0.0, 0.0)
-                    world!!.spawnParticle(Particle.FLAME, it.minX.toDouble(), it.maxY.toDouble(), zv, 5, 0.0, 0.0, 0.0, 0.0)
-                    world!!.spawnParticle(Particle.FLAME, it.maxX.toDouble(), it.minY.toDouble(), zv, 5, 0.0, 0.0, 0.0, 0.0)
-                    world!!.spawnParticle(Particle.FLAME, it.maxX.toDouble(), it.maxY.toDouble(), zv, 5, 0.0, 0.0, 0.0, 0.0)
-                }
-                if (--counter < 0) task.close()
-            }, 0, 10)
-        }
-        stopPoint?.also {
-            var counter = 20
-            val xO = it.x.toDouble()
-            val yO = it.y.toDouble()
-            val zO = it.z.toDouble()
-            val xs = listOf(xO, xO+0.5, xO+1.0)
-            val ys = listOf(yO, yO+0.5, yO+1.0)
-            val zs = listOf(zO, zO+0.5, zO+1.0)
-            Schedulers.sync().runRepeating({ task ->
-                // Draw a cube fire framework
-                for (x in xs) {
-                    for (y in ys) {
-                        for (z in zs) {
-                            world!!.spawnParticle(Particle.PORTAL, x, y, z, 3, 0.0, 0.0, 0.0, 0.0)
-                        }
-                    }
-                }
-                if (--counter < 0) task.close()
-            }, 0, 10)
-        }
+        area?.visualize(world!!, Particle.FLAME, 10)
+        stopPoint?.visualize(world!!, Particle.BARRIER, 10)
         if (p == null) {
             PluginMain.INSTANCE.messageManager.printf(sender, "效果预览已显示")
         } else {
@@ -176,7 +127,7 @@ fun handleAreaInput (sender: Player, oldArea: RailArea?, iStation: Station? = nu
                     }
                 }
             }
-            "dir" -> {
+            "dir", "direction" -> {
                 if (world != null && world != sender.world) {
                     PluginMain.INSTANCE.messageManager.printf(sender, "&c你必须在范围所在世界!")
                     return@gets false

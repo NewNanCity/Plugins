@@ -31,6 +31,7 @@ import org.bukkit.event.world.WorldLoadEvent
 import org.bukkit.event.world.WorldUnloadEvent
 import org.bukkit.scoreboard.DisplaySlot
 import org.bukkit.util.Vector
+import java.io.File
 
 data class Note(val sound: Sound, val pitch: Float, val delta: Long, val volume: Float)
 
@@ -54,13 +55,13 @@ class PluginMain : ExtendedJavaPlugin() {
     private val inAreaPlayerMap = mutableMapOf<Player, RailArea>()
     private val inAreaMinecartMap = mutableMapOf<Minecart, RailArea>()
     private val waitingMinecartMap = mutableMapOf<Minecart, Terminable>()
+    private val hasBoardPlayers = mutableSetOf<Player>()
     private var WAITING_COUNT_DOWN: Int = 20
     private var RUN_WARNING_THRESHOLD: Int = 12
     private var DEFAULT_SPEED: Double = 1.0
     private var START_WARNING_SOUND = Sound.BLOCK_NOTE_BLOCK_BIT
     private val arriveMusic = mutableListOf<Note>()
     private val startMusic = mutableListOf<Note>()
-    private val hasBoardPlayers = mutableSetOf<Player>()
     val stations = mutableMapOf<String, Station>()
     val lines = mutableMapOf<String, RailLine>()
     val lineStationAreas = mutableMapOf<Pair<Station, RailLine>, MutableSet<RailArea>>()
@@ -74,7 +75,7 @@ class PluginMain : ExtendedJavaPlugin() {
             player.sendTitle(area.station, area.line, area.reverse, RailTitleMode.ARRIVE, 5, 200, 0)
         } else {
             player.sendTitle(area.station, area.line, area.reverse, RailTitleMode.UNDER_BOARD, 5, 40, 0)
-            if (!area.line.isCycle && area.line.stations.size > 0 && area.line.stations.last() == area.station) {
+            if (!area.line.isCycle && area.isTerminal) {
                 player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent("§c本站为终点站, 请到对侧站台乘车"))
             } else {
                 player.spigot().sendMessage(ChatMessageType.ACTION_BAR, *ComponentBuilder()
@@ -96,7 +97,7 @@ class PluginMain : ExtendedJavaPlugin() {
             // Or do noting
         } else {
             player.sendTitle(area.station, area.line, area.reverse, RailTitleMode.UNDER_BOARD, 0, 40, 0)
-            if (!area.line.isCycle && area.line.stations.size > 0 && area.line.stations.last() == area.station) {
+            if (!area.line.isCycle && area.isTerminal) {
                 player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent("§c本站为终点站, 请到对侧站台乘车"))
             } else {
                 player.spigot().sendMessage(ChatMessageType.ACTION_BAR, *ComponentBuilder()
@@ -131,6 +132,10 @@ class PluginMain : ExtendedJavaPlugin() {
         server.onlinePlayers.forEach { checkPlayer(it) }
 
         // 用户移动
+        Events.subscribe(PlayerTeleportEvent::class.java, EventPriority.MONITOR)
+            .filter(EventFilters.ignoreCancelled())
+            .handler { checkPlayer(it.player) }
+            .bindWith(this)
         Events.subscribe(PlayerMoveEvent::class.java, EventPriority.MONITOR)
             .filter(EventFilters.ignoreCancelled())
             .filter(EventFilters.ignoreSameBlock())
@@ -147,6 +152,7 @@ class PluginMain : ExtendedJavaPlugin() {
                 if (hasBoardPlayers.remove(it.player)) {
                     it.player.scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard
                 }
+                inAreaPlayerMap.remove(it.player)
             }
             .bindWith(this)
         Events.subscribe(PlayerInteractEvent::class.java, EventPriority.MONITOR)
@@ -159,7 +165,7 @@ class PluginMain : ExtendedJavaPlugin() {
                 val player = it.player
                 val world = player.world
                 val area = inAreaPlayerMap[player] ?: return@handler
-                if (!area.line.isCycle && area.line.stations.last() == area.station) return@handler
+                if (!area.line.isCycle && area.isTerminal) return@handler
                 val location = Location(area.world, area.stopPoint.x.toDouble() + 0.5, area.stopPoint.y.toDouble() + 0.1, area.stopPoint.z.toDouble() + 0.5)
                 val minecart = world.spawn(location, Minecart::class.java)
                 minecart.addPassenger(player)
@@ -173,7 +179,7 @@ class PluginMain : ExtendedJavaPlugin() {
         Events.subscribe(VehicleMoveEvent::class.java, EventPriority.HIGHEST)
             .filter { it.vehicle is Minecart }
             .filter { waitingMinecartMap.containsKey(it.vehicle) }
-            .handler { it.vehicle.velocity = Vector(it.vehicle.velocity.x, 0.0, it.vehicle.velocity.z) }
+            .handler { it.vehicle.velocity = Vector(0.0, it.vehicle.velocity.y, 0.0) }
             .bindWith(this)
 
         // 矿车销毁
@@ -193,19 +199,28 @@ class PluginMain : ExtendedJavaPlugin() {
             .handler {
                 val world = it.vehicle.world
                 val minecart = it.vehicle as Minecart
-                if (minecart.isEmpty) {
+                var isPassenger = false
+                if (it.exited is Player) {
+                    if (hasBoardPlayers.remove(it.exited as Player)) {
+                        (it.exited as Player).scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard
+                        isPassenger = true
+                    }
+                    checkPlayer(it.exited as Player)
+                }
+                // 此时 minecart.isEmpty 是 false，下一个 tick 才会为真
+                if (isPassenger) {
+                    // 如果之前上面的是乘客, 则销毁
+                    inAreaMinecartMap.remove(minecart)
+                    waitingMinecartMap.remove(minecart)?.close()
+                    minecart.remove()
+                } else {
                     // 空车如果在区域内，就销毁
                     val point3D = Point3D(minecart.location.blockX, minecart.location.blockY, minecart.location.blockZ)
                     inAreaMinecartMap.remove(minecart)?.also { minecart.remove() }
                     queryArea(point3D, world)?.also { minecart.remove() }
                     waitingMinecartMap.remove(minecart)?.close()
                 }
-                if (it.exited is Player) {
-                    if (hasBoardPlayers.remove(it.exited as Player)) {
-                        (it.exited as Player).scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard
-                    }
-                    checkPlayer(it.exited as Player)
-                }
+
             }
             .bindWith(this)
 
@@ -256,6 +271,7 @@ class PluginMain : ExtendedJavaPlugin() {
                         }
                         var hasPassenger = false
                         inAreaMinecartMap.remove(minecart)
+                        waitingMinecartMap.remove(minecart)?.close()
                         // 坐的可能不是人
                         minecart.passengers.forEach { passenger ->
                             if (passenger is Player) {
@@ -397,7 +413,6 @@ class PluginMain : ExtendedJavaPlugin() {
 
     override fun disable() {
         commandManager.unregisterCommands()
-        save()
     }
 
     fun reload() {
@@ -498,6 +513,13 @@ class PluginMain : ExtendedJavaPlugin() {
             lineMap[line.id] = RailLineConfig(line.name, line.stations.map { it.id }, line.color.toHexString(),
                 line.isCycle, line.colorMaterial)
         }
+
+        // copy rails.yml to rails-backup.yml
+        val railFile = File(dataFolder, "rails.yml")
+        if (railFile.length() > 10L) {
+            val backupFile = File(dataFolder, "rails-backup.yml")
+            railFile.copyTo(backupFile, true)
+        }
         configManager.save(
             RailsConfig(
                 stations = stationMap,
@@ -531,12 +553,11 @@ class PluginMain : ExtendedJavaPlugin() {
 
     private fun waitMinecart(minecart: Minecart, area: RailArea) {
         if (waitingMinecartMap.containsKey(minecart)) return
-        if ((!area.line.isCycle && area.line.stations.last() == area.station)) {
-            minecart.remove()
+        if ((!area.line.isCycle && area.isTerminal)) {
             minecart.passengers.forEach {
-                if (it is Player) it.spigot().sendMessage(ChatMessageType.ACTION_BAR,
-                    TextComponent("§c列车已到达终点站, 感谢您的乘坐!"))
+                if (it is Player) messageManager.printf(it, "§c列车已到达终点站, 感谢您的乘坐!")
             }
+            minecart.remove()
             return
         }
         // 列车站台

@@ -17,7 +17,12 @@ class RailArea(
     val station: Station,
     val line: RailLine,
     val reverse: Boolean,
-)
+) {
+    val isTerminal: Boolean
+        get() =
+            if (reverse) line.stations.size > 0 && line.stations.first() == station
+            else line.stations.size > 0 && line.stations.last() == station
+}
 
 
 @JsonInclude(JsonInclude.Include.NON_NULL)

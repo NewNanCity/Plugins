@@ -40,7 +40,7 @@ fun sendRequest(session: Session) {
         it.addExtra(blockButton)
     }
 
-    PluginMain.INSTANCE.messageManager.printf(target, false, "§7§l§m--------------------------------------------------------------------------------")
+    PluginMain.INSTANCE.messageManager.printf(target, false, "§7§l§m-----------------------------------------------------------------------")
     target.spigot().sendMessage(requestText)
-    PluginMain.INSTANCE.messageManager.printf(target, false, "§7§l§m--------------------------------------------------------------------------------")
+    PluginMain.INSTANCE.messageManager.printf(target, false, "§7§l§m-----------------------------------------------------------------------")
 }

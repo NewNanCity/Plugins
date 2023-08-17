@@ -16,13 +16,14 @@ import org.bukkit.OfflinePlayer
 import org.bukkit.event.EventPriority
 import java.io.File
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayDeque
 
-data class TransferOther(val account: OfflinePlayer, val amount: BigDecimal, var time: Long)
-data class TransferSelf(val amount: BigDecimal, var time: Long)
+data class TransferOther(val account: OfflinePlayer, val amount: BigDecimal, var time: Long, val rounded: BigDecimal)
+data class TransferSelf(val amount: BigDecimal, var time: Long, val rounded: BigDecimal)
 
 class PluginMain : ExtendedJavaPlugin() {
     companion object {
@@ -89,14 +90,15 @@ class PluginMain : ExtendedJavaPlugin() {
                     otherTransfers.removeFirst()
                 while (!selfTransfers.isEmpty() && selfTransfers.first().time < expired)
                     selfTransfers.removeFirst()
-                if (event.player == targetAccount) {
+                if (event.player.uniqueId == targetAccount!!.uniqueId) {
                     // 流入是别人的流出
                     val amount = event.newBalance - event.oldBalance
-                    if (bypassTransfer2.remove(amount)) return@handler
+                    val rounded = amount.setScale(2, RoundingMode.HALF_UP)
+                    if (bypassTransfer2.remove(rounded)) return@handler
                     // 查看转入交易中有没有金额一致的
-                    val transfer = otherTransfers.find { t -> t.amount == amount && t.time >= expired }
+                    val transfer = otherTransfers.find { t -> t.rounded == rounded && t.time >= expired }
                     if (transfer == null) {
-                        selfTransfers.add(TransferSelf(amount, now))
+                        selfTransfers.add(TransferSelf(amount, now, rounded))
                     } else {
                         transfer.time = 0
                         passiveTransfer(transfer.account, amount)
@@ -104,17 +106,18 @@ class PluginMain : ExtendedJavaPlugin() {
                 } else {
                     // 流出是别人的流入
                     val amount = event.oldBalance - event.newBalance
-                    if (bypassTransfer1.remove(event.player.uniqueId to amount)) return@handler
+                    val rounded = amount.setScale(2, RoundingMode.HALF_UP)
+                    if (bypassTransfer1.remove(event.player.uniqueId to rounded)) return@handler
                     // 查看转出交易中有没有金额一致的
-                    val transfer = selfTransfers.find { t -> t.amount == amount && t.time >= expired }
+                    val transfer = selfTransfers.find { t -> t.rounded == rounded && t.time >= expired }
                     if (transfer == null) {
-                        otherTransfers.add(TransferOther(event.player, amount, now))
+                        otherTransfers.add(TransferOther(event.player, amount, now, rounded))
                     } else {
                         transfer.time = 0
                         passiveTransfer(event.player, amount)
                     }
                 }
-            }
+            }.bindWith(this)
 
         Schedulers.async().runRepeating({ _ -> save() }, 1200L, 1200L).bindWith(this)
     }
@@ -187,8 +190,9 @@ class PluginMain : ExtendedJavaPlugin() {
     // 基金会 -> 其他人: 负
     // 其他人 -> 基金会: 正
     fun activeTransfer(account: OfflinePlayer, amount: BigDecimal) {
-        bypassTransfer2.add(amount)
-        bypassTransfer1.add(account.uniqueId to amount)
+        val rounded = amount.setScale(2, RoundingMode.HALF_UP)
+        bypassTransfer2.add(rounded)
+        bypassTransfer1.add(account.uniqueId to rounded)
         if (amount > BigDecimal.ZERO) {
             patchActiveTransferMap[account.uniqueId] = patchActiveTransferMap.getOrDefault(account.uniqueId, BigDecimal.ZERO) + amount
         }
@@ -203,11 +207,12 @@ class PluginMain : ExtendedJavaPlugin() {
     internal fun getTop(): List<RecordDisplay> {
         if (topCache != null) return topCache!!
         Schedulers.sync().runLater({ topCache = null }, 1200L).bindWith(this)
-        val list = recordsStrReader.readValues<RecordDouble>(File(dataFolder, "data.csv")).readAll()
+        val list = mutableListOf<RecordDisplay>()
+        for (record in recordsReader.readValues<RecordDouble>(File(dataFolder, "data.csv"))) {
+            list.add(RecordDisplay(server.getOfflinePlayer(record.id).name ?: "§7#未知#§r", record.active, record.passive))
+        }
         list.sortByDescending { record -> record.passive + record.active }
-        val uuidToOfflinePlayer = mutableMapOf<UUID, OfflinePlayer>()
-        server.offlinePlayers.forEach { p -> uuidToOfflinePlayer[p.uniqueId] = p }
-        topCache = list.map { record -> RecordDisplay(uuidToOfflinePlayer[record.id]?.name ?: "未知玩家", record.active, record.passive) }
+        topCache = list
         return topCache!!
     }
 
