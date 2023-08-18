@@ -2,6 +2,7 @@ package city.newnan.railarea.gui
 
 import city.newnan.railarea.PluginMain
 import city.newnan.railarea.input.handleAreaInput
+import city.newnan.railarea.input.handleYesInput
 import dev.triumphteam.gui.builder.item.ItemBuilder
 import me.lucko.helper.Schedulers
 import net.kyori.adventure.text.Component
@@ -37,14 +38,13 @@ fun showFreeAreaGui (player: Player, done: () -> Unit) {
                     if (it.isRightClick) {
                         gui.close(player)
                         PluginMain.INSTANCE.messageManager.printf(player, "&c确认删除区域? 回复Y确认, 回复其他取消")
-                        PluginMain.INSTANCE.messageManager.gets(player) { input ->
-                            if (input == "Y") {
+                        handleYesInput(player) { yes ->
+                            if (yes) {
                                 PluginMain.INSTANCE.removeArea(area)
                                 Schedulers.sync().runLater({ update(); gui.update(); gui.open(player) }, 1)
                             } else {
                                 Schedulers.sync().runLater({ gui.open(player) }, 1)
                             }
-                            true
                         }
                     } else {
                         gui.close(player)
@@ -55,6 +55,7 @@ fun showFreeAreaGui (player: Player, done: () -> Unit) {
                             } else {
                                 PluginMain.INSTANCE.updateArea(area, newArea)
                                 Schedulers.sync().runLater({ update(); gui.update(); gui.open(player) }, 1)
+                                PluginMain.INSTANCE.checkPlayer(player)
                             }
                         }
                     }

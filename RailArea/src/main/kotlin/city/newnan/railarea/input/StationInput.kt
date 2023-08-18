@@ -6,6 +6,12 @@ import org.bukkit.entity.Player
 
 fun handleStationInput(player: Player, oldStation: Station?, done: (station: Station?) -> Unit) {
     var name: String? = oldStation?.name
+    if (lock) {
+        PluginMain.INSTANCE.messageManager.printf(player, "&c你正在进行其他输入, 请先取消之!")
+        done(null)
+        return
+    }
+    lock = true
     PluginMain.INSTANCE.messageManager.gets(player) { input ->
         val argv = input.split(" ").filter { it.isNotEmpty() }
         when (argv[0]) {
@@ -24,6 +30,8 @@ fun handleStationInput(player: Player, oldStation: Station?, done: (station: Sta
             }
             "cancel" -> {
                 PluginMain.INSTANCE.messageManager.printf(player, "已取消")
+                lock = false
+                done(null)
                 return@gets true
             }
             "ok" -> {
@@ -32,6 +40,7 @@ fun handleStationInput(player: Player, oldStation: Station?, done: (station: Sta
                 } else {
                     val station = Station(oldStation?.id ?: PluginMain.INSTANCE.nextStationId++, name!!,
                         oldStation?.lines ?: mutableSetOf())
+                    lock = false
                     done(station)
                     return@gets true
                 }

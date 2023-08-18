@@ -8,9 +8,15 @@ import city.newnan.railarea.config.toMaterial
 import org.bukkit.Color
 import org.bukkit.entity.Player
 
-fun handleRailLineInput(player: Player, oldLine: RailLine?, done: (line: RailLine) -> Unit) {
+fun handleRailLineInput(player: Player, oldLine: RailLine?, done: (line: RailLine?) -> Unit) {
+    if (lock) {
+        PluginMain.INSTANCE.messageManager.printf(player, "&c你正在进行其他输入, 请先取消之!")
+        done(null)
+        return
+    }
     var name: String? = oldLine?.name
     var color: Color? = oldLine?.color
+    lock = true
     PluginMain.INSTANCE.messageManager.gets(player) { input ->
         val argv = input.split(" ").filter { it.isNotEmpty() }
         when (argv[0]) {
@@ -44,12 +50,15 @@ fun handleRailLineInput(player: Player, oldLine: RailLine?, done: (line: RailLin
             }
             "cancel" -> {
                 PluginMain.INSTANCE.messageManager.printf(player, "已取消")
+                lock = false
+                done(null)
                 return@gets true
             }
             "ok" -> {
                 if (color == null || name == null) {
                     PluginMain.INSTANCE.messageManager.printf(player, "&c请先设置名称和颜色!")
                 } else {
+                    lock = false
                     val line = RailLine(oldLine?.id ?: PluginMain.INSTANCE.nextLineId++, name!!,
                         oldLine?.stations ?: mutableListOf(), color!!, false, color!!.toMaterial())
                     done(line)

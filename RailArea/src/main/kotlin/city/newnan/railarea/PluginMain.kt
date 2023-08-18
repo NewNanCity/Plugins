@@ -6,6 +6,7 @@ import city.newnan.railarea.octree.Point3D
 import city.newnan.railarea.octree.Range3D
 import city.newnan.railarea.utils.RailTitleMode
 import city.newnan.railarea.utils.sendTitle
+import city.newnan.railarea.utils.showBoard
 import city.newnan.violet.config.ConfigManager2
 import city.newnan.violet.message.MessageManager
 import co.aikar.commands.PaperCommandManager
@@ -55,7 +56,7 @@ class PluginMain : ExtendedJavaPlugin() {
     private val inAreaPlayerMap = mutableMapOf<Player, RailArea>()
     private val inAreaMinecartMap = mutableMapOf<Minecart, RailArea>()
     private val waitingMinecartMap = mutableMapOf<Minecart, Terminable>()
-    private val hasBoardPlayers = mutableSetOf<Player>()
+    val hasBoardPlayers = mutableSetOf<Player>()
     private var WAITING_COUNT_DOWN: Int = 20
     private var RUN_WARNING_THRESHOLD: Int = 12
     private var DEFAULT_SPEED: Double = 1.0
@@ -165,7 +166,10 @@ class PluginMain : ExtendedJavaPlugin() {
                 val player = it.player
                 val world = player.world
                 val area = inAreaPlayerMap[player] ?: return@handler
-                if (!area.line.isCycle && area.isTerminal) return@handler
+                if (!area.line.isCycle && area.isTerminal) {
+                    it.setCancelled(true)
+                    return@handler
+                }
                 val location = Location(area.world, area.stopPoint.x.toDouble() + 0.5, area.stopPoint.y.toDouble() + 0.1, area.stopPoint.z.toDouble() + 0.5)
                 val minecart = world.spawn(location, Minecart::class.java)
                 minecart.addPassenger(player)
@@ -362,10 +366,7 @@ class PluginMain : ExtendedJavaPlugin() {
                     }.onEach {
                         areaRangeMap[it.world]!![it.range3D] = it
                         octree.insert(it.range3D)
-                        if (!lineStationAreas.containsKey(it.station to it.line)) {
-                            lineStationAreas[it.station to it.line] = mutableSetOf()
-                        }
-                        lineStationAreas[it.station to it.line]!!.add(it)
+                        lineStationAreas.getOrPut(it.station to it.line) { mutableSetOf() }.add(it)
                     }.also { messageManager.info("Loaded ${it.size} areas in world \"${world.name}\"") }
                 }
             }
@@ -466,12 +467,12 @@ class PluginMain : ExtendedJavaPlugin() {
         // Stations and lines
         val stationIdMap = mutableMapOf<Int, Station>()
         val lineIdMap = mutableMapOf<Int, RailLine>()
-        railConfig.stations.forEach { (id, station) ->
+        railConfig.stations.toSortedMap().forEach { (id, station) ->
             nextStationId = maxOf(nextStationId, id + 1)
             stations[station.name] = Station(id, station.name)
             stationIdMap[id] = stations[station.name]!!
         }
-        railConfig.railLines.forEach { (id, lineC) ->
+        railConfig.railLines.toSortedMap().forEach { (id, lineC) ->
             val stations = lineC.stations.mapNotNull { stationIdMap[it] }.toMutableList()
             val color = lineC.color.toColor()
             nextLineId = maxOf(nextLineId, id + 1)
@@ -486,16 +487,17 @@ class PluginMain : ExtendedJavaPlugin() {
             val octree = getWorldOctree(world) ?: continue
             areaRangeMap[world] = mutableMapOf()
             areas.map {
-                val station = stationIdMap[it.station] ?: unknownStation
-                val line = lineIdMap[it.line] ?: unknownLine
-                RailArea(world, it.range3D, it.direction, it.stopPoint, station, line, it.reverse)
+                val station = stationIdMap[it.station]
+                val line = lineIdMap[it.line]
+                if (station != null && line != null && station.lines.contains(line)) {
+                    return@map RailArea(world, it.range3D, it.direction, it.stopPoint, station, line, it.reverse)
+                } else {
+                    return@map RailArea(world, it.range3D, it.direction, it.stopPoint, unknownStation, unknownLine, it.reverse)
+                }
             }.onEach {
                 areaRangeMap[it.world]!![it.range3D] = it
                 octree.insert(it.range3D)
-                if (!lineStationAreas.containsKey(it.station to it.line)) {
-                    lineStationAreas[it.station to it.line] = mutableSetOf()
-                }
-                lineStationAreas[it.station to it.line]!!.add(it)
+                lineStationAreas.getOrPut(it.station to it.line) { mutableSetOf() }.add(it)
             }.also { messageManager.info("Loaded ${it.size} areas in world \"$worldName\"") }
         }
     }
@@ -506,9 +508,9 @@ class PluginMain : ExtendedJavaPlugin() {
         for ((world, areas) in areaRangeMap) {
             areasWorlds[world.name] = areas.map { RailAreaConfig.valueOf(it.value) }
         }
-        val stationMap = mutableMapOf<Int, StationConfig>()
+        val stationMap = sortedMapOf<Int, StationConfig>()
         stations.forEach { (_, station) -> stationMap[station.id] = StationConfig(station.name) }
-        val lineMap = mutableMapOf<Int, RailLineConfig>()
+        val lineMap = sortedMapOf<Int, RailLineConfig>()
         this.lines.forEach { (_, line) ->
             lineMap[line.id] = RailLineConfig(line.name, line.stations.map { it.id }, line.color.toHexString(),
                 line.isCycle, line.colorMaterial)
@@ -535,7 +537,7 @@ class PluginMain : ExtendedJavaPlugin() {
         return areaRangeMap[world]!![range]
     }
 
-    private fun checkPlayer(player: Player) {
+    fun checkPlayer(player: Player) {
         val world = player.world
         val point3D = Point3D(player.location.blockX, player.location.blockY, player.location.blockZ)
         // 旧范围
@@ -556,102 +558,13 @@ class PluginMain : ExtendedJavaPlugin() {
         if ((!area.line.isCycle && area.isTerminal)) {
             minecart.passengers.forEach {
                 if (it is Player) messageManager.printf(it, "§c列车已到达终点站, 感谢您的乘坐!")
+                minecart.removePassenger(it)
+                it.teleport(Location(area.world, area.stopPoint.x.toDouble()+0.5, area.stopPoint.y.toDouble()+0.3, area.stopPoint.z.toDouble()+0.5))
             }
             minecart.remove()
             return
         }
-        // 列车站台
-        fun showBoard(wait: Boolean) {
-             Schedulers.sync().run {
-                Bukkit.getScoreboardManager()?.newScoreboard?.also {
-                    val n = "rail.${if (wait) "w" else "g"}.l${area.line.id}.s${area.station.id}"
-                    val name = n.substring(0, n.length.coerceAtMost(16))
-                    it.getObjective(n)?.unregister()
-                    val board = it.registerNewObjective(name, "dummy",
-                        " §8==§r    ${area.line.color.toFMString()}§n§l${area.line.name}§r    §8==§r ")
-                    board.displaySlot = DisplaySlot.SIDEBAR
-                    val dots = area.line.stations.size > 9
-                    val maxStations = if (dots) 7 else 8
-                    val index = area.line.stations.indexOf(area.station)
-                    val nextStations: MutableList<Station> = mutableListOf()
-                    var terminal: Station? = null
-                    if (area.reverse) {
-                        for (i in index - 1 downTo 0) {
-                            if (nextStations.size > maxStations) break
-                            nextStations.add(area.line.stations[i])
-                        }
-                        if (area.line.isCycle) {
-                            for (i in area.line.stations.size - 1 downTo index + 1) {
-                                if (nextStations.size > maxStations) break
-                                nextStations.add(area.line.stations[i])
-                            }
-                        } else {
-                            terminal = area.line.stations.first()
-                        }
-                    } else {
-                        for (i in index + 1 until area.line.stations.size) {
-                            if (nextStations.size > maxStations) break
-                            nextStations.add(area.line.stations[i])
-                        }
-                        if (area.line.isCycle) {
-                            for (i in 0 until index) {
-                                if (nextStations.size > maxStations) break
-                                nextStations.add(area.line.stations[i])
-                            }
-                        } else {
-                            terminal = area.line.stations.last()
-                        }
-                    }
-                    if (nextStations.size > 0 && terminal == nextStations.last()) terminal = null
-                    if (nextStations.size == 0) terminal = null
-                    var scoreIndex = nextStations.size + (if (dots) 1 else 0) + (if (terminal == null) 0 else 1)
-                    // https://www.spigotmc.org/threads/1-16-1-19-scoreboard-objective-score-with-rgb-hex-color.468079/
-                    fun intersection(text: String, colors: List<Color>) {
-                        if (colors.isNotEmpty()) {
-                            val team = it.getTeam(text) ?: it.registerNewTeam(text)
-                            var suffix = " "
-                            colors.forEach { color ->
-                                suffix += net.md_5.bungee.api.ChatColor.of(color.toHexString()).toString() + "●"
-                            }
-                            team.suffix = suffix
-                            team.addEntry(text)
-                        }
-                        board.getScore(text).score = scoreIndex--
-                    }
-                    if (wait) {
-                        intersection(" §6☛ §l${area.station.name}§r", area.station.lines.filter { l -> l != area.line }.map { l -> l.color })
-                    } else {
-                        intersection(" §8▼§7 §o${area.station.name}§r", area.station.lines.filter { l -> l != area.line }.map { l -> l.color })
-                    }
-                    var first = true
-                    nextStations.forEach { station ->
-                        if (first) {
-                            if (wait) {
-                                intersection(" §f▽ §l${station.name}§r", station.lines.filter { l -> l != area.line }.map { l -> l.color })
-                            } else {
-                                intersection(" §6☛ §l${station.name}§r", station.lines.filter { l -> l != area.line }.map { l -> l.color })
-                            }
-                            first = false
-                        } else {
-                            intersection(" §f▽ ${station.name}§r", station.lines.filter { l -> l != area.line }.map { l -> l.color })
-                        }
-                    }
-                    if (terminal != null) {
-                        if (dots && nextStations.size >= maxStations)
-                            board.getScore("     §8...§r     ").score = scoreIndex--
-                        intersection(" ◇ §f§n${terminal.name}§r", terminal.lines.filter { l -> l != area.line }.map { l -> l.color })
-                    }
-
-                    minecart.passengers.forEach { p ->
-                        if (p is Player) {
-                            p.scoreboard = it
-                            hasBoardPlayers.add(p)
-                        }
-                    }
-                }
-            }
-        }
-        showBoard(true)
+        showBoard(true, area, minecart)
 
         // 发车倒计时
         var countDown = WAITING_COUNT_DOWN
@@ -671,19 +584,21 @@ class PluginMain : ExtendedJavaPlugin() {
             }
             countDown--
             if (countDown <= 0) {
-                showBoard(false)
+                showBoard(false, area, minecart)
                 task.close()
-                waitingMinecartMap.remove(minecart)
-                when (area.direction) {
-                    Direction.NORTH -> minecart.velocity = Vector(0.0, 0.0, -DEFAULT_SPEED)
-                    Direction.SOUTH -> minecart.velocity = Vector(0.0, 0.0, DEFAULT_SPEED)
-                    Direction.EAST -> minecart.velocity = Vector(DEFAULT_SPEED, 0.0, 0.0)
-                    Direction.WEST -> minecart.velocity = Vector(-DEFAULT_SPEED, 0.0, 0.0)
-                }
-                minecart.passengers.forEach {
-                    if (it is Player) {
-                        it.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent("§c列车已启动, 请扶好站稳, 注意安全"))
-                        it.sendTitle(area.station, area.line, area.reverse, RailTitleMode.START, 5, 100, 0)
+                Schedulers.sync().run {
+                    waitingMinecartMap.remove(minecart)
+                    when (area.direction) {
+                        Direction.NORTH -> minecart.velocity = Vector(0.0, 0.0, -DEFAULT_SPEED)
+                        Direction.SOUTH -> minecart.velocity = Vector(0.0, 0.0, DEFAULT_SPEED)
+                        Direction.EAST -> minecart.velocity = Vector(DEFAULT_SPEED, 0.0, 0.0)
+                        Direction.WEST -> minecart.velocity = Vector(-DEFAULT_SPEED, 0.0, 0.0)
+                    }
+                    minecart.passengers.forEach {
+                        if (it is Player) {
+                            it.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent("§c列车已启动, 请扶好站稳, 注意安全"))
+                            it.sendTitle(area.station, area.line, area.reverse, RailTitleMode.START, 5, 100, 0)
+                        }
                     }
                 }
                 return@runRepeating
@@ -702,8 +617,7 @@ class PluginMain : ExtendedJavaPlugin() {
         if (!areaRangeMap.containsKey(area.world)) areaRangeMap[area.world] = mutableMapOf()
         areaRangeMap[area.world]!![area.range3D] = area
         getWorldOctree(area.world)!!.insert(area.range3D)
-        if (!lineStationAreas.containsKey(area.station to area.line)) lineStationAreas[area.station to area.line] = mutableSetOf()
-        lineStationAreas[area.station to area.line]!!.add(area)
+        lineStationAreas.getOrPut(area.station to area.line) { mutableSetOf() }.add(area)
         if (save) save()
     }
 
@@ -724,8 +638,7 @@ class PluginMain : ExtendedJavaPlugin() {
     fun updateArea(oldArea: RailArea, newArea: RailArea, save: Boolean = true) {
         if (oldArea.world != newArea.world || oldArea.range3D != newArea.range3D) {
             areaRangeMap[oldArea.world]?.remove(oldArea.range3D)
-            if (!areaRangeMap.containsKey(newArea.world)) areaRangeMap[newArea.world] = mutableMapOf()
-            areaRangeMap[newArea.world]!![newArea.range3D] = newArea
+            areaRangeMap.getOrPut(newArea.world) { mutableMapOf() }[newArea.range3D] = newArea
             worldOctrees[oldArea.world]?.remove(oldArea.range3D)
             getWorldOctree(newArea.world)!!.insert(newArea.range3D)
             if (areaRangeMap[oldArea.world]?.isEmpty() == true) {
@@ -733,16 +646,13 @@ class PluginMain : ExtendedJavaPlugin() {
                 worldOctrees.remove(oldArea.world)
             }
         } else {
-            if (!areaRangeMap.containsKey(newArea.world)) areaRangeMap[newArea.world] = mutableMapOf()
-            areaRangeMap[newArea.world]!![newArea.range3D] = newArea
+            areaRangeMap.getOrPut(newArea.world) { mutableMapOf() }[newArea.range3D] = newArea
         }
         lineStationAreas[oldArea.station to oldArea.line]?.also {
             it.remove(oldArea)
             if (it.size == 0) lineStationAreas.remove(oldArea.station to oldArea.line)
         }
-        if (!lineStationAreas.containsKey(newArea.station to newArea.line))
-            lineStationAreas[newArea.station to newArea.line] = mutableSetOf()
-        lineStationAreas[newArea.station to newArea.line]!!.add(newArea)
+        lineStationAreas.getOrPut(newArea.station to newArea.line) { mutableSetOf() }.add(newArea)
         if (save) save()
     }
 
@@ -819,17 +729,15 @@ class PluginMain : ExtendedJavaPlugin() {
     }
 
     private fun getWorldOctree(world: World): Octree? {
-        if (!worldOctrees.containsKey(world)) {
+        return worldOctrees.getOrPut(world) {
             val worldSize = worldSizes[world.name] ?: /* worldSizes["default"] ?: */ return null
             val minX = minOf(worldSize.x1, worldSize.x2)
             val minZ = minOf(worldSize.z1, worldSize.z2)
             val maxX = maxOf(worldSize.x1, worldSize.x2)
             val maxZ = maxOf(worldSize.z1, worldSize.z2)
             val worldRange = Range3D(minX, 0, minZ, maxX, 255, maxZ)
-            val octree = Octree(worldRange)
-            worldOctrees[world] = octree
+            Octree(worldRange)
         }
-        return worldOctrees[world]
     }
 
     private fun playMusic(music: Iterable<Note>, getLocation: () -> Location?) {

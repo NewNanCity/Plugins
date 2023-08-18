@@ -2,36 +2,6 @@ version = "0.0.1"
 group = "city.newnan.template"
 description = "Template plugin"
 
-tasks.shadowJar {
-    // Violet
-    relocate("city.newnan.violet", "city.newnan.violet_v2_1_1")
-
-    // gui
-    relocate("dev.triumphteam.gui", "dev.triumphteam.gui_v3_1_2")
-
-    // helper
-    relocate("me.lucko.helper", "me.lucko.helper_v5_6_14")
-    relocate("me.lucko.helper", "me.lucko.helper_v5_6_14")
-    relocate("me.lucko.shadow", "me.lucko.shadow_v5_6_14")
-
-    // commands
-    relocate("co.aikar.locales", "co.aikar.locales_v0_5_1")
-    relocate("co.aikar.commands", "co.aikar.commands_v0_5_1")
-
-    // jackson
-    relocate("org.yaml.snakeyaml", "org.yaml.snakeyaml_v2_0")
-    relocate("com.fasterxml.jackson", "com.fasterxml.jackson_v2_15_2")
-    relocate("com.jasonclawson.jackson", "com.jasonclawson.jackson_v1_1_0")
-
-    // HikariCP + ktorm
-    relocate("com.zaxxer.hikari", "com.zaxxer.hikari_v4_0_3")
-    relocate("org.ktorm", "org.ktorm_v3_6_0")
-
-    // okhttp + kohttp
-    relocate("okhttp3", "okhttp3_v4_11_0")
-    relocate("io.github.rybalkinsd.okhttp", "io.github.rybalkinsd.okhttp_v0_12_0")
-}
-
 dependencies {
     // Utils
     implementation("me.lucko:helper:5.6.14")

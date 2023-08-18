@@ -53,12 +53,22 @@ subprojects {
             exclude("LICENSE*", "LICENSE", "license*", "license")
         }
         archiveFileName.set("${project.name}-${project.version}.jar")
-        minimize() {
+        minimize {
             include(dependency("org.jetbrains.kotlin:kotlin-stdlib"))
             include(dependency("org.jetbrains.kotlin:kotlin-stdlib-jdk8"))
             include(dependency("org.jetbrains.kotlin:kotlin-stdlib-jdk7"))
             include(dependency("org.jetbrains.kotlin:kotlin-reflect"))
         }
+        // Relocate
+        listOf(
+            "city.newnan.violet",
+            "dev.triumphteam.gui",
+            "me.lucko",
+            "co.aikar",
+            "org.yaml.snakeyaml",
+            "com.fasterxml.jackson",
+            "com.jasonclawson.jackson",
+        ).forEach { relocate(it, "${project.group}._dependencies_.$it") }
     }
 
     project.ext["load"] = "STARTUP"

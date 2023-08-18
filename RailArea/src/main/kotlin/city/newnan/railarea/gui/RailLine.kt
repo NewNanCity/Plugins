@@ -6,6 +6,7 @@ import city.newnan.railarea.config.Station
 import city.newnan.railarea.config.toFMString
 import city.newnan.railarea.config.toHexString
 import city.newnan.railarea.input.handleRailLineInput
+import city.newnan.railarea.input.handleYesInput
 import dev.triumphteam.gui.builder.item.ItemBuilder
 import me.lucko.helper.Schedulers
 import net.kyori.adventure.text.Component
@@ -65,8 +66,8 @@ fun showLineStationGui (player: Player, editable: Boolean, done: (line: RailLine
                         } else if (it.isRightClick) {
                             stationGui.close(player)
                             PluginMain.INSTANCE.messageManager.printf(player, "&c确认从线路中移除站点 ${stationKW.name}? 站点自身不会被删除! 回复Y确认, 回复其他取消")
-                            PluginMain.INSTANCE.messageManager.gets(player) { input ->
-                                if (input == "Y") {
+                            handleYesInput(player) {yes ->
+                                if (yes) {
                                     val newStations = line.stations.toMutableList()
                                     newStations.remove(stationKW)
                                     val newLine = RailLine(line.id, line.name, newStations, line.color, line.isCycle, line.colorMaterial)
@@ -76,7 +77,6 @@ fun showLineStationGui (player: Player, editable: Boolean, done: (line: RailLine
                                 } else {
                                     Schedulers.sync().runLater({ stationGui.open(player) }, 1)
                                 }
-                                true
                             }
                             return@asGuiItem
                         }
@@ -105,7 +105,7 @@ fun showLineStationGui (player: Player, editable: Boolean, done: (line: RailLine
 
     fun updateRailGui() {
         railGui.clearPageItems()
-        PluginMain.INSTANCE.lines.forEach { lineKW ->
+        PluginMain.INSTANCE.lines.entries.sortedBy { it.value.id }.forEach { lineKW ->
             val item = ItemStack(lineKW.value.colorMaterial)
             item.itemMeta = item.itemMeta?.also {
                 it.setDisplayName("§r${lineKW.value.color.toFMString()}${lineKW.value.name}§r")
@@ -128,26 +128,32 @@ fun showLineStationGui (player: Player, editable: Boolean, done: (line: RailLine
                     if (editable) {
                         if (it.isShiftClick) {
                             if (it.isLeftClick) {
+                                railGui.close(player)
+                                PluginMain.INSTANCE.messageManager.printf(player, "&c请设定线路名称和颜色")
                                 handleRailLineInput(player, lineKW.value) { newLine ->
-                                    PluginMain.INSTANCE.lines.remove(lineKW.value.name)
-                                    lineKW.value.name = newLine.name
-                                    lineKW.value.color = newLine.color
-                                    lineKW.value.colorMaterial = newLine.colorMaterial
-                                    PluginMain.INSTANCE.lines[lineKW.value.name] = lineKW.value
-                                    PluginMain.INSTANCE.save()
-                                    Schedulers.sync().runLater({ updateRailGui(); railGui.update(); railGui.open(player) }, 1)
+                                    if (newLine == null) {
+                                        Schedulers.sync().runLater({ railGui.open(player) }, 1)
+                                    } else {
+                                        PluginMain.INSTANCE.lines.remove(lineKW.value.name)
+                                        lineKW.value.name = newLine.name
+                                        lineKW.value.color = newLine.color
+                                        lineKW.value.colorMaterial = newLine.colorMaterial
+                                        PluginMain.INSTANCE.lines[lineKW.value.name] = lineKW.value
+                                        PluginMain.INSTANCE.save()
+                                        Schedulers.sync().runLater({ updateRailGui(); railGui.update(); railGui.open(player) }, 1)
+                                    }
                                 }
                             } else {
                                 railGui.close(player)
-                                PluginMain.INSTANCE.messageManager.printf(player, "&c确认删除线路 ${lineKW.value.name}? 将删除其包含的所有站点(站点自身不会被删除)! 回复Y确认, 回复其他取消")
-                                PluginMain.INSTANCE.messageManager.gets(player) { input ->
-                                    if (input == "Y") {
+                                PluginMain.INSTANCE.messageManager.printf(player, "§c确认删除线路 ${
+                                    lineKW.value.color.toFMString()}${lineKW.value.name}§r§c? 将删除其包含的所有站点(站点自身不会被删除)! 回复Y确认, 回复其他取消")
+                                handleYesInput(player) {yes ->
+                                    if (yes) {
                                         PluginMain.INSTANCE.removeLine(lineKW.value)
                                         Schedulers.sync().runLater({ updateRailGui(); railGui.update(); railGui.open(player) }, 1)
                                     } else {
                                         Schedulers.sync().runLater({ railGui.open(player) }, 1)
                                     }
-                                    true
                                 }
                             }
                             return@asGuiItem
@@ -168,11 +174,15 @@ fun showLineStationGui (player: Player, editable: Boolean, done: (line: RailLine
             railGui.setItem(6, 1, ItemBuilder.from(Material.ACACIA_SIGN).name(Component.text("添加线路")).asGuiItem {
                 if (it.whoClicked != player && it.inventory != railGui.inventory) return@asGuiItem
                 railGui.close(player)
-                PluginMain.INSTANCE.messageManager.printf(player, "&c请设定线路名称和颜色")
+                PluginMain.INSTANCE.messageManager.printf(player, "§c请设定线路名称和颜色")
                 handleRailLineInput(player, null) { line ->
-                    PluginMain.INSTANCE.addRailLine(line)
-                    PluginMain.INSTANCE.messageManager.printf(player, "&a线路 ${line.name} 已添加!")
-                    Schedulers.sync().runLater({ updateRailGui(); railGui.update(); railGui.open(player) }, 1)
+                    if (line == null) {
+                        Schedulers.sync().runLater({ railGui.open(player) }, 1)
+                    } else {
+                        PluginMain.INSTANCE.addRailLine(line)
+                        PluginMain.INSTANCE.messageManager.printf(player, "§a线路 ${line.color.toFMString()}${line.name}§r 已添加!")
+                        Schedulers.sync().runLater({ updateRailGui(); railGui.update(); railGui.open(player) }, 1)
+                    }
                 }
             })
             if (PluginMain.INSTANCE.lineStationAreas.containsKey(PluginMain.INSTANCE.unknownStation to PluginMain.INSTANCE.unknownLine)) {

@@ -4,6 +4,7 @@ import city.newnan.railarea.config.toFMString
 import city.newnan.railarea.gui.pageGui
 import city.newnan.railarea.gui.showLineStationGui
 import city.newnan.railarea.input.handleAreaInput
+import city.newnan.railarea.input.handleYesInput
 import city.newnan.railarea.utils.visualize
 import co.aikar.commands.BaseCommand
 import co.aikar.commands.CommandHelp
@@ -77,6 +78,7 @@ object Commands : BaseCommand() {
                                         PluginMain.INSTANCE.messageManager.printf(sender,
                                             "区域 &2${area.station.name}(${area.line.name})&r 已更新!")
                                         Schedulers.sync().runLater({ update(); gui.update(); gui.open(sender) }, 1)
+                                        PluginMain.INSTANCE.checkPlayer(sender)
                                     } else {
                                         Schedulers.sync().runLater({ gui.open(sender) }, 1)
                                     }
@@ -84,8 +86,8 @@ object Commands : BaseCommand() {
                             } else if (it.isRightClick) {
                                 gui.close(sender)
                                 PluginMain.INSTANCE.messageManager.printf(sender, "&c确认删除区域? 回复Y确认, 回复其他取消")
-                                PluginMain.INSTANCE.messageManager.gets(sender) { input ->
-                                    if (input == "Y") {
+                                handleYesInput(sender) { yes ->
+                                    if (yes) {
                                         PluginMain.INSTANCE.removeArea(area)
                                         PluginMain.INSTANCE.messageManager.printf(sender,
                                             "区域 &2${area.station.name}(${area.line.name})&r 已删除!")
@@ -93,7 +95,6 @@ object Commands : BaseCommand() {
                                     } else {
                                         Schedulers.sync().runLater({ gui.open(sender) }, 1)
                                     }
-                                    true
                                 }
                             }
                         } else if (it.isRightClick) {
@@ -117,6 +118,7 @@ object Commands : BaseCommand() {
                         PluginMain.INSTANCE.addArea(area)
                         PluginMain.INSTANCE.messageManager.printf(sender, "区域已创建!")
                         Schedulers.sync().runLater({ update(); gui.update(); gui.open(sender) }, 1)
+                        PluginMain.INSTANCE.checkPlayer(sender)
                     } else {
                         Schedulers.sync().runLater({ gui.open(sender) }, 1)
                     }
@@ -136,6 +138,7 @@ object Commands : BaseCommand() {
             if (area != null) {
                 PluginMain.INSTANCE.addArea(area)
                 PluginMain.INSTANCE.messageManager.printf(sender, "区域已创建!")
+                PluginMain.INSTANCE.checkPlayer(sender)
             }
         }
     }

@@ -55,9 +55,9 @@ data class RailLine(
     }
 }
 
-fun Color.toHexString() = "#${Integer.toHexString(asRGB()).uppercase()}"
+fun Color.toHexString() = "#${"%06X".format(asRGB())}"
 fun String.toColor() = Color.fromRGB(substring(1).toInt(16))
-fun Color.toFMString() = "§x${Integer.toHexString(asRGB()).toCharArray().joinToString("") { "§$it" }}"
+fun Color.toFMString() = "§x${"%06X".format(asRGB()).toCharArray().joinToString("") { "§$it" }}"
 
 val colorMaterials = arrayOf(
     Color.fromRGB(0xcdd3d4) to Material.WHITE_CONCRETE,

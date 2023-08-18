@@ -3,6 +3,7 @@ package city.newnan.railarea.gui
 import city.newnan.railarea.PluginMain
 import city.newnan.railarea.config.Station
 import city.newnan.railarea.input.handleStationInput
+import city.newnan.railarea.input.handleYesInput
 import dev.triumphteam.gui.builder.item.ItemBuilder
 import me.lucko.helper.Schedulers
 import net.kyori.adventure.text.Component
@@ -14,7 +15,7 @@ fun showStationGui (player: Player, unavailableStations: Set<Station>, back: () 
     val gui = pageGui(Component.text("所有可用站点"))
     fun update() {
         gui.clearPageItems()
-        PluginMain.INSTANCE.stations.forEach { (_, station) ->
+        PluginMain.INSTANCE.stations.entries.sortedBy { it.value.id }.forEach { (_, station) ->
             val unavailable = unavailableStations.contains(station)
             val item = ItemStack(Material.ACTIVATOR_RAIL)
             item.itemMeta = item.itemMeta?.also {
@@ -32,14 +33,13 @@ fun showStationGui (player: Player, unavailableStations: Set<Station>, back: () 
                         if (station.lines.size == 0) {
                             gui.close(player)
                             PluginMain.INSTANCE.messageManager.printf(player, "&c确认删除站点 ${station.name}? 回复Y确认, 回复其他取消")
-                            PluginMain.INSTANCE.messageManager.gets(player) { input ->
-                                if (input == "Y") {
+                            handleYesInput(player) { yes ->
+                                if (yes) {
                                     PluginMain.INSTANCE.removeStation(station)
                                     Schedulers.sync().runLater({ update(); gui.update(); gui.open(player) }, 1)
                                 } else {
                                     Schedulers.sync().runLater({ gui.open(player) }, 1)
                                 }
-                                true
                             }
                         }
                     } else {
