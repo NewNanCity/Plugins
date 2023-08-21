@@ -3,6 +3,7 @@ package city.newnan.railarea
 import city.newnan.railarea.config.toFMString
 import city.newnan.railarea.gui.pageGui
 import city.newnan.railarea.gui.showLineStationGui
+import city.newnan.railarea.gui.showReverseGui
 import city.newnan.railarea.input.handleAreaInput
 import city.newnan.railarea.input.handleYesInput
 import city.newnan.railarea.utils.visualize
@@ -112,15 +113,17 @@ object Commands : BaseCommand() {
             })
             gui.setItem(6, 1, ItemBuilder.from(Material.EMERALD_BLOCK).name(Component.text("添加区域")).asGuiItem {
                 gui.close(sender)
-                PluginMain.INSTANCE.messageManager.printf(sender, "开始设置区域，接下来请设定区域的属性:")
-                handleAreaInput(sender, null, iStation = station, iLine = line) { area ->
-                    if (area != null) {
-                        PluginMain.INSTANCE.addArea(area)
-                        PluginMain.INSTANCE.messageManager.printf(sender, "区域已创建!")
-                        Schedulers.sync().runLater({ update(); gui.update(); gui.open(sender) }, 1)
-                        PluginMain.INSTANCE.checkPlayer(sender)
-                    } else {
-                        Schedulers.sync().runLater({ gui.open(sender) }, 1)
+                showReverseGui(sender, line) {
+                    PluginMain.INSTANCE.messageManager.printf(sender, "开始设置区域，接下来请设定区域的属性:")
+                    handleAreaInput(sender, null, iStation = station, iLine = line, iReverse = it) { area ->
+                        if (area != null) {
+                            PluginMain.INSTANCE.addArea(area)
+                            PluginMain.INSTANCE.messageManager.printf(sender, "区域已创建!")
+                            Schedulers.sync().runLater({ update(); gui.update(); gui.open(sender) }, 1)
+                            PluginMain.INSTANCE.checkPlayer(sender)
+                        } else {
+                            Schedulers.sync().runLater({ gui.open(sender) }, 1)
+                        }
                     }
                 }
             })

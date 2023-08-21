@@ -17,6 +17,10 @@ data class RailLineConfig(
     val isCycle: Boolean = false,
     @JsonProperty("color-material")
     val colorMaterial: Material,
+    @JsonProperty("left-return")
+    val leftReturn: Boolean = false,
+    @JsonProperty("right-return")
+    val rightReturn: Boolean = false,
 )
 
 data class Station(val id: Int, var name: String, val lines: MutableSet<RailLine> = mutableSetOf()) {
@@ -39,6 +43,8 @@ data class RailLine(
     var color: Color,
     var isCycle: Boolean,
     var colorMaterial: Material,
+    var leftReturn: Boolean,
+    var rightReturn: Boolean,
 ) {
     override fun hashCode(): Int  = id
     override fun equals(other: Any?): Boolean {
@@ -79,7 +85,6 @@ val colorMaterials = arrayOf(
 )
 
 fun Color.toMaterial(): Material {
-    // find nearest Manhattan distance of this color and colorMaterials
     var minDistance = 0xFFFFFF
     var minMaterial = Material.WHITE_CONCRETE
     val r = red

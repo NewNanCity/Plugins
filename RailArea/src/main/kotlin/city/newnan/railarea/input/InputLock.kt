@@ -1,3 +1,6 @@
 package city.newnan.railarea.input
 
-var lock = false
+import java.util.*
+import kotlin.collections.HashSet
+
+val inputLocks: HashSet<UUID> = HashSet()

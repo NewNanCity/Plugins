@@ -3,6 +3,7 @@ package city.newnan.foundation
 import co.aikar.commands.BaseCommand
 import co.aikar.commands.CommandHelp
 import co.aikar.commands.annotation.*
+import org.bukkit.block.CommandBlock
 import org.bukkit.command.BlockCommandSender
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -46,14 +47,13 @@ object Commands : BaseCommand() {
         PluginMain.INSTANCE.activeTransfer(sender, amountT)
         PluginMain.INSTANCE.economy.withdrawPlayer(sender, amountTT)
         PluginMain.INSTANCE.economy.depositPlayer(PluginMain.INSTANCE.targetAccount!!, amountTT)
-        PluginMain.INSTANCE.messageManager.printf(sender, "您已向牛腩基金会慷慨捐款 §a${amountTT} ₦§r, 谢谢您让牛腩变得更好!")
+        PluginMain.INSTANCE.messageManager.printf(sender, "您已向牛腩基金会慷慨捐款 §a$amountTT ₦§r, 谢谢您让牛腩变得更好!")
     }
 
     @CommandAlias("sudo-donate")
     @Description("使用选择器选择玩家, 使其捐赠一定数额给基金会, 用于命令方块")
     @CommandPermission("foundation.donate.selector")
     fun sudoDonate(sender: CommandSender, selector: String, amount: Double) {
-        println(sender::class.java.canonicalName)
         if (sender !is BlockCommandSender) {
             PluginMain.INSTANCE.messageManager.printf(sender, "只能在命令方块中使用!")
             return
@@ -77,14 +77,15 @@ object Commands : BaseCommand() {
             PluginMain.INSTANCE.messageManager.printf(sender, "§c基金会账户未设置, 请联系管理!")
         }
         val amount = PluginMain.INSTANCE.economy.getBalance(PluginMain.INSTANCE.targetAccount!!)
-        PluginMain.INSTANCE.messageManager.printf(sender, "§a基金会余额为: §f${amount} ₦§r")
+        PluginMain.INSTANCE.messageManager.printf(sender, "§a基金会余额为: §f$amount ₦§r")
     }
 
     @Subcommand("allocate|pay")
     @CommandAlias("allocate")
-    @Description("从基金会拨款一定数量的牛腩币至指定玩家")
     @CommandPermission("foundation.allocate")
-    fun allocate(sender: CommandSender, amount: Double, target: String, reason: String) {
+    @CommandCompletion("@players @noting @noting")
+    @Syntax("<玩家> <数额> <原因> - 从基金会拨款一定数量的牛腩币至指定玩家")
+    fun allocate(sender: CommandSender, target: String, amount: Double, reason: String) {
         if (PluginMain.INSTANCE.targetAccount == null) {
             PluginMain.INSTANCE.messageManager.printf(sender, "§c基金会账户未设置, 请联系管理!")
         }
@@ -102,16 +103,16 @@ object Commands : BaseCommand() {
             PluginMain.INSTANCE.messageManager.printf(sender, "§c基金会余额不足, 无法拨款!")
             return
         }
-        val targetAccount = PluginMain.INSTANCE.server.offlinePlayers.find { p -> p.name == target }
+        val targetAccount = PluginMain.INSTANCE.server.offlinePlayers.find { p -> p.name == target && p.hasPlayedBefore() }
         if (targetAccount == null) {
-            PluginMain.INSTANCE.messageManager.printf(sender, "§c玩家 §f${target} §r不存在!")
+            PluginMain.INSTANCE.messageManager.printf(sender, "§c玩家 §f$target §r不存在!")
             return
         }
         PluginMain.INSTANCE.activeTransfer(targetAccount, -amountT)
         PluginMain.INSTANCE.economy.withdrawPlayer(PluginMain.INSTANCE.targetAccount!!, amountTT)
         PluginMain.INSTANCE.economy.depositPlayer(targetAccount, amountTT)
         PluginMain.INSTANCE.appendAllocationLog(Date(), if (sender is Player) sender else null, targetAccount, amountTT, reason)
-        PluginMain.INSTANCE.messageManager.printf(sender, "您已向玩家 §a${target} §r拨款 §a${amountTT} ₦§r, 原因: §a${reason}§r (拨款日志记录在后台文件中)")
+        PluginMain.INSTANCE.messageManager.printf(sender, "您已向玩家 §a$target §r拨款 §a$amountTT ₦§r, 原因: §a$reason§r (拨款日志记录在后台文件中)")
     }
 
     @Subcommand("top")

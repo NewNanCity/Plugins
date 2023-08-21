@@ -1,29 +1,29 @@
 package city.newnan.mcron
 
 import city.newnan.mcron.config.ConfigFile
-import city.newnan.violet.message.MessageManager
+import city.newnan.mcron.timeiterator.CronExpression
+import city.newnan.mcron.timeiterator.TimeIterator
 import me.lucko.helper.Schedulers
-import org.bukkit.Bukkit
-import org.bukkit.command.CommandSender
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
-import java.util.function.Consumer
 
 
 class CronManager : me.lucko.helper.terminable.Terminable {
     val dateFormatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+    private var newTasks = mutableListOf<CronCommand>() // 线程安全
     internal val tasks = mutableListOf<CronCommand>()
     internal val outdatedTasks = mutableListOf<CronCommand>()
 
     // 1秒内即将执行的任务
-    private val inTimeTasks = mutableListOf<CronCommand>()
+    private var inTimeTasks: MutableList<CronCommand> = mutableListOf()
 
     // 为防止卡顿导致错过一些任务(没有执行，但是错过了判断，被误认为是已过期任务)
     // 有一个缓冲池，在1s~60s后即将执行的命令也会在这里，这样如果这些任务过期了会立即执行
     // p.s. 不会有人写每秒都会运行的程序吧...
     private val cacheInTimeTasks = mutableListOf<CronCommand>()
     private var cronTask: me.lucko.helper.scheduler.Task? = null
+    private var needReload = false
 
     init {
         reload()
@@ -32,24 +32,12 @@ class CronManager : me.lucko.helper.terminable.Terminable {
 
     fun run() {
         cronTask = Schedulers.async().runRepeating(Runnable { this.runCheck() }, 0, 20)
+        println("run")
     }
 
     fun reload() {
-        // 清空
-        tasks.clear()
-        cacheInTimeTasks.clear()
-        inTimeTasks.clear()
-        outdatedTasks.clear()
-
-        PluginMain.INSTANCE.configManager.parse<ConfigFile>("config.yml").also {
-            // 设置时区
-            CronExpression.setTimeZoneOffset(it.timezoneOffset)
-            dateFormatter.timeZone = TimeZone.getTimeZone(CronExpression.localTimezoneOffset)
-            // 重载
-            it.scheduleTasks.forEach { (key, value) ->
-                addTask(key, value.toTypedArray())
-            }
-        }
+        needReload = true
+        println("needReload = true")
     }
 
     /**
@@ -66,6 +54,38 @@ class CronManager : me.lucko.helper.terminable.Terminable {
      * 定时任务检查，每秒运行
      */
     private fun runCheck() {
+        if (needReload) {
+            try {
+                // 清空
+                tasks.clear()
+                cacheInTimeTasks.clear()
+                inTimeTasks.clear()
+                outdatedTasks.clear()
+
+                PluginMain.INSTANCE.configManager.parse<ConfigFile>("config.yml").also {
+                    // 设置时区
+                    CronExpression.setTimeZoneOffset(it.timezoneOffset)
+                    dateFormatter.timeZone = TimeZone.getTimeZone(CronExpression.localTimezoneOffset)
+                    // 重载
+                    it.scheduleTasks.forEach { (key, value) ->
+                        addTask(key, value)
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            needReload = false
+        }
+
+        // 线程安全
+        if (newTasks.isNotEmpty()) {
+            val newTasks = this.newTasks
+            this.newTasks = mutableListOf()
+            tasks.addAll(newTasks)
+            secondsCounter = 1L
+            counterBorder = 1L
+        }
+
         // 小于计数上限，继续休眠
         if (secondsCounter < counterBorder) {
             secondsCounter++
@@ -127,11 +147,7 @@ class CronManager : me.lucko.helper.terminable.Terminable {
 
         // 清理失效任务
         if (tmpOutdated.isNotEmpty()) {
-            tmpOutdated.forEach(Consumer { o: CronCommand ->
-                tasks.remove(
-                    o
-                )
-            })
+            tmpOutdated.forEach { tasks.remove(it) }
             outdatedTasks.addAll(tmpOutdated)
             tmpOutdated.clear()
         }
@@ -192,15 +208,12 @@ class CronManager : me.lucko.helper.terminable.Terminable {
      * 执行inTimeTask中的那些一秒内即将执行的任务
      */
     private fun runInSecond() {
-        val sender: CommandSender = Bukkit.getConsoleSender()
-        val messageManager: MessageManager = PluginMain.INSTANCE.messageManager
-        inTimeTasks.forEach(Consumer { task: CronCommand ->
-            for (command in task.commands) {
-                messageManager info "§a§lRun Command: §r$command"
-                Bukkit.dispatchCommand(sender, command)
-            }
-        })
-        inTimeTasks.clear()
+        val tasks = inTimeTasks
+        inTimeTasks = mutableListOf()
+        tasks.forEach { task ->
+            task.expression.onExecute()
+            PluginMain.INSTANCE.executeCommands(task.commands)
+        }
     }
 
     override fun close() {
@@ -212,10 +225,10 @@ class CronManager : me.lucko.helper.terminable.Terminable {
      * @param cronExpression cron表达式
      * @param commands 任务要执行的指令
      */
-    private fun addTask(cronExpression: String?, commands: Array<String>) {
+    private fun addTask(cronExpression: String, commands: Array<String>) {
         try {
             val task = CronCommand(cronExpression, commands)
-            tasks.add(task)
+            newTasks.add(task)
         } catch (e: Exception) {
             PluginMain.INSTANCE.messageManager.apply {
                 warn(sprintf("\$msg.invalid_expression$", cronExpression))
@@ -223,12 +236,31 @@ class CronManager : me.lucko.helper.terminable.Terminable {
         }
     }
 
-    internal class CronCommand(expression: String?, commands: Array<String>) {
-        val expression: CronExpression
+    fun addTask(nextTime: Long, commands: Array<String>) {
+        val task = CronCommand(nextTime, commands)
+        newTasks.add(task)
+    }
+
+    internal class CronCommand {
+        val expression: TimeIterator
         val commands: Array<String>
 
-        init {
-            this.expression = CronExpression(expression!!)
+        constructor(expression: String, commands: Array<String>) {
+            this.expression = CronExpression(expression)
+            this.commands = commands
+        }
+
+        constructor(nextTime: Long, commands: Array<String>) {
+            var hasExecuted = false
+            this.expression = object : TimeIterator {
+                override fun getNextTime(now: Long): Long {
+                    return if (hasExecuted) 0L else nextTime
+                }
+
+                override fun onExecute() {
+                    hasExecuted = true
+                }
+            }
             this.commands = commands
         }
     }

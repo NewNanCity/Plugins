@@ -5,8 +5,8 @@ project.ext["depend"] = listOf("Vault", "Essentials")
 
 dependencies {
     // API
-    listOf("com.github.MilkBowl:VaultAPI:1.7.1", "net.essentialsx:EssentialsX:2.19.7")
-        .forEach { compileOnly(it); testImplementation(it) }
+    compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
+    compileOnly("net.essentialsx:EssentialsX:2.19.7")
 
     // Utils
     implementation("me.lucko:helper:5.6.14")

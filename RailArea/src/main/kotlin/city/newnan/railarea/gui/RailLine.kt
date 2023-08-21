@@ -27,6 +27,18 @@ fun showLineStationGui (player: Player, editable: Boolean, done: (line: RailLine
         })
         fun updateLineGui() {
             stationGui.clearPageItems()
+            if (editable && !line.isCycle) {
+                stationGui.addItem(ItemBuilder.from(if (line.leftReturn) Material.GREEN_CONCRETE else Material.RED_CONCRETE)
+                    .name(Component.text(if (line.leftReturn) "左侧折返: §a是" else "左侧折返: §c否"))
+                    .lore(Component.text("指到实际线路达终点站后"), Component.text("是否能够折返到另一边的起点"))
+                    .asGuiItem {
+                        if (it.whoClicked != player && it.inventory != stationGui.inventory) return@asGuiItem
+                        line.leftReturn = !line.leftReturn
+                        PluginMain.INSTANCE.save()
+                        Schedulers.sync().runLater({ updateLineGui(); stationGui.update(); stationGui.open(player) }, 1)
+                    }
+                )
+            }
             line.stations.forEach { stationKW ->
                 val item = ItemStack(Material.ACTIVATOR_RAIL)
                 val index = line.stations.indexOf(stationKW)
@@ -70,7 +82,7 @@ fun showLineStationGui (player: Player, editable: Boolean, done: (line: RailLine
                                 if (yes) {
                                     val newStations = line.stations.toMutableList()
                                     newStations.remove(stationKW)
-                                    val newLine = RailLine(line.id, line.name, newStations, line.color, line.isCycle, line.colorMaterial)
+                                    val newLine = RailLine(line.id, line.name, newStations, line.color, line.isCycle, line.colorMaterial, line.leftReturn, line.rightReturn)
                                     PluginMain.INSTANCE.updateLine(line, newLine)
                                     line = newLine
                                     Schedulers.sync().runLater({ updateLineGui(); stationGui.update(); stationGui.open(player) }, 1)
@@ -86,6 +98,18 @@ fun showLineStationGui (player: Player, editable: Boolean, done: (line: RailLine
                     }
                 })
             }
+            if (editable && !line.isCycle) {
+                stationGui.addItem(ItemBuilder.from(if (line.rightReturn) Material.GREEN_CONCRETE else Material.RED_CONCRETE)
+                    .name(Component.text(if (line.rightReturn) "右侧折返: §a是" else "右侧折返: §c否"))
+                    .lore(Component.text("指到实际线路达终点站后"), Component.text("是否能够折返到另一边的起点"))
+                    .asGuiItem {
+                        if (it.whoClicked != player && it.inventory != stationGui.inventory) return@asGuiItem
+                        line.rightReturn = !line.rightReturn
+                        PluginMain.INSTANCE.save()
+                        Schedulers.sync().runLater({ updateLineGui(); stationGui.update(); stationGui.open(player) }, 1)
+                    }
+                )
+            }
         }
         if (editable) {
             stationGui.setItem(6, 1, ItemBuilder.from(Material.ACACIA_SIGN).name(Component.text("添加站点")).asGuiItem {
@@ -93,7 +117,8 @@ fun showLineStationGui (player: Player, editable: Boolean, done: (line: RailLine
                 showStationGui(player, line.stations.toSet(), { Schedulers.sync().runLater({ updateLineGui(); stationGui.update(); stationGui.open(player) }, 1) }) { station ->
                     val newStations = line.stations.toMutableList()
                     newStations.add(station)
-                    val newLine = RailLine(line.id, line.name, newStations, line.color, line.isCycle, line.colorMaterial)
+                    val newLine = RailLine(line.id, line.name, newStations, line.color, line.isCycle, line.colorMaterial,
+                        leftReturn = false, rightReturn = false)
                     PluginMain.INSTANCE.updateLine(line, newLine)
                     line = newLine
                     Schedulers.sync().runLater({ updateLineGui(); stationGui.update(); stationGui.open(player) }, 1)

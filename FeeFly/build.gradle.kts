@@ -6,7 +6,7 @@ project.ext["loadBefore"] = listOf("Vault")
 
 dependencies {
     // API
-    listOf("com.github.MilkBowl:VaultAPI:1.7.1").forEach { compileOnly(it); testImplementation(it) }
+    compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
 
     // Utils
     implementation("me.lucko:helper:5.6.14")

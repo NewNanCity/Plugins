@@ -1,6 +1,7 @@
 package city.newnan.railarea
 
 import city.newnan.railarea.config.*
+import city.newnan.railarea.input.inputLocks
 import city.newnan.railarea.octree.Octree
 import city.newnan.railarea.octree.Point3D
 import city.newnan.railarea.octree.Range3D
@@ -67,16 +68,19 @@ class PluginMain : ExtendedJavaPlugin() {
     val lines = mutableMapOf<String, RailLine>()
     val lineStationAreas = mutableMapOf<Pair<Station, RailLine>, MutableSet<RailArea>>()
     val unknownStation = Station(0, "§8未知§r")
-    val unknownLine = RailLine(0, "§8未知§r", mutableListOf(), Color.WHITE, false, Material.CHEST)
+    val unknownLine = RailLine(0, "§8未知§r", mutableListOf(), Color.WHITE, false, Material.CHEST,
+        leftReturn = false,
+        rightReturn = false
+    )
     var nextStationId = 1
     var nextLineId = 1
 
     private fun onAreaEnter(player: Player, area: RailArea) {
         if (player.isInsideVehicle && player.vehicle is Minecart) {
-            player.sendTitle(area.station, area.line, area.reverse, RailTitleMode.ARRIVE, 5, 200, 0)
+            player.sendTitle(area, RailTitleMode.ARRIVE, 5, 200, 0)
         } else {
-            player.sendTitle(area.station, area.line, area.reverse, RailTitleMode.UNDER_BOARD, 5, 40, 0)
-            if (!area.line.isCycle && area.isTerminal) {
+            player.sendTitle(area, RailTitleMode.UNDER_BOARD, 5, 40, 0)
+            if (area.nextStation == null) {
                 player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent("§c本站为终点站, 请到对侧站台乘车"))
             } else {
                 player.spigot().sendMessage(ChatMessageType.ACTION_BAR, *ComponentBuilder()
@@ -93,12 +97,12 @@ class PluginMain : ExtendedJavaPlugin() {
     private fun onAreaStay(player: Player, area: RailArea) {
         if (player.isInsideVehicle && player.vehicle is Minecart) {
             if (waitingMinecartMap.containsKey(player.vehicle as Minecart)) {
-                player.sendTitle(area.station, area.line, area.reverse, RailTitleMode.ARRIVE, 0, 40, 0)
+                player.sendTitle(area, RailTitleMode.ARRIVE, 0, 40, 0)
             }
             // Or do noting
         } else {
-            player.sendTitle(area.station, area.line, area.reverse, RailTitleMode.UNDER_BOARD, 0, 40, 0)
-            if (!area.line.isCycle && area.isTerminal) {
+            player.sendTitle(area, RailTitleMode.UNDER_BOARD, 0, 40, 0)
+            if (area.nextStation == null) {
                 player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent("§c本站为终点站, 请到对侧站台乘车"))
             } else {
                 player.spigot().sendMessage(ChatMessageType.ACTION_BAR, *ComponentBuilder()
@@ -135,12 +139,12 @@ class PluginMain : ExtendedJavaPlugin() {
         // 用户移动
         Events.subscribe(PlayerTeleportEvent::class.java, EventPriority.MONITOR)
             .filter(EventFilters.ignoreCancelled())
-            .handler { checkPlayer(it.player) }
+            .handler { checkPlayer(it.player, it.to) }
             .bindWith(this)
         Events.subscribe(PlayerMoveEvent::class.java, EventPriority.MONITOR)
             .filter(EventFilters.ignoreCancelled())
             .filter(EventFilters.ignoreSameBlock())
-            .handler { checkPlayer(it.player) }
+            .handler { checkPlayer(it.player, it.to) }
             .bindWith(this)
         Events.subscribe(PlayerJoinEvent::class.java, EventPriority.MONITOR)
             .handler { checkPlayer(it.player) }
@@ -150,6 +154,7 @@ class PluginMain : ExtendedJavaPlugin() {
             .bindWith(this)
         Events.subscribe(PlayerQuitEvent::class.java, EventPriority.MONITOR)
             .handler {
+                inputLocks.remove(it.player.uniqueId)
                 if (hasBoardPlayers.remove(it.player)) {
                     it.player.scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard
                 }
@@ -166,15 +171,14 @@ class PluginMain : ExtendedJavaPlugin() {
                 val player = it.player
                 val world = player.world
                 val area = inAreaPlayerMap[player] ?: return@handler
-                if (!area.line.isCycle && area.isTerminal) {
-                    it.setCancelled(true)
-                    return@handler
+                if (area.nextStation != null) {
+                    val location = Location(area.world, area.stopPoint.x.toDouble() + 0.5,
+                        area.stopPoint.y.toDouble() + 0.1, area.stopPoint.z.toDouble() + 0.5)
+                    val minecart = world.spawn(location, Minecart::class.java)
+                    minecart.addPassenger(player)
+                    inAreaMinecartMap[minecart] = area
+                    waitMinecart(minecart, area)
                 }
-                val location = Location(area.world, area.stopPoint.x.toDouble() + 0.5, area.stopPoint.y.toDouble() + 0.1, area.stopPoint.z.toDouble() + 0.5)
-                val minecart = world.spawn(location, Minecart::class.java)
-                minecart.addPassenger(player)
-                inAreaMinecartMap[minecart] = area
-                waitMinecart(minecart, area)
                 it.setCancelled(true)
             }
             .bindWith(this)
@@ -476,7 +480,7 @@ class PluginMain : ExtendedJavaPlugin() {
             val stations = lineC.stations.mapNotNull { stationIdMap[it] }.toMutableList()
             val color = lineC.color.toColor()
             nextLineId = maxOf(nextLineId, id + 1)
-            val line = RailLine(id, lineC.name, stations, color, lineC.isCycle, lineC.colorMaterial)
+            val line = RailLine(id, lineC.name, stations, color, lineC.isCycle, lineC.colorMaterial, lineC.leftReturn, lineC.rightReturn)
             stations.forEach { station -> station.lines.add(line) }
             lines[line.name] = line
             lineIdMap[id] = line
@@ -513,7 +517,7 @@ class PluginMain : ExtendedJavaPlugin() {
         val lineMap = sortedMapOf<Int, RailLineConfig>()
         this.lines.forEach { (_, line) ->
             lineMap[line.id] = RailLineConfig(line.name, line.stations.map { it.id }, line.color.toHexString(),
-                line.isCycle, line.colorMaterial)
+                line.isCycle, line.colorMaterial, line.leftReturn, line.rightReturn)
         }
 
         // copy rails.yml to rails-backup.yml
@@ -537,9 +541,10 @@ class PluginMain : ExtendedJavaPlugin() {
         return areaRangeMap[world]!![range]
     }
 
-    fun checkPlayer(player: Player) {
-        val world = player.world
-        val point3D = Point3D(player.location.blockX, player.location.blockY, player.location.blockZ)
+    fun checkPlayer(player: Player, location: Location? = null) {
+        val world = location?.world ?: player.world
+        val l = location ?: player.location
+        val point3D = Point3D(l.blockX, l.blockY, l.blockZ)
         // 旧范围
         inAreaPlayerMap[player]?.also { area ->
             if (area.world == world && area.range3D.contains(point3D)) return@checkPlayer
@@ -555,7 +560,7 @@ class PluginMain : ExtendedJavaPlugin() {
 
     private fun waitMinecart(minecart: Minecart, area: RailArea) {
         if (waitingMinecartMap.containsKey(minecart)) return
-        if ((!area.line.isCycle && area.isTerminal)) {
+        if (area.nextStation == null) {
             minecart.passengers.forEach {
                 if (it is Player) messageManager.printf(it, "§c列车已到达终点站, 感谢您的乘坐!")
                 minecart.removePassenger(it)
@@ -597,7 +602,7 @@ class PluginMain : ExtendedJavaPlugin() {
                     minecart.passengers.forEach {
                         if (it is Player) {
                             it.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent("§c列车已启动, 请扶好站稳, 注意安全"))
-                            it.sendTitle(area.station, area.line, area.reverse, RailTitleMode.START, 5, 100, 0)
+                            it.sendTitle(area, RailTitleMode.START, 5, 100, 0)
                         }
                     }
                 }

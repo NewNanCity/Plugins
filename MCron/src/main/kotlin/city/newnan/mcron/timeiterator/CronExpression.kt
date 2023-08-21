@@ -1,4 +1,4 @@
-package city.newnan.mcron
+package city.newnan.mcron.timeiterator
 
 import java.time.DayOfWeek
 import java.time.LocalDateTime
@@ -11,7 +11,7 @@ import java.util.*
  * 定时表达式类，比Linux的cron表达式多了一个"秒描述"
  * @param expressionString cron表达式，但是比Linux的cron表达式多了一个"秒描述"
  */
-class CronExpression(expressionString: String) {
+class CronExpression(expressionString: String) : TimeIterator {
     private val secondList: IntArray
     private val minuteList: IntArray
     private val hourList: IntArray
@@ -68,7 +68,7 @@ class CronExpression(expressionString: String) {
      * 获取该表达式在未来的最近一次执行时间
      * @return 未来最近一次执行的毫秒时间戳(本地时间，考虑时区)；如果表达式已失效，即不存在未来满足条件的执行时刻，则返回0
      */
-    fun getNextTime(now: Long): Long {
+    override fun getNextTime(now: Long): Long {
         // 失效的表达式，没有下一次了
         if (nextTime == 0L) return 0
         // 如果当前时间已晚于上次预计执行的时间，那么就计算下一次执行时间
@@ -78,6 +78,8 @@ class CronExpression(expressionString: String) {
         }
         return nextTime
     }
+
+    override fun onExecute() {}
 
     /**
      * 获取下一个可用时刻，或者初始化获得最近的下一个可用时刻
@@ -582,16 +584,6 @@ class CronExpression(expressionString: String) {
     private fun <T> atomicListAdd(list: MutableList<T>, `object`: T) {
         if (list.contains(`object`)) return
         list.add(`object`)
-    }
-
-    @Deprecated("")
-    internal fun printPointer() {
-        System.out.printf("second: %d\n", secondList[secondListPointer])
-        System.out.printf("minute: %d\n", monthList[minuteListPointer])
-        System.out.printf("hour: %d\n", hourList[hourListPointer])
-        System.out.printf("day: %d\n", dayPointer)
-        System.out.printf("month: %d\n", monthList[monthListPointer])
-        System.out.printf("year: %d\n", yearPointer)
     }
 
     companion object {

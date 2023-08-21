@@ -1,5 +1,6 @@
 package city.newnan.mcron
 
+import city.newnan.mcron.timeiterator.CronExpression
 import co.aikar.commands.BaseCommand
 import co.aikar.commands.CommandHelp
 import co.aikar.commands.annotation.*
@@ -24,11 +25,13 @@ object Commands : BaseCommand() {
         val dateFormatter = PluginMain.INSTANCE.cronManager.dateFormatter
         PluginMain.INSTANCE.messageManager.printf(sender, "所有任务:   §7现在时间${dateFormatter.format(Date(now))}")
         PluginMain.INSTANCE.cronManager.tasks.forEach {
+            if (it.expression !is CronExpression) return@forEach
             sender.sendMessage("§a§l${it.expression.expressionString} §r§7(下次执行: ${
                     dateFormatter.format(Date(it.expression.getNextTime(now)))})")
             it.commands.forEach { command -> sender.sendMessage("§7- §r$command") }
         }
         PluginMain.INSTANCE.cronManager.outdatedTasks.forEach {
+            if (it.expression !is CronExpression) return@forEach
             sender.sendMessage("§7§m${it.expression.expressionString} §r§7(已过期)")
             it.commands.forEach { command -> sender.sendMessage("§7- $command") }
         }
@@ -39,5 +42,20 @@ object Commands : BaseCommand() {
     @Subcommand("help")
     fun onHelp(sender: CommandSender, help: CommandHelp) {
         help.showHelp()
+    }
+
+    @Subcommand("player")
+    class PlayerCommands : BaseCommand() {
+        @Subcommand("push-onjoin")
+        @CommandPermission("mcron.player.push")
+        @CommandCompletion("@players")
+        fun onPushOnJoin(sender: CommandSender, playerName: String, command: String) {
+            val uuid = PluginMain.INSTANCE.server.offlinePlayers.find { it.name == playerName }?.uniqueId?.run {
+                PluginMain.INSTANCE.pushPlayerJoinTask(this, command)
+                PluginMain.INSTANCE.messageManager.printf(sender, "已为玩家 §a§l$playerName§r 添加任务, 将会在玩家加入后执行!")
+            } ?: run {
+                PluginMain.INSTANCE.messageManager.printf(sender, "§c§l找不到玩家 §r§c§l$playerName§r §c!")
+            }
+        }
     }
 }

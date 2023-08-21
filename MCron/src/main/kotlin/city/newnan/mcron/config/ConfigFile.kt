@@ -9,11 +9,11 @@ data class ConfigFile(
     @JsonProperty("timezone-offset")
     val timezoneOffset: String = "Z",
     @JsonProperty("on-server-ready")
-    val onServerReady: Map<String, List<String>> = emptyMap(),
+    val onServerReady: Map<String, Array<String>> = emptyMap(),
     @JsonProperty("on-plugin-ready")
-    val onPluginReady: Map<String, List<String>> = emptyMap(),
+    val onPluginReady: Map<String, Array<String>> = emptyMap(),
     @JsonProperty("on-plugin-disable")
-    val onPluginDisable: Map<String, List<String>> = emptyMap(),
+    val onPluginDisable: Map<String, Array<String>> = emptyMap(),
     @JsonProperty("schedule-tasks")
-    val scheduleTasks: Map<String, List<String>> = emptyMap(),
+    val scheduleTasks: Map<String, Array<String>> = emptyMap(),
 )

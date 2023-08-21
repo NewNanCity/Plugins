@@ -1,6 +1,9 @@
 package city.newnan.mcron
 
 import city.newnan.mcron.config.ConfigFile
+import city.newnan.mcron.config.PlayerCron
+import city.newnan.mcron.config.PlayerCrons
+import city.newnan.mcron.timeiterator.CronExpression
 import city.newnan.violet.config.ConfigManager2
 import city.newnan.violet.message.MessageManager
 import co.aikar.commands.PaperCommandManager
@@ -8,9 +11,12 @@ import me.lucko.helper.Events
 import me.lucko.helper.plugin.ExtendedJavaPlugin
 import org.bukkit.Bukkit
 import org.bukkit.event.EventPriority
+import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.server.PluginDisableEvent
 import org.bukkit.event.server.PluginEnableEvent
 import org.bukkit.event.server.ServerLoadEvent
+import java.util.*
+import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
 
@@ -23,6 +29,7 @@ class PluginMain : ExtendedJavaPlugin() {
     internal val messageManager: MessageManager by lazy { MessageManager(this) }
     internal val cronManager: CronManager by lazy { CronManager() }
     private val commandManager: PaperCommandManager by lazy { PaperCommandManager(this) }
+    private val playerCronMap = mutableMapOf<UUID, PlayerCron>()
     companion object {
         lateinit var INSTANCE: PluginMain
             private set
@@ -42,6 +49,7 @@ class PluginMain : ExtendedJavaPlugin() {
 
         // 运行Cron
         cronManager.run()
+        cronManager.bindWith(this)
         Events.subscribe(ServerLoadEvent::class.java, EventPriority.MONITOR)
             .handler {
                 val now = System.currentTimeMillis()
@@ -62,6 +70,14 @@ class PluginMain : ExtendedJavaPlugin() {
                     .onPluginDisable[it.plugin.description.name]?.apply { executeCommands(this) }
             }
             .bindWith(this)
+        Events.subscribe(PlayerJoinEvent::class.java, EventPriority.MONITOR)
+            .filter { playerCronMap.containsKey(it.player.uniqueId) }
+            .handler {
+                executeCommands(playerCronMap[it.player.uniqueId]!!.onJoin.toTypedArray())
+                playerCronMap[it.player.uniqueId]!!.onJoin.clear()
+                save()
+            }
+            .bindWith(this)
     }
 
     override fun disable() {
@@ -71,13 +87,68 @@ class PluginMain : ExtendedJavaPlugin() {
     fun reload() {
         configManager.cache?.clear()
         cronManager.reload()
+
+        playerCronMap.clear()
+        configManager touch "players.yml"
+        playerCronMap.putAll(configManager.parse<PlayerCrons>("players.yml"))
     }
 
-    private fun executeCommands(commands: Iterable<String>) {
+    private fun save() {
+        playerCronMap.forEach { (uuid, playerCron) ->
+            if (playerCron.onJoin.isNotEmpty()) return@forEach
+            playerCronMap.remove(uuid)
+        }
+        configManager.save(playerCronMap, "players.yml")
+    }
+
+    fun pushPlayerJoinTask(uuid: UUID, command: String) {
+        playerCronMap.getOrPut(uuid) { PlayerCron() }.onJoin.add(command)
+        save()
+    }
+
+    fun executeCommands(commands: Array<String>) {
         Bukkit.getConsoleSender().run {
+            val nextCommands = mutableListOf<String>()
+            var nextTimeDelta = 0L
             commands.forEach { command ->
-                messageManager.printf("> $command")
-                Bukkit.dispatchCommand(this, command)
+                if (nextTimeDelta <= 0L) {
+                    if (command.startsWith("\$sleep\$ ")) {
+                        val sleepTimeArgv = command.substring(8)
+                        when {
+                            sleepTimeArgv.endsWith("ms") -> {
+                                val sleepTime = sleepTimeArgv.substring(0, sleepTimeArgv.length - 2).toLong()
+                                nextTimeDelta = sleepTime
+                            }
+                            sleepTimeArgv.endsWith("s") -> {
+                                val sleepTime = sleepTimeArgv.substring(0, sleepTimeArgv.length - 1).toLong()
+                                nextTimeDelta = TimeUnit.SECONDS.toMillis(sleepTime)
+                            }
+                            sleepTimeArgv.endsWith("m") -> {
+                                val sleepTime = sleepTimeArgv.substring(0, sleepTimeArgv.length - 1).toLong()
+                                nextTimeDelta = TimeUnit.MINUTES.toMillis(sleepTime)
+                            }
+                            sleepTimeArgv.endsWith("h") -> {
+                                val sleepTime = sleepTimeArgv.substring(0, sleepTimeArgv.length - 1).toLong()
+                                nextTimeDelta = TimeUnit.HOURS.toMillis(sleepTime)
+                            }
+                            sleepTimeArgv.endsWith("d") -> {
+                                val sleepTime = sleepTimeArgv.substring(0, sleepTimeArgv.length - 1).toLong()
+                                nextTimeDelta = TimeUnit.DAYS.toMillis(sleepTime)
+                            }
+                            else -> {
+                                return@forEach
+                            }
+                        }
+                    } else {
+                        messageManager.printf("§7> §a$command")
+                        Bukkit.dispatchCommand(this, command)
+                    }
+                } else {
+                    nextCommands.add(command)
+                }
+            }
+            if (nextCommands.isNotEmpty()) {
+                cronManager.addTask(System.currentTimeMillis() + nextTimeDelta, nextCommands.toTypedArray())
             }
         }
     }

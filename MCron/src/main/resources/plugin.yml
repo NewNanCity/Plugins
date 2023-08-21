@@ -25,3 +25,6 @@ permissions:
   mcron.list:
     description: 列出所有定时任务
     default: op
+  mcron.player.push:
+    description: 推送定时任务到玩家
+    default: op

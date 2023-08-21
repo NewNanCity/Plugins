@@ -22,6 +22,25 @@ class RailArea(
         get() =
             if (reverse) line.stations.size > 0 && line.stations.first() == station
             else line.stations.size > 0 && line.stations.last() == station
+
+    val nextStation: Station?
+        get() {
+            if (line.stations.size <= 0) return null
+            val i = line.stations.indexOf(station)
+            if (i < 0) return null
+            if (line.isCycle) {
+                return if (reverse) (if (i == 0) line.stations.last() else line.stations[i - 1])
+                else (if ((i + 1) >= line.stations.size) line.stations.first() else line.stations[i + 1])
+            } else {
+                if (reverse) {
+                    if (i == 0) return if (line.leftReturn) line.stations.first() else null
+                    return line.stations[i - 1]
+                } else {
+                    if ((i + 1) >= line.stations.size) return if (line.rightReturn) line.stations.last() else null
+                    return line.stations[i + 1]
+                }
+            }
+        }
 }
 
 

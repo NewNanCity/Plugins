@@ -90,7 +90,9 @@ class PluginMain : ExtendedJavaPlugin() {
             }
             if (!config.allowNonPlayer && !vehicle.passengers.any { it is Player }) return DEFAULT_SPEED
             // 看看铁轨下面的方块是什么，赋予相应的速度
-            return config.blockSpeedMap.getOrDefault(curBlock.getRelative(BlockFace.DOWN).type, DEFAULT_SPEED)
+            val blockType = curBlock.getRelative(BlockFace.DOWN).type
+            if (blockType == Material.REDSTONE_BLOCK) return vehicle.maxSpeed
+            return config.blockSpeedMap.getOrDefault(blockType, DEFAULT_SPEED)
         }
 
         Events.subscribe(VehicleMoveEvent::class.java, EventPriority.MONITOR)

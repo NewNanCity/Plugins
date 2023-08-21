@@ -41,9 +41,6 @@ data class Book(
         }
         player.openBook(bookItem)
     }
-
-    fun clone(): Book =
-        Book(title, creator, modifier, created, modified, pages.toMutableList())
 }
 
 private val dateFormatter = SimpleDateFormat("yyyy年M月d日")
@@ -90,7 +87,7 @@ internal fun BookMeta.applyBook(book: Book, bookId: UUID, toWrittenBook: Boolean
     }
     if (addModifyInfo) {
         info.add("§r§6最后修改 §r§7${Bukkit.getOfflinePlayer(book.modifier).name ?: "秩名"}§r")
-        info.add("§r§6修改时间 §r§7${dateFormatter.format(book.modified)}§r",)
+        info.add("§r§6修改时间 §r§7${dateFormatter.format(book.modified)}§r")
     }
     info.add("§r§8§l[牛腩书局出版社]§r")
     lore = info

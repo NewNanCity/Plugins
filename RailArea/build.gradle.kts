@@ -6,7 +6,7 @@ project.ext["loadBefore"] = listOf("WorldEdit")
 
 dependencies {
     // API
-    listOf("com.sk89q.worldedit:worldedit-bukkit:7.2.0-SNAPSHOT").forEach { compileOnly(it); testImplementation(it) }
+    compileOnly("com.sk89q.worldedit:worldedit-bukkit:7.2.0-SNAPSHOT")
 
     // Utils
     implementation("me.lucko:helper:5.6.14")

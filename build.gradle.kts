@@ -33,6 +33,8 @@ subprojects {
          maven("https://repo.essentialsx.net/releases/")
          maven("https://papermc.io/repo/repository/maven-public")
          maven("https://repo.aikar.co/content/groups/aikar")
+         maven("https://repo.mikeprimm.com/")
+         maven("https://repo.triumphteam.dev/snapshots/")
          mavenCentral()
     }
 
@@ -62,7 +64,7 @@ subprojects {
         // Relocate
         listOf(
             "city.newnan.violet",
-            "dev.triumphteam.gui",
+            "dev.triumphteam",
             "me.lucko",
             "co.aikar",
             "org.yaml.snakeyaml",
