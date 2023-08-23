@@ -32,12 +32,10 @@ class CronManager : me.lucko.helper.terminable.Terminable {
 
     fun run() {
         cronTask = Schedulers.async().runRepeating(Runnable { this.runCheck() }, 0, 20)
-        println("run")
     }
 
     fun reload() {
         needReload = true
-        println("needReload = true")
     }
 
     /**

@@ -7,11 +7,11 @@ data class ConfigFile(
     val world: String,
     @JsonProperty("default-group")
     val defaultGroup: String,
+    @JsonProperty("builder-group")
     val builderGroup: String,
 )
 
 data class CreateArea(
-    val mame: String,
     val x1: Int,
     val z1: Int,
     val x2: Int,

@@ -5,8 +5,10 @@ import city.newnan.railarea.octree.Range3D
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
+import me.lucko.helper.Schedulers
 import org.bukkit.World
 import org.bukkit.block.BlockFace
+import org.bukkit.entity.Player
 
 
 class RailArea(
@@ -41,6 +43,19 @@ class RailArea(
                 }
             }
         }
+
+    fun teleport(player: Player) {
+        Schedulers.sync().run {
+            player.teleport(
+                org.bukkit.Location(
+                    world,
+                    stopPoint.x.toDouble() + 0.5,
+                    stopPoint.y.toDouble() + 0.3,
+                    stopPoint.z.toDouble() + 0.5
+                )
+            )
+        }
+    }
 }
 
 

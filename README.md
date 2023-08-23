@@ -14,3 +14,11 @@
 ## 一些需要注意的
 
 scoreboard、tp等不是线程安全的，需要切换至同步任务
+
+```kotlin
+@CommandComplete("@players") // OnlinePlayers
+@CommandComplete("@worlds")  // Worlds
+@CommandComplete("@dyecolors") // Cye Colors
+@CommandComplete("@chatcolors") // Chat Colors
+@CommandComplete("@mobs") // Mobs
+```

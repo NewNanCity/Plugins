@@ -44,18 +44,15 @@ object Commands : BaseCommand() {
         help.showHelp()
     }
 
-    @Subcommand("player")
-    class PlayerCommands : BaseCommand() {
-        @Subcommand("push-onjoin")
-        @CommandPermission("mcron.player.push")
-        @CommandCompletion("@players")
-        fun onPushOnJoin(sender: CommandSender, playerName: String, command: String) {
-            val uuid = PluginMain.INSTANCE.server.offlinePlayers.find { it.name == playerName }?.uniqueId?.run {
-                PluginMain.INSTANCE.pushPlayerJoinTask(this, command)
-                PluginMain.INSTANCE.messageManager.printf(sender, "已为玩家 §a§l$playerName§r 添加任务, 将会在玩家加入后执行!")
-            } ?: run {
-                PluginMain.INSTANCE.messageManager.printf(sender, "§c§l找不到玩家 §r§c§l$playerName§r §c!")
-            }
+    @Subcommand("player add onjoin")
+    @CommandPermission("mcron.player.push")
+    @CommandCompletion("@players @nothing")
+    fun onAddPlayerOnJoin(sender: CommandSender, playerName: String, command: String) {
+        val uuid = PluginMain.INSTANCE.server.offlinePlayers.find { it.name == playerName }?.uniqueId?.run {
+            PluginMain.INSTANCE.pushPlayerJoinTask(this, command)
+            PluginMain.INSTANCE.messageManager.printf(sender, "已为玩家 §a§l$playerName§r 添加任务, 将会在玩家加入后执行!")
+        } ?: run {
+            PluginMain.INSTANCE.messageManager.printf(sender, "§c§l找不到玩家 §r§c§l$playerName§r §c!")
         }
     }
 }

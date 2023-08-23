@@ -2,6 +2,7 @@ package city.newnan.foundation
 
 import city.newnan.foundation.config.*
 import city.newnan.violet.config.ConfigManager2
+import city.newnan.violet.gui.GuiManager
 import city.newnan.violet.message.MessageManager
 import co.aikar.commands.PaperCommandManager
 import com.fasterxml.jackson.databind.ObjectReader
@@ -36,6 +37,7 @@ class PluginMain : ExtendedJavaPlugin() {
             setCache(ConfigManager2.CacheType.None)
         }
     }
+    val guiManager: GuiManager by lazy { GuiManager(this) }
     val messageManager: MessageManager by lazy { MessageManager(this) }
     private val commandManager: PaperCommandManager by lazy { PaperCommandManager(this) }
     lateinit var economy: Economy
@@ -74,11 +76,12 @@ class PluginMain : ExtendedJavaPlugin() {
             ?: throw Exception("Vault economy service not found!")
 
         reload()
-        messageManager setPlayerPrefix "§7[§6牛腩小镇§7] §f"
+        messageManager setPlayerPrefix "§7[§6牛腩基金§7] §f"
 
         // 初始化CommandManager
         commandManager.enableUnstableAPI("help")
         commandManager.registerCommand(Commands)
+        commandManager.locales.setDefaultLocale(Locale.SIMPLIFIED_CHINESE)
 
         Events.subscribe(UserBalanceUpdateEvent::class.java, EventPriority.MONITOR)
             .filter { targetAccount != null }
@@ -204,12 +207,16 @@ class PluginMain : ExtendedJavaPlugin() {
         patchPassiveTransferMap[account.uniqueId] = patchPassiveTransferMap.getOrDefault(account.uniqueId, BigDecimal.ZERO) + amount
     }
 
-    internal fun getTop(): List<RecordDisplay> {
+    internal fun getTop(onUpdate: () -> Unit): List<RecordDisplay> {
         if (topCache != null) return topCache!!
+        onUpdate()
         Schedulers.sync().runLater({ topCache = null }, 1200L).bindWith(this)
         val list = mutableListOf<RecordDisplay>()
+        val offlinePlayerMap = mutableMapOf<UUID, OfflinePlayer>()
+        server.offlinePlayers.forEach { offlinePlayerMap[it.uniqueId] = it }
         for (record in recordsReader.readValues<RecordDouble>(File(dataFolder, "data.csv"))) {
-            list.add(RecordDisplay(server.getOfflinePlayer(record.id).name ?: "§7#未知#§r", record.active, record.passive))
+            val player = offlinePlayerMap[record.id] ?: continue
+            list.add(RecordDisplay(player, record.active, record.passive))
         }
         list.sortByDescending { record -> record.passive + record.active }
         topCache = list

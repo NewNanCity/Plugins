@@ -1,5 +1,6 @@
 package city.newnan.foundation
 
+import city.newnan.foundation.gui.openFoundationTopGui
 import co.aikar.commands.BaseCommand
 import co.aikar.commands.CommandHelp
 import co.aikar.commands.annotation.*
@@ -13,6 +14,7 @@ import java.util.*
 @CommandAlias("foundation|fund")
 object Commands : BaseCommand() {
     @HelpCommand
+    @CatchUnknown
     @Subcommand("help")
     fun help(sender: CommandSender, help: CommandHelp) {
         help.showHelp()
@@ -120,32 +122,33 @@ object Commands : BaseCommand() {
     @Description("查看捐赠排行榜")
     @CommandPermission("foundation.top")
     fun top(sender: CommandSender, @Default("1") page: Int) {
-        val list = PluginMain.INSTANCE.getTop()
-        // each page 10 items
-        val maxPage = (list.size + 9) / 10
-        if (page < 1 || page > maxPage) {
-            PluginMain.INSTANCE.messageManager.printf(sender, "§c页码超出范围!")
-            return
-        }
-        val start = (page - 1) * 10
-        val end = (start + 10).coerceAtMost(list.size)
-        PluginMain.INSTANCE.messageManager.printf(sender, "§8======================== §6牛腩基金会慈善榜§r§8 =========================")
-        val pageStart = "§8".padEnd(30 - page.toString().length, '=')
-        val pageEnd = "§8".padEnd(30 - maxPage.toString().length, '=')
-        for (i in start until end) {
-            val record = list[i]
-            val s1 = "§8[§a${i + 1}§8] §f§l${record.name}"
-            val s2 = "§r§7-  §a§l${record.active} §r§2(+${record.passive}被动)§r"
-            val paddings = "".padEnd(80 - s1.length - s2.length, ' ')
-            PluginMain.INSTANCE.messageManager.printf(sender, "$s1$paddings$s2")
-        }
-        PluginMain.INSTANCE.messageManager.printf(sender, "$pageStart §f第§a§l $page §r§7/§a§l $maxPage §r§f页§r $pageEnd")
-        val indexOfSender = list.indexOfFirst { record -> record.name == sender.name }
-        if (indexOfSender < 0) {
-            PluginMain.INSTANCE.messageManager.printf(sender, "§7您还没有捐赠过, 暂时无法显示您的排名!")
+        if (sender is Player) {
+            val session = PluginMain.INSTANCE.guiManager[sender]
+            session.clear()
+            openFoundationTopGui(session)
         } else {
-            PluginMain.INSTANCE.messageManager.printf(sender, "您目前位于 §a第 §l${indexOfSender + 1} §r§a名§r!")
+            val list = PluginMain.INSTANCE.getTop {
+                PluginMain.INSTANCE.messageManager.printf(sender, "§f基金会数据统计中, 请稍候...")
+            }
+            // each page 10 items
+            val maxPage = (list.size + 9) / 10
+            if (page < 1 || page > maxPage) {
+                PluginMain.INSTANCE.messageManager.printf(sender, "§c页码超出范围!")
+                return
+            }
+            val start = (page - 1) * 10
+            val end = (start + 10).coerceAtMost(list.size)
+            PluginMain.INSTANCE.messageManager.printf(sender, "§8======================== §6牛腩基金会慈善榜§r§8 =========================")
+            val pageStart = "§8".padEnd(30 - page.toString().length, '=')
+            val pageEnd = "§8".padEnd(30 - maxPage.toString().length, '=')
+            for (i in start until end) {
+                val record = list[i]
+                val s1 = "§8[§a${i + 1}§8] §f§l${record.player.name ?: "§8未知"}"
+                val s2 = "§r§7-  §a§l${record.active} §r§2(+${record.passive}被动)§r"
+                val paddings = "".padEnd(80 - s1.length - s2.length, ' ')
+                PluginMain.INSTANCE.messageManager.printf(sender, "$s1$paddings$s2")
+            }
+            PluginMain.INSTANCE.messageManager.printf(sender, "$pageStart §f第§a§l $page §r§7/§a§l $maxPage §r§f页§r $pageEnd")
         }
-        PluginMain.INSTANCE.messageManager.printf(sender, "您可以使用 §a/fundtop <页码> §r查看更多! 使用 §a/donate <数额> §r捐赠!")
     }
 }

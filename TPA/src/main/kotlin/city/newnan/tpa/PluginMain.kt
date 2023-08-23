@@ -2,6 +2,7 @@ package city.newnan.tpa
 
 import city.newnan.tpa.config.ConfigFile
 import city.newnan.violet.config.ConfigManager2
+import city.newnan.violet.gui.GuiManager
 import city.newnan.violet.message.MessageManager
 import co.aikar.commands.PaperCommandManager
 import me.lucko.helper.Schedulers
@@ -11,8 +12,8 @@ import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
 import java.util.*
-import kotlin.collections.ArrayDeque
 import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayDeque
 
 class PluginMain : ExtendedJavaPlugin() {
     companion object {
@@ -25,6 +26,7 @@ class PluginMain : ExtendedJavaPlugin() {
             setCache(ConfigManager2.CacheType.None)
         }
     }
+    val guiManager: GuiManager by lazy { GuiManager(this) }
     val messageManager: MessageManager by lazy { MessageManager(this) }
     private val commandManager: PaperCommandManager by lazy { PaperCommandManager(this) }
     private val sessions = mutableMapOf<Long, Session>() // 随机访问O(1)
@@ -41,7 +43,8 @@ class PluginMain : ExtendedJavaPlugin() {
         reload()
         commandManager.enableUnstableAPI("help")
         commandManager.registerCommand(Commands)
-        messageManager setPlayerPrefix "§7[§6牛腩小镇§7] §f"
+        commandManager.locales.setDefaultLocale(Locale.SIMPLIFIED_CHINESE)
+        messageManager setPlayerPrefix "§7[§6牛腩传送§7] §f"
     }
 
     override fun disable() {
@@ -59,7 +62,7 @@ class PluginMain : ExtendedJavaPlugin() {
         }
 
         playerBlockSet.clear()
-        configManager.touch("blocked.yml", playerBlockSet)
+        configManager.touch("blocked.yml", { playerBlockSet })
         playerBlockSet = configManager.parse<MutableMap<UUID, MutableSet<UUID>>>("blocked.yml")
     }
 
@@ -117,9 +120,12 @@ class PluginMain : ExtendedJavaPlugin() {
         messageManager.printf(requester, "§a已向 §f${target.name} §a发送请求!")
     }
 
-    fun responseYes(id: Long): Session? {
+    fun responseYes(id: Long, responser: Player): Session? {
         val session = sessions[id]?.also {
-            val now = System.currentTimeMillis()
+            if (it.target.uniqueId != responser.uniqueId) {
+                messageManager.printf(responser, "§c这个请求不属于你!")
+                return@also
+            }
             if (!it.target.isOnline) {
                 it.expired = 0
                 return@also
@@ -130,6 +136,7 @@ class PluginMain : ExtendedJavaPlugin() {
                 messageManager.printf(target, "§c对方已离线!")
                 return@also
             }
+            val now = System.currentTimeMillis()
             if (it.expired < now) {
                 messageManager.printf(target, "§c请求已过期!")
                 return@also
@@ -150,8 +157,8 @@ class PluginMain : ExtendedJavaPlugin() {
             val to = if (it.targetToRequester) requester else target
             var counter = waitSeconds
             Schedulers.async().runRepeating({ task ->
-                from.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent("你将在 §6$counter§r 秒后传送到对方身边!"))
-                to.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent("对方将在 §6$counter§r 秒后传送到你身边!"))
+                from.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent("你将在 §c§r$counter§r 秒后传送到对方身边!"))
+                to.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent("对方将在 §c§r$counter§r 秒后传送到你身边!"))
                 if (counter-- <= 0) {
                     task.close()
                     if (!from.isOnline) {
@@ -186,11 +193,15 @@ class PluginMain : ExtendedJavaPlugin() {
         return session
     }
 
-    fun responseNo(id: Long): Session? {
+    fun responseNo(id: Long, responser: Player): Session? {
         val session = sessions[id]?.also {
+            if (it.target.uniqueId != responser.uniqueId) {
+                messageManager.printf(responser, "§c这个请求不属于你!")
+                return@also
+            }
             if (it.expired == 0L) return@also
-            if (it.target.isOnline) messageManager.printf(it.target.player!!, "§c对方拒绝了你的请求!")
-            if (it.requester.isOnline) messageManager.printf(it.requester.player!!, "§c你拒绝了对方的请求!")
+            if (it.target.isOnline) messageManager.printf(it.target.player!!, "§c你拒绝了对方的请求!")
+            if (it.requester.isOnline) messageManager.printf(it.requester.player!!, "§c对方拒绝了你的请求!")
             coolingDownPlayer.remove(it.requester.uniqueId)
             it.expired = 0
         }

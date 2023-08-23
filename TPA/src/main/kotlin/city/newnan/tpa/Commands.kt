@@ -1,5 +1,7 @@
 package city.newnan.tpa
 
+import city.newnan.tpa.gui.openBlockListGui
+import city.newnan.tpa.gui.openOnlinePlayersGui
 import co.aikar.commands.BaseCommand
 import co.aikar.commands.CommandHelp
 import co.aikar.commands.annotation.*
@@ -62,28 +64,49 @@ object Commands : BaseCommand() {
     @Description("查看屏蔽列表")
     @CommandPermission("tpa.user")
     fun blocklist(sender: Player) {
-        PluginMain.INSTANCE.playerBlockSet[sender.uniqueId]?.let {
-            PluginMain.INSTANCE.messageManager.printf(sender, "§a屏蔽列表: §f${
-                it.mapNotNull { id -> Bukkit.getOfflinePlayer(id).name }.joinToString("§8, §f")}")
-        } ?: PluginMain.INSTANCE.messageManager.printf(sender, "§a屏蔽列表: §8无")
+        val session = PluginMain.INSTANCE.guiManager[sender]
+        session.clear()
+        openBlockListGui(session)
     }
 
     @Default
-    @CommandAlias("there")
+    @Subcommand("there")
+    @CommandAlias("tpathere")
     @Description("向某玩家发送传送请求, 使自己传送至对方所在位置")
     @CommandPermission("tpa.user")
-    fun tpa(sender: Player, target: OnlinePlayer) {
-        if (sender == target.player) PluginMain.INSTANCE.messageManager.printf(sender, "?啥")
-        else PluginMain.INSTANCE.request(sender, target.player, false)
+    @CommandCompletion("@players")
+    fun tpa(sender: Player, @Optional target: OnlinePlayer? = null) {
+        if (target == null) {
+            val session = PluginMain.INSTANCE.guiManager[sender]
+            session.clear()
+            openOnlinePlayersGui(session, false) {
+                if (!it.isOnline || it.uniqueId == session.player.uniqueId) return@openOnlinePlayersGui
+                PluginMain.INSTANCE.request(sender, it.player!!, false)
+                session.back()
+            }
+        } else {
+            if (sender == target.player) PluginMain.INSTANCE.messageManager.printf(sender, "?啥")
+            else PluginMain.INSTANCE.request(sender, target.player, false)
+        }
     }
 
     @Subcommand("here")
     @CommandAlias("tpahere")
     @Description("向某玩家发送传送请求, 使对方传送至自己所在位置")
     @CommandPermission("tpa.user")
-    fun tpaHere(sender: Player, target: OnlinePlayer) {
-        if (sender == target.player) PluginMain.INSTANCE.messageManager.printf(sender, "?啥")
-        else PluginMain.INSTANCE.request(sender, target.player, true)
+    fun tpaHere(sender: Player, @Optional target: OnlinePlayer? = null) {
+        if (target == null) {
+            val session = PluginMain.INSTANCE.guiManager[sender]
+            session.clear()
+            openOnlinePlayersGui(session, false) {
+                if (!it.isOnline || it.uniqueId == session.player.uniqueId) return@openOnlinePlayersGui
+                PluginMain.INSTANCE.request(sender, it.player!!, false)
+                session.back()
+            }
+        } else {
+            if (sender == target.player) PluginMain.INSTANCE.messageManager.printf(sender, "?啥")
+            else PluginMain.INSTANCE.request(sender, target.player, true)
+        }
     }
 
     @Private
@@ -91,7 +114,7 @@ object Commands : BaseCommand() {
     @Description("接受某玩家的传送请求")
     @CommandPermission("tpa.user")
     fun accept(sender: Player, id: Long) {
-        if (PluginMain.INSTANCE.responseYes(id) == null) {
+        if (PluginMain.INSTANCE.responseYes(id, sender) == null) {
             PluginMain.INSTANCE.messageManager.printf(sender, "§c请求已失效!")
         }
     }
@@ -101,7 +124,7 @@ object Commands : BaseCommand() {
     @Description("拒绝某玩家的传送请求")
     @CommandPermission("tpa.user")
     fun refuse(sender: Player, id: Long) {
-        if (PluginMain.INSTANCE.responseNo(id) == null) {
+        if (PluginMain.INSTANCE.responseNo(id, sender) == null) {
             PluginMain.INSTANCE.messageManager.printf(sender, "§c请求已失效!")
         }
     }

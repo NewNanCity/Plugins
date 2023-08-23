@@ -1,30 +1,43 @@
+# 插件基本信息
 name: ${project.name}
 version: ${project.version}
 main: ${project.group}.PluginMain
 api-version: ${project.apiVersion}
 load: ${project.load}
 authors: ${project.authors}
+contributors: ${project.contributors}
 description: ${project.description}
 website: ${project.url}
-# 硬依赖，没有就无法启动
-depend: ${project.depend}
-loadbefore: ${project.loadBefore}
-softdepend: ${project.softDepend}
+prefix: ${project.name}
 
-# 权限节点，可选
+# 需要的库, 没有就会帮你下载, 但是这和 maven TOS 有冲突
+libraries: ${project.libraries}
+#  - com.google.code.gson:gson:2.8.6
+
+#### 插件依赖关系, 排在依赖的插件之后执行, 小心产生循环依赖
+# 硬依赖, 没有就无法启动
+depend: ${project.depend}
+# 软依赖, 一般是可以用来提供额外的功能, 但是不是必须的
+softdepend: ${project.softDepend}
+# 你的插件会在这些插件之前加载, 如为这些插件提供API等
+loadbefore: ${project.loadBefore}
+# 告诉服务器该插件将提供某个库或者某个插件的功能，(软)依赖于此的插件会将其作为(软)依赖从而不会报错
+provides: ${project.provides}
+
+
+# 默认为 op
+default-permission: op
+# 权限节点, 可选
 permissions:
   # 模板
   # 'Example':
   #  description: '权限的解释'
-  #  default: 玩家权限节点的默认值，true、false、op和not op
+  #  default: 玩家权限节点的默认值，true、false、op和not op  不写就是 default-permission   控制台算op,false则控制台无权限
   #  children: #子节点(仅名字)
   #    'Example2': true会继承父节点的权限，false会与父节点相反
   mcron.reload:
     description: 重载所有定时任务
-    default: op
   mcron.list:
     description: 列出所有定时任务
-    default: op
   mcron.player.push:
     description: 推送定时任务到玩家
-    default: op

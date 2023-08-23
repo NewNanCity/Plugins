@@ -18,6 +18,7 @@ import org.bukkit.event.block.Action
 import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.meta.BookMeta
+import java.util.*
 
 class PluginMain : ExtendedJavaPlugin() {
     companion object {
@@ -28,7 +29,7 @@ class PluginMain : ExtendedJavaPlugin() {
 
     val configManager: ConfigManager2 by lazy {
         ConfigManager2(this).apply {
-            setCache(ConfigManager2.CacheType.GreedyDualSize, 16)
+            setCache(ConfigManager2.CacheType.LFU, 16)
         }
     }
     internal val messageManager: MessageManager by lazy { MessageManager(this) }
@@ -36,17 +37,18 @@ class PluginMain : ExtendedJavaPlugin() {
 
     override fun enable() {
         messageManager setPlayerPrefix "§7[§6牛腩书局§7] §f"
+
         commandManager.enableUnstableAPI("help")
         commandManager.registerCommand(Commands)
+        commandManager.locales.setDefaultLocale(Locale.SIMPLIFIED_CHINESE)
+
         Librarian.enable()
         Events.subscribe(PlayerInteractEvent::class.java, EventPriority.MONITOR)
             .filter(EventFilters.ignoreCancelled())
             .filter { it.hasItem() }
-            .filter { it.action == Action.RIGHT_CLICK_AIR || it.action == Action.RIGHT_CLICK_BLOCK }
+            .filter { it.action == Action.RIGHT_CLICK_AIR
+                    || (it.action == Action.RIGHT_CLICK_BLOCK && it.clickedBlock!!.type != Material.LECTERN) }
             .handler { event ->
-                if (event.action == Action.RIGHT_CLICK_BLOCK &&
-                    event.material == Material.WRITTEN_BOOK &&
-                    event.clickedBlock!!.type == Material.LECTERN) return@handler;
                 event.item!!.findBookUUID(writable = false)?.also{ uuid ->
                     Librarian[uuid]?.also {
                         it.readBook(event.player)
@@ -60,8 +62,8 @@ class PluginMain : ExtendedJavaPlugin() {
 
         Events.subscribe(PlayerInteractEvent::class.java, EventPriority.MONITOR)
             .filter(EventFilters.ignoreCancelled())
-            .filter { it.action == Action.RIGHT_CLICK_BLOCK && it.clickedBlock!!.type == Material.LECTERN }
             .filter { !it.player.isSneaking }
+            .filter { it.action == Action.RIGHT_CLICK_BLOCK && it.clickedBlock!!.type == Material.LECTERN }
             .handler { event ->
                 (event.clickedBlock!!.state as Lectern).inventory.getItem(0)?.findBookUUID()
                     ?.also { Librarian[it]?.readBook(event.player)?.also { event.isCancelled = true } }
@@ -82,5 +84,6 @@ class PluginMain : ExtendedJavaPlugin() {
 
     override fun disable() {
         commandManager.unregisterCommands()
+        configManager.cache?.clear()
     }
 }

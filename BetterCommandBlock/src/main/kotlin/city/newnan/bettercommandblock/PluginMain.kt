@@ -5,6 +5,7 @@ import city.newnan.violet.config.ConfigManager2
 import city.newnan.violet.message.MessageManager
 import co.aikar.commands.PaperCommandManager
 import me.lucko.helper.plugin.ExtendedJavaPlugin
+import java.util.*
 
 class PluginMain : ExtendedJavaPlugin() {
     companion object {
@@ -24,6 +25,8 @@ class PluginMain : ExtendedJavaPlugin() {
         reload()
         commandManager.enableUnstableAPI("help")
         commandManager.registerCommand(Commands)
+        commandManager.locales.setDefaultLocale(Locale.SIMPLIFIED_CHINESE)
+
         messageManager setPlayerPrefix "§7[§6牛腩小镇§7] §f"
     }
 

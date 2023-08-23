@@ -2,23 +2,18 @@ package city.newnan.railarea.input
 
 import city.newnan.railarea.PluginMain
 import city.newnan.railarea.config.Station
-import org.bukkit.entity.Player
+import city.newnan.violet.gui.PlayerGuiSession
 
-fun handleStationInput(player: Player, oldStation: Station?, done: (station: Station?) -> Unit) {
+fun handleStationInput(session: PlayerGuiSession, oldStation: Station?, setStation: (station: Station?) -> Unit) {
+    val player = session.player
     var name: String? = oldStation?.name
-    if (inputLocks.contains(player.uniqueId)) {
-        PluginMain.INSTANCE.messageManager.printf(player, "§c你正在进行其他输入, 请先取消之!")
-        done(null)
-        return
-    }
-    inputLocks.add(player.uniqueId)
-    PluginMain.INSTANCE.messageManager.gets(player) { input ->
+    session.chatInput { input ->
         val argv = input.split(" ").filter { it.isNotEmpty() }
         when (argv[0]) {
             "name" -> {
                 if (argv.size < 2) {
                     PluginMain.INSTANCE.messageManager.printf(player, "§c请输入名称!")
-                    return@gets false
+                    return@chatInput false
                 }
                 val nameT = argv.subList(1, argv.size).joinToString(" ")
                 if (PluginMain.INSTANCE.stations.containsKey(nameT)) {
@@ -30,9 +25,8 @@ fun handleStationInput(player: Player, oldStation: Station?, done: (station: Sta
             }
             "cancel" -> {
                 PluginMain.INSTANCE.messageManager.printf(player, "已取消")
-                inputLocks.remove(player.uniqueId)
-                done(null)
-                return@gets true
+                setStation(null)
+                return@chatInput true
             }
             "ok" -> {
                 if (name == null) {
@@ -40,9 +34,8 @@ fun handleStationInput(player: Player, oldStation: Station?, done: (station: Sta
                 } else {
                     val station = Station(oldStation?.id ?: PluginMain.INSTANCE.nextStationId++, name!!,
                         oldStation?.lines ?: mutableSetOf())
-                    inputLocks.remove(player.uniqueId)
-                    done(station)
-                    return@gets true
+                    setStation(station)
+                    return@chatInput true
                 }
             }
             else -> {
@@ -50,5 +43,16 @@ fun handleStationInput(player: Player, oldStation: Station?, done: (station: Sta
             }
         }
         false
+    }.also {
+        if (it) {
+            if (oldStation != null) {
+                PluginMain.INSTANCE.messageManager.printf(player, "开始设置站点 &2${oldStation.name}&r，接下来请设定站点的属性:")
+            } else {
+                PluginMain.INSTANCE.messageManager.printf(player, "&c请输入站点名称")
+            }
+        } else {
+            PluginMain.INSTANCE.messageManager.printf(player, "§c你正在进行其他输入, 请先取消之!")
+            setStation(null)
+        }
     }
 }

@@ -1,5 +1,6 @@
 package city.newnan.createarea
 
+import city.newnan.createarea.gui.openCreateAreasGui
 import co.aikar.commands.BaseCommand
 import co.aikar.commands.CommandHelp
 import co.aikar.commands.annotation.*
@@ -65,14 +66,14 @@ object Commands : BaseCommand() {
             Bukkit.getWorld(PluginMain.INSTANCE.createWorld)?.run {
                 sender.teleport(Location(this, area.minX.toDouble(),
                     getHighestBlockYAt(area.minX, area.minZ).toDouble(), area.minZ.toDouble()))
-            } ?: PluginMain.INSTANCE.messageManager.printf(sender, "§c世界 ${PluginMain.INSTANCE.createWorld} 不存在!")
+            } ?: PluginMain.INSTANCE.messageManager.printf(sender, "§c世界 §f${PluginMain.INSTANCE.createWorld} §c不存在!")
         }
         if (target != null) {
             PluginMain.INSTANCE.builders.keys.find { it.name == target }?.run {
                 val area = PluginMain.INSTANCE.builders[this]!!
                 tpTo(area)
-                PluginMain.INSTANCE.messageManager.printf(sender, "§a已将你传送到玩家 §c$target§r 的创造区域!")
-            } ?: PluginMain.INSTANCE.messageManager.printf(sender, "§c玩家 §a$target§r 的创造区域不存在!")
+                PluginMain.INSTANCE.messageManager.printf(sender, "§a已将你传送到玩家 §c$target§r §a的创造区域!")
+            } ?: PluginMain.INSTANCE.messageManager.printf(sender, "§c玩家 §a$target§r §c的创造区域不存在!")
         } else {
             PluginMain.INSTANCE.builders[sender]?.run {
                 tpTo(this)
@@ -105,8 +106,8 @@ object Commands : BaseCommand() {
         } else {
             PluginMain.INSTANCE.server.offlinePlayers.find { it.name == target && it.hasPlayedBefore() }?.run {
                 PluginMain.INSTANCE.updateArea(this, selection.range.minX, selection.range.maxX, selection.range.minZ, selection.range.maxZ)
-                PluginMain.INSTANCE.messageManager.printf(sender, "§a已为玩家 §c$target§r 创建创造区域!")
-            } ?: PluginMain.INSTANCE.messageManager.printf(sender, "§c玩家 §a$target§r 不存在!")
+                PluginMain.INSTANCE.messageManager.printf(sender, "§a已为玩家 §c$target§r §a创建创造区域!")
+            } ?: PluginMain.INSTANCE.messageManager.printf(sender, "§c玩家 §a$target§r §c不存在!")
         }
     }
 
@@ -129,44 +130,16 @@ object Commands : BaseCommand() {
         } else {
             PluginMain.INSTANCE.builders.keys.find { it.name == target }?.run {
                 PluginMain.INSTANCE.deleteArea(this)
-                PluginMain.INSTANCE.messageManager.printf(sender, "§a已删除玩家 §c$target§r 的创造区域!")
-            } ?: PluginMain.INSTANCE.messageManager.printf(sender, "§c玩家 §a$target§r 的创造区域不存在!")
+                PluginMain.INSTANCE.messageManager.printf(sender, "§a已删除玩家 §c$target§r §a的创造区域!")
+            } ?: PluginMain.INSTANCE.messageManager.printf(sender, "§c玩家 §a$target§r §c的创造区域不存在!")
         }
     }
 
     @Subcommand("gui|list")
-    @CommandPermission("createarea.gui")
+    @CommandPermission("createarea.gui.all")
     fun onGui(sender: Player) {
-        val gui = Gui.paginated()
-            .title(Component.text("所有创造区"))
-            .pageSize(6)
-            .create()
-        gui.setItem(6, 3, ItemBuilder.from(Material.PAPER).name(Component.text("上一页")).asGuiItem {
-            gui.previous()
-        })
-        gui.setItem(6, 7, ItemBuilder.from(Material.PAPER).name(Component.text("下一页")).asGuiItem {
-            gui.next()
-        })
-        listOf(1,2,4,5,6,8).forEach { gui.setItem(6, it, ItemBuilder.from(Material.BLACK_STAINED_GLASS_PANE)
-            .name(Component.text("")).asGuiItem()) }
-        gui.setItem(6, 9, ItemBuilder.from(Material.BARRIER).name(Component.text("关闭")).asGuiItem {
-            gui.close(sender)
-        })
-        PluginMain.INSTANCE.builders.forEach { (player, range) ->
-            gui.addItem(ItemBuilder.from(Material.PAPER)
-                .name(Component.text("${player.name!!} 的创造区"))
-                .lore(
-                    Component.text("§r§7范围:"),
-                    Component.text("  §r${range.minX}, ${range.minZ}§r"),
-                    Component.text("  §r${range.maxX}, ${range.maxZ}§r"),
-                    Component.text(""),
-                    Component.text("§6左键: 传送§r")
-                )
-                .asGuiItem {
-                    gui.close(sender)
-                    onTp(sender, player.name)
-                }
-            )
-        }
+        val session = PluginMain.INSTANCE.guiManager[sender]
+        session.clear()
+        openCreateAreasGui(session)
     }
 }

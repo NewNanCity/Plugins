@@ -5,37 +5,30 @@ import city.newnan.railarea.config.Direction
 import city.newnan.railarea.config.RailArea
 import city.newnan.railarea.config.RailLine
 import city.newnan.railarea.config.Station
-import city.newnan.railarea.gui.showLineStationGui
-import city.newnan.railarea.gui.showReverseGui
+import city.newnan.railarea.gui.openRailLineGui
+import city.newnan.railarea.gui.openRailLinesGui
+import city.newnan.railarea.gui.openReverseGui
 import city.newnan.railarea.octree.Point3D
 import city.newnan.railarea.octree.Range3D
 import city.newnan.railarea.utils.*
-import dev.triumphteam.gui.builder.item.ItemBuilder
-import dev.triumphteam.gui.guis.Gui
-import me.lucko.helper.Schedulers
-import net.kyori.adventure.text.Component
+import city.newnan.violet.gui.PlayerGuiSession
 import net.md_5.bungee.api.ChatMessageType
 import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Particle
 import org.bukkit.World
-import org.bukkit.entity.Player
 
 val emptyRange3D = Range3D(0, 0, 0, 0, 0, 0)
 val emptyPoint3D = Point3D(0, 0, 0)
 
-fun handleAreaInput (player: Player, oldArea: RailArea?, iStation: Station? = null, iLine: RailLine? = null, iReverse: Boolean? = null,
-                     done: (area: RailArea?) -> Unit) {
-    if (inputLocks.contains(player.uniqueId)) {
-        PluginMain.INSTANCE.messageManager.printf(player, "§c你正在进行其他输入, 请先取消之!")
-        done(null)
-        return
-    }
+fun handleAreaInput (session: PlayerGuiSession, oldArea: RailArea?, iStation: Station? = null, iLine: RailLine? = null,
+                     iReverse: Boolean? = null, setRailArea: (RailArea?) -> Unit) {
+    val player = session.player
     var station: Station? = oldArea?.station ?: iStation
     var railLine: RailLine? = oldArea?.line ?: iLine
     var area: Range3D? = oldArea?.range3D
-    var world: World = oldArea?.world ?: player.world
+    var world: World = oldArea?.world ?: session.player.world
     var stopPoint: Point3D? = oldArea?.stopPoint
     var direction: Direction? = oldArea?.direction
     var reverse: Boolean? = oldArea?.reverse ?: iReverse
@@ -55,21 +48,19 @@ fun handleAreaInput (player: Player, oldArea: RailArea?, iStation: Station? = nu
             PluginMain.INSTANCE.messageManager.printf(player, "§2$p&r 已设定, 效果预览已显示，请继续设置其他属性!")
         }
     }
-    inputLocks.add(player.uniqueId)
-    PluginMain.INSTANCE.messageManager.gets(player) { input ->
+    session.chatInput { input ->
         val argv = input.split(" ").filter { it.isNotEmpty() }
         when (argv[0].lowercase()) {
             "station" -> {
-                showLineStationGui(player, false) { l, s, back ->
-                    showReverseGui(player, l) {
-                        if (it == null) {
-                            back()
-                            return@showReverseGui
+                openRailLinesGui(session, false) { l ->
+                    openRailLineGui(session, false, l) { s ->
+                        openReverseGui(session, l) {
+                            reverse = it
+                            railLine = l
+                            station = s
+                            session.back(3, false)
+                            preview("站点")
                         }
-                        reverse = it
-                        railLine = l
-                        station = s
-                        preview("站点")
                     }
                 }
             }
@@ -81,11 +72,11 @@ fun handleAreaInput (player: Player, oldArea: RailArea?, iStation: Station? = nu
                     } else {
                         if (areaw.world != player.world) {
                             PluginMain.INSTANCE.messageManager.printf(player, "§c请先切换到选择区域所在的世界!")
-                            return@gets false
+                            return@chatInput false
                         }
                         if (areaw.range.maxX == areaw.range.minX || areaw.range.maxY == areaw.range.minY || areaw.range.maxZ == areaw.range.minZ) {
                             PluginMain.INSTANCE.messageManager.printf(player, "§c是不是不小心把area打成stop了? 选择区域大一点吧!")
-                            return@gets false
+                            return@chatInput false
                         }
                         if (world != areaw.world) {
                             stopPoint = null
@@ -137,14 +128,14 @@ fun handleAreaInput (player: Player, oldArea: RailArea?, iStation: Station? = nu
             "dir", "direction" -> {
                 if (world != player.world) {
                     PluginMain.INSTANCE.messageManager.printf(player, "§c你必须在范围所在世界!")
-                    return@gets false
+                    return@chatInput false
                 }
                 try {
                     direction = Direction.valueOf(player.facing)
                     PluginMain.INSTANCE.messageManager.printf(player, "已设定方向为: §2${direction!!.name}")
                 } catch (e: Exception) {
                     PluginMain.INSTANCE.messageManager.printf(player, "§c请面向正东西南北!")
-                    return@gets false
+                    return@chatInput false
                 }
             }
             "stop" -> {
@@ -155,15 +146,15 @@ fun handleAreaInput (player: Player, oldArea: RailArea?, iStation: Station? = nu
                     } else {
                         if (pointw.world != player.world) {
                             PluginMain.INSTANCE.messageManager.printf(player, "§c请先切换到选择铁轨所在的世界!")
-                            return@gets false
+                            return@chatInput false
                         }
                         if (world != pointw.world) {
                             PluginMain.INSTANCE.messageManager.printf(player, "§c停靠点必须在区域内!")
-                            return@gets false
+                            return@chatInput false
                         }
                         if (pointw.world.getBlockAt(pointw.point.x, pointw.point.y, pointw.point.z).type != Material.RAIL) {
                             PluginMain.INSTANCE.messageManager.printf(player, "§c请先用小木斧选择一个铁轨, 注意是边长为1的范围!")
-                            return@gets false
+                            return@chatInput false
                         }
                         world = pointw.world
                         stopPoint = pointw.point
@@ -193,9 +184,8 @@ fun handleAreaInput (player: Player, oldArea: RailArea?, iStation: Station? = nu
             }
             "cancel" -> {
                 PluginMain.INSTANCE.messageManager.printf(player, "已取消!")
-                inputLocks.remove(player.uniqueId)
-                done(null)
-                return@gets true
+                setRailArea(null)
+                return@chatInput true
             }
             "ok" -> {
                 if (station == null || railLine == null || reverse == null) {
@@ -209,17 +199,28 @@ fun handleAreaInput (player: Player, oldArea: RailArea?, iStation: Station? = nu
                 } else {
                     if (!area!!.contains(stopPoint!!)) {
                         PluginMain.INSTANCE.messageManager.printf(player, "§c停靠点必须在区域内!")
-                        return@gets false
+                        return@chatInput false
                     }
-                    inputLocks.remove(player.uniqueId)
-                    done(RailArea(world, area!!, direction!!, stopPoint!!, station!!, railLine!!, reverse!!))
-                    return@gets true
+                    setRailArea(RailArea(world, area!!, direction!!, stopPoint!!, station!!, railLine!!, reverse!!))
+                    return@chatInput true
                 }
             }
             else -> {
                 PluginMain.INSTANCE.messageManager.printf(player, "§c未知指令! 你现在正处于区域设置模式，可用指令有: station, area, dir, stop, preview, cancel, ok")
             }
         }
-        return@gets false
+        return@chatInput false
+    }.also {
+        if (it) {
+            if (oldArea != null) {
+                PluginMain.INSTANCE.messageManager.printf(player,
+                            "开始设置区域 &2${oldArea.station.name}(${oldArea.line.name})&r，接下来请设定区域的属性:")
+            } else {
+                PluginMain.INSTANCE.messageManager.printf(player, "开始设置区域，接下来请设定区域的属性:")
+            }
+        } else {
+            PluginMain.INSTANCE.messageManager.printf(player, "§c你正在进行其他输入, 请先取消之!")
+            setRailArea(null)
+        }
     }
 }

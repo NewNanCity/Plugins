@@ -2,7 +2,6 @@ version = "0.0.1"
 group = "city.newnan.deathcost"
 description = "Pay for death"
 project.ext["depend"] = listOf("Vault")
-project.ext["loadBefore"] = listOf("Vault")
 
 dependencies {
     // API
@@ -11,7 +10,7 @@ dependencies {
     // Utils
     implementation("me.lucko:helper:5.6.14")
     implementation("co.aikar:acf-paper:0.5.1-SNAPSHOT")
-    implementation("com.github.NewNanCity:Violet:2.1.0")
+    implementation("com.github.NewNanCity:Violet:2.1.5")
 
     // Jackson
     implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")

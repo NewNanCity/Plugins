@@ -3,19 +3,26 @@ package city.newnan.railarea.gui
 import city.newnan.railarea.PluginMain
 import city.newnan.railarea.input.handleAreaInput
 import city.newnan.railarea.input.handleYesInput
+import city.newnan.railarea.utils.visualize
+import city.newnan.violet.gui.PlayerGuiSession
+import city.newnan.violet.gui.UpdateType
 import dev.triumphteam.gui.builder.item.ItemBuilder
-import me.lucko.helper.Schedulers
 import net.kyori.adventure.text.Component
-import org.bukkit.Location
 import org.bukkit.Material
-import org.bukkit.entity.Player
+import org.bukkit.Particle
 import org.bukkit.inventory.ItemStack
 
-fun showFreeAreaGui (player: Player, done: () -> Unit) {
-    val gui = pageGui(Component.text("游离区域"))
-    fun update() {
+fun openFreeAreaGui (session: PlayerGuiSession) {
+    val player = session.player
+    val key = PluginMain.INSTANCE.unknownStation to PluginMain.INSTANCE.unknownLine
+    session.open(pageGui(session, Component.text("§7[§3§l牛腩轨道交通§r§7]§r 游离区域")), { type, gui, _ ->
+        if (type == UpdateType.Init) {
+            gui.setItem(6, 9, ItemBuilder.from(Material.BARRIER).name(Component.text("返回")).asGuiItem {
+                session.back()
+            })
+        }
         gui.clearPageItems()
-        PluginMain.INSTANCE.lineStationAreas[PluginMain.INSTANCE.unknownStation to PluginMain.INSTANCE.unknownLine]?.forEach { area ->
+        PluginMain.INSTANCE.lineStationAreas[key]?.forEach { area ->
             val item = ItemStack(Material.RAIL).also {
                 it.itemMeta = it.itemMeta?.also { meta ->
                     meta.setDisplayName("游离区域")
@@ -33,44 +40,29 @@ fun showFreeAreaGui (player: Player, done: () -> Unit) {
                 }
             }
             gui.addItem(ItemBuilder.from(item).asGuiItem {
-                if (it.whoClicked != player) return@asGuiItem
                 if (it.isShiftClick) {
                     if (it.isRightClick) {
-                        gui.close(player)
-                        PluginMain.INSTANCE.messageManager.printf(player, "&c确认删除区域? 回复Y确认, 回复其他取消")
-                        handleYesInput(player) { yes ->
-                            if (yes) {
-                                PluginMain.INSTANCE.removeArea(area)
-                                Schedulers.sync().runLater({ update(); gui.update(); gui.open(player) }, 1)
-                            } else {
-                                Schedulers.sync().runLater({ gui.open(player) }, 1)
-                            }
+                        handleYesInput(session, "&c确认删除区域? 回复Y确认, 回复其他取消") { yes ->
+                            if (yes) PluginMain.INSTANCE.removeArea(area)
+                            session.show()
                         }
                     } else {
-                        gui.close(player)
-                        PluginMain.INSTANCE.messageManager.printf(player, "开始设置区域，接下来请设定区域的属性:")
-                        handleAreaInput(player, area) { newArea ->
-                            if (newArea == null) {
-                                Schedulers.sync().runLater({ gui.open(player) }, 1)
-                            } else {
+                        handleAreaInput(session, area) { newArea ->
+                            if (newArea != null) {
                                 PluginMain.INSTANCE.updateArea(area, newArea)
-                                Schedulers.sync().runLater({ update(); gui.update(); gui.open(player) }, 1)
                                 PluginMain.INSTANCE.checkPlayer(player)
                             }
+                            session.show()
                         }
                     }
                 } else if (it.isRightClick) {
-                    player.teleport(
-                        Location(area.world,
-                        area.stopPoint.x.toDouble()+0.5, area.stopPoint.y.toDouble()+0.1, area.stopPoint.z.toDouble()+0.5)
-                    )
+                    area.range3D.visualize(area.world, Particle.FLAME, 10)
+                    area.stopPoint.visualize(area.world, Particle.BARRIER, 10)
+                    area.teleport(player)
                     PluginMain.INSTANCE.messageManager.printf(player, "&a传送成功!")
                 }
             })
         }
-    }
-    gui.setItem(6, 9, ItemBuilder.from(Material.BARRIER).name(Component.text("返回")).asGuiItem {
-        done()
-    })
-    Schedulers.sync().runLater({ update(); gui.open(player) }, 1)
+        true
+    }, null)
 }

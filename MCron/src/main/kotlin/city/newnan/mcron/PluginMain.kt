@@ -41,11 +41,12 @@ class PluginMain : ExtendedJavaPlugin() {
         configManager touch "config.yml"
 
         // 初始化MessageManager
-        messageManager setPlayerPrefix "§7[§6牛腩小镇§7] §r"
+        messageManager setPlayerPrefix "§7[§6牛腩定时§7] §r"
 
         // 初始化CommandManager
         commandManager.enableUnstableAPI("help")
         commandManager.registerCommand(Commands)
+        commandManager.locales.setDefaultLocale(Locale.SIMPLIFIED_CHINESE)
 
         // 运行Cron
         cronManager.run()

@@ -1,7 +1,6 @@
 package city.newnan.railarea
 
 import city.newnan.railarea.config.*
-import city.newnan.railarea.input.inputLocks
 import city.newnan.railarea.octree.Octree
 import city.newnan.railarea.octree.Point3D
 import city.newnan.railarea.octree.Range3D
@@ -9,6 +8,7 @@ import city.newnan.railarea.utils.RailTitleMode
 import city.newnan.railarea.utils.sendTitle
 import city.newnan.railarea.utils.showBoard
 import city.newnan.violet.config.ConfigManager2
+import city.newnan.violet.gui.GuiManager
 import city.newnan.violet.message.MessageManager
 import co.aikar.commands.PaperCommandManager
 import me.lucko.helper.Events
@@ -31,9 +31,9 @@ import org.bukkit.event.vehicle.VehicleMoveEvent
 import org.bukkit.event.world.ChunkLoadEvent
 import org.bukkit.event.world.WorldLoadEvent
 import org.bukkit.event.world.WorldUnloadEvent
-import org.bukkit.scoreboard.DisplaySlot
 import org.bukkit.util.Vector
 import java.io.File
+import java.util.Locale
 
 data class Note(val sound: Sound, val pitch: Float, val delta: Long, val volume: Float)
 
@@ -48,6 +48,7 @@ class PluginMain : ExtendedJavaPlugin() {
             setCache(ConfigManager2.CacheType.None)
         }
     }
+    val guiManager: GuiManager by lazy { GuiManager(this) }
     val messageManager: MessageManager by lazy { MessageManager(this) }
 
     private val commandManager: PaperCommandManager by lazy { PaperCommandManager(this) }
@@ -118,7 +119,8 @@ class PluginMain : ExtendedJavaPlugin() {
         reload()
         commandManager.enableUnstableAPI("help")
         commandManager.registerCommand(Commands)
-        messageManager setPlayerPrefix "§7[§6牛腩小镇§7] §f"
+        commandManager.locales.setDefaultLocale(Locale.SIMPLIFIED_CHINESE)
+        messageManager setPlayerPrefix "§7[§6牛腩轨交§7] §f"
 
         Schedulers.async().runRepeating({ _ ->
             inAreaPlayerMap.forEach { (player, area) -> onAreaStay(player, area) }
@@ -154,7 +156,6 @@ class PluginMain : ExtendedJavaPlugin() {
             .bindWith(this)
         Events.subscribe(PlayerQuitEvent::class.java, EventPriority.MONITOR)
             .handler {
-                inputLocks.remove(it.player.uniqueId)
                 if (hasBoardPlayers.remove(it.player)) {
                     it.player.scoreboard = Bukkit.getScoreboardManager()!!.mainScoreboard
                 }
@@ -499,10 +500,16 @@ class PluginMain : ExtendedJavaPlugin() {
                     return@map RailArea(world, it.range3D, it.direction, it.stopPoint, unknownStation, unknownLine, it.reverse)
                 }
             }.onEach {
-                areaRangeMap[it.world]!![it.range3D] = it
-                octree.insert(it.range3D)
+                if (it.station != unknownStation && it.line != unknownLine) {
+                    areaRangeMap[it.world]!![it.range3D] = it
+                    octree.insert(it.range3D)
+                }
                 lineStationAreas.getOrPut(it.station to it.line) { mutableSetOf() }.add(it)
             }.also { messageManager.info("Loaded ${it.size} areas in world \"$worldName\"") }
+            if (areaRangeMap[world]!!.isEmpty()) {
+                areaRangeMap.remove(world)
+                worldOctrees.remove(world)
+            }
         }
     }
 
@@ -641,11 +648,15 @@ class PluginMain : ExtendedJavaPlugin() {
     }
 
     fun updateArea(oldArea: RailArea, newArea: RailArea, save: Boolean = true) {
-        if (oldArea.world != newArea.world || oldArea.range3D != newArea.range3D) {
+        if (oldArea.world != newArea.world || oldArea.range3D != newArea.range3D ||
+            oldArea.station == unknownStation || oldArea.line == unknownLine ||
+            newArea.station == unknownStation || newArea.line == unknownLine) {
             areaRangeMap[oldArea.world]?.remove(oldArea.range3D)
-            areaRangeMap.getOrPut(newArea.world) { mutableMapOf() }[newArea.range3D] = newArea
             worldOctrees[oldArea.world]?.remove(oldArea.range3D)
-            getWorldOctree(newArea.world)!!.insert(newArea.range3D)
+            if (newArea.station != unknownStation && newArea.line != unknownLine) {
+                areaRangeMap.getOrPut(newArea.world) { mutableMapOf() }[newArea.range3D] = newArea
+                getWorldOctree(newArea.world)!!.insert(newArea.range3D)
+            }
             if (areaRangeMap[oldArea.world]?.isEmpty() == true) {
                 areaRangeMap.remove(oldArea.world)
                 worldOctrees.remove(oldArea.world)

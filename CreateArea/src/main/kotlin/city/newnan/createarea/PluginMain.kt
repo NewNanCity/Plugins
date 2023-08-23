@@ -4,6 +4,7 @@ import city.newnan.createarea.config.ConfigFile
 import city.newnan.createarea.config.CreateArea
 import city.newnan.createarea.config.CreateAreas
 import city.newnan.violet.config.ConfigManager2
+import city.newnan.violet.gui.GuiManager
 import city.newnan.violet.message.MessageManager
 import co.aikar.commands.PaperCommandManager
 import me.lucko.helper.Events
@@ -11,6 +12,7 @@ import me.lucko.helper.plugin.ExtendedJavaPlugin
 import net.milkbowl.vault.permission.Permission
 import org.bukkit.OfflinePlayer
 import org.bukkit.event.EventPriority
+import org.bukkit.event.player.PlayerChangedWorldEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.dynmap.DynmapCommonAPI
 import org.dynmap.DynmapCommonAPIListener
@@ -37,6 +39,7 @@ class PluginMain : ExtendedJavaPlugin() {
             setCache(ConfigManager2.CacheType.None)
         }
     }
+    val guiManager: GuiManager by lazy { GuiManager(this) }
     val messageManager: MessageManager by lazy { MessageManager(this) }
     private var dynmap: DynmapCommonAPI? = null
     private lateinit var permission: Permission
@@ -51,7 +54,9 @@ class PluginMain : ExtendedJavaPlugin() {
         reload()
         commandManager.enableUnstableAPI("help")
         commandManager.registerCommand(Commands)
-        messageManager setPlayerPrefix "§7[§6牛腩小镇§7] §f"
+        commandManager.locales.setDefaultLocale(Locale.SIMPLIFIED_CHINESE)
+
+        messageManager setPlayerPrefix "§7[§6牛腩创造§7] §f"
         DynmapCommonAPIListener.register(object : DynmapCommonAPIListener() {
             override fun apiEnabled(api: DynmapCommonAPI) {
                 dynmap = api
@@ -63,6 +68,10 @@ class PluginMain : ExtendedJavaPlugin() {
             ?: throw Exception("Vault permission service not found!")
         Events.subscribe(PlayerJoinEvent::class.java, EventPriority.MONITOR)
             .handler { checkPlayer(it.player) }
+            .bindWith(this)
+        Events.subscribe(PlayerChangedWorldEvent::class.java, EventPriority.MONITOR)
+            .filter { it.from.name == createWorld }
+            .handler { it.player.gameMode = org.bukkit.GameMode.SURVIVAL }
             .bindWith(this)
     }
 
@@ -92,7 +101,6 @@ class PluginMain : ExtendedJavaPlugin() {
         builders.forEach { (player, range2D) ->
             if (player.name == null) return@forEach
             buildersConfigMap[player.uniqueId] = CreateArea(
-                player.name!!,
                 range2D.minX,
                 range2D.minZ,
                 range2D.maxX,

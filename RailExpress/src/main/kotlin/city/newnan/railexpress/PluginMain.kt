@@ -49,11 +49,12 @@ class PluginMain : ExtendedJavaPlugin() {
         reload()
 
         // 初始化MessageManager
-        messageManager setPlayerPrefix "§7[§6牛腩小镇§7] §f"
+        messageManager setPlayerPrefix "§7[§6牛腩快轨§7] §f"
 
         // 注册指令
         commandManager.enableUnstableAPI("help")
         commandManager.registerCommand(Commands)
+        commandManager.locales.setDefaultLocale(Locale.SIMPLIFIED_CHINESE)
 
         // 注册事件
         Events.subscribe(WorldLoadEvent::class.java, EventPriority.MONITOR)

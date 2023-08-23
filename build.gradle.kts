@@ -10,7 +10,7 @@ plugins {
 
 val targetJavaVersion = 11
 tasks.register("buildAll") {
-    dependsOn(subprojects.map { it.tasks.named("clean") })
+    // dependsOn(subprojects.map { it.tasks.named("clean") })
     dependsOn(subprojects.map { it.tasks.named("shadowJar") })
 }
 tasks.register("cleanAll") {
@@ -73,25 +73,23 @@ subprojects {
         ).forEach { relocate(it, "${project.group}._dependencies_.$it") }
     }
 
-    project.ext["load"] = "STARTUP"
+    project.ext["load"] = "POSTWORLD" // "STARTUP"
     ext["apiVersion"] = "1.16"
-    project.ext["authors"] = listOf("Gk0Wk")
-    project.ext["depend"] = listOf<String>()
-    project.ext["loadBefore"] = listOf<String>()
-    project.ext["softDepend"] = listOf<String>()
+    project.ext["contributors"] = emptySet<String>()
+    project.ext["authors"] = setOf("Gk0Wk")
+    project.ext["depend"] = emptySet<String>()
+    project.ext["loadBefore"] = emptySet<String>()
+    project.ext["softDepend"] = setOf("Citizens", "QuickShop", "Essentials", "WorldEdit", "WorldGuard")
+    project.ext["provides"] = emptySet<String>()
+    project.ext["libraries"] = emptySet<String>()
     project.ext["url"] = "https://www.newnan.city/"
     tasks.processResources {
+        outputs.upToDateWhen { false } // 禁用增量构建, processResources 看到文件未修改就不处理了, 上面这一堆修改了也不会更新
         filteringCharset = "UTF-8"
         from("src/main/resources") {
             include("**/*.yml", "**/*.yaml", "**/*.json", "**/*.properties")
             duplicatesStrategy = DuplicatesStrategy.INCLUDE
-            expand(project.properties.mapValues {
-                if (it.value is List<*>) {
-                    (it.value as List<*>).joinToString(", ") { it1 -> "'${it1.toString()}'" }
-                } else {
-                    it.value
-                }
-            })
+            expand(project.properties)
         }
     }
 
@@ -109,12 +107,14 @@ subprojects {
     }
 
     tasks.withType<JavaCompile>().configureEach {
+        options.compilerArgs.add("-parameters")
         if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible) {
             options.release.set(targetJavaVersion)
         }
     }
 
     tasks.withType<KotlinCompile> {
+        kotlinOptions.javaParameters = true
         kotlinOptions.jvmTarget = JavaVersion.toVersion(targetJavaVersion).toString()
     }
 

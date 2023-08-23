@@ -21,6 +21,9 @@ import org.bukkit.event.player.PlayerChangedWorldEvent
 import org.bukkit.event.player.PlayerGameModeChangeEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 import kotlin.math.roundToInt
 
 class PluginMain : ExtendedJavaPlugin() {
@@ -53,8 +56,9 @@ class PluginMain : ExtendedJavaPlugin() {
             ?: throw Exception("Vault economy service not found!")
 
         reload()
-        messageManager setPlayerPrefix "§7[§6牛腩小镇§7] §f"
+        messageManager setPlayerPrefix "§7[§6牛腩飞行§7] §f"
         commandManager.enableUnstableAPI("help")
+        commandManager.locales.setDefaultLocale(Locale.SIMPLIFIED_CHINESE)
         commandManager.registerCommand(Commands)
 
         // 玩家死亡则取消飞行模式
@@ -127,7 +131,7 @@ class PluginMain : ExtendedJavaPlugin() {
 
         // 恢复之前的信息
         flyingPlayers.clear()
-        configManager.touch("player-cache.yml", PlayerCache())
+        configManager.touch("player-cache.yml", { PlayerCache() })
         configManager.parse<PlayerCache>("player-cache.yml").players.forEach {
             server.getPlayer(it.key)?.let { player -> flyingPlayers[player] = it.value }
         }

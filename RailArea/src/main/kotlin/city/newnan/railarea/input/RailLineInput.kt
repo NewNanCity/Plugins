@@ -5,25 +5,20 @@ import city.newnan.railarea.config.RailLine
 import city.newnan.railarea.config.toColor
 import city.newnan.railarea.config.toFMString
 import city.newnan.railarea.config.toMaterial
+import city.newnan.violet.gui.PlayerGuiSession
 import org.bukkit.Color
-import org.bukkit.entity.Player
 
-fun handleRailLineInput(player: Player, oldLine: RailLine?, done: (line: RailLine?) -> Unit) {
-    if (inputLocks.contains(player.uniqueId)) {
-        PluginMain.INSTANCE.messageManager.printf(player, "§c你正在进行其他输入, 请先取消之!")
-        done(null)
-        return
-    }
+fun handleRailLineInput(session: PlayerGuiSession, oldLine: RailLine?, setLine: (line: RailLine?) -> Unit) {
+    val player = session.player
     var name: String? = oldLine?.name
     var color: Color? = oldLine?.color
-    inputLocks.add(player.uniqueId)
-    PluginMain.INSTANCE.messageManager.gets(player) { input ->
+    session.chatInput { input ->
         val argv = input.split(" ").filter { it.isNotEmpty() }
         when (argv[0]) {
             "name" -> {
                 if (argv.size < 2) {
                     PluginMain.INSTANCE.messageManager.printf(player, "§c请输入名称!")
-                    return@gets false
+                    return@chatInput false
                 }
                 val nameT = argv.subList(1, argv.size).joinToString(" ")
                 if (PluginMain.INSTANCE.lines.containsKey(nameT)) {
@@ -36,7 +31,7 @@ fun handleRailLineInput(player: Player, oldLine: RailLine?, done: (line: RailLin
             "color" -> {
                 if (argv.size < 2) {
                     PluginMain.INSTANCE.messageManager.printf(player, "§c请输入颜色 #RRGGBB 格式!")
-                    return@gets false
+                    return@chatInput false
                 }
                 if (!argv[1].startsWith("#")) {
                     PluginMain.INSTANCE.messageManager.printf(player, "§c颜色格式错误! 请使用 #RRGGBB 格式!")
@@ -50,20 +45,18 @@ fun handleRailLineInput(player: Player, oldLine: RailLine?, done: (line: RailLin
             }
             "cancel" -> {
                 PluginMain.INSTANCE.messageManager.printf(player, "已取消")
-                inputLocks.remove(player.uniqueId)
-                done(null)
-                return@gets true
+                setLine(null)
+                return@chatInput true
             }
             "ok" -> {
                 if (color == null || name == null) {
                     PluginMain.INSTANCE.messageManager.printf(player, "§c请先设置名称和颜色!")
                 } else {
-                    inputLocks.remove(player.uniqueId)
                     val line = RailLine(oldLine?.id ?: PluginMain.INSTANCE.nextLineId++, name!!,
                         oldLine?.stations ?: mutableListOf(), color!!, false, color!!.toMaterial(),
                         oldLine?.leftReturn ?: false, oldLine?.rightReturn ?: false)
-                    done(line)
-                    return@gets true
+                    setLine(line)
+                    return@chatInput true
                 }
             }
             else -> {
@@ -71,5 +64,12 @@ fun handleRailLineInput(player: Player, oldLine: RailLine?, done: (line: RailLin
             }
         }
         false
+    }.also {
+        if (it) {
+            PluginMain.INSTANCE.messageManager.printf(player, "§c请设定线路名称和颜色")
+        } else {
+            PluginMain.INSTANCE.messageManager.printf(player, "§c你正在进行其他输入, 请先取消之!")
+            setLine(null)
+        }
     }
 }

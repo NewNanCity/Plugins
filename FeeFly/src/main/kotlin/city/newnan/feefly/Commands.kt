@@ -5,6 +5,7 @@ import co.aikar.commands.CommandHelp
 import co.aikar.commands.annotation.*
 import co.aikar.commands.bukkit.contexts.OnlinePlayer
 import org.bukkit.command.CommandSender
+import org.bukkit.command.ConsoleCommandSender
 import org.bukkit.entity.Player
 
 @CommandAlias("fly|feefly")
