@@ -6,6 +6,7 @@ import co.aikar.commands.annotation.*
 import org.bukkit.command.CommandSender
 import city.newnan.violet.item.getSkull
 import city.newnan.violet.item.toSkull
+import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 
 
@@ -44,7 +45,7 @@ object Commands : BaseCommand() {
     @Description("根据玩家名获取头颅")
     @CommandCompletion("@players")
     fun onPlayerHead(sender: Player, playerName: String) {
-        PluginMain.INSTANCE.server.offlinePlayers.find { it.name == playerName }?.let {
+        Bukkit.getPlayer(playerName)?.let {
             if (sender.inventory.addItem(it.getSkull(1)).size > 0) {
                 PluginMain.INSTANCE.messageManager.printf(sender, "§c你的背包已满!")
                 return

@@ -13,6 +13,7 @@ import me.lucko.helper.Schedulers
 import me.lucko.helper.plugin.ExtendedJavaPlugin
 import net.ess3.api.events.UserBalanceUpdateEvent
 import net.milkbowl.vault.economy.Economy
+import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import org.bukkit.event.EventPriority
 import java.io.File
@@ -174,7 +175,7 @@ class PluginMain : ExtendedJavaPlugin() {
         configManager.parse<ConfigFile>("config.yml").also {
             targetAccount = it.target?.let { name ->
                 if (name.isBlank()) return@let null
-                server.offlinePlayers.find { p -> p.name == name }?.also { p ->
+                Bukkit.getPlayer(name)?.also { p ->
                     messageManager.info("设置基金账户为: ${p.name}")
                 }
             }
@@ -212,10 +213,9 @@ class PluginMain : ExtendedJavaPlugin() {
         onUpdate()
         Schedulers.sync().runLater({ topCache = null }, 1200L).bindWith(this)
         val list = mutableListOf<RecordDisplay>()
-        val offlinePlayerMap = mutableMapOf<UUID, OfflinePlayer>()
-        server.offlinePlayers.forEach { offlinePlayerMap[it.uniqueId] = it }
         for (record in recordsReader.readValues<RecordDouble>(File(dataFolder, "data.csv"))) {
-            val player = offlinePlayerMap[record.id] ?: continue
+            val player = Bukkit.getOfflinePlayer(record.id)
+            if (!player.hasPlayedBefore()) continue
             list.add(RecordDisplay(player, record.active, record.passive))
         }
         list.sortByDescending { record -> record.passive + record.active }

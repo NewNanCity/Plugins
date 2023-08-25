@@ -33,17 +33,14 @@ fun openBlockListGui(session: PlayerGuiSession) {
             gui.setDefaultClickAction { it.isCancelled = true }
         }
         gui.clearPageItems()
-        PluginMain.INSTANCE.playerBlockSet[session.player.uniqueId]?.also {
-            Bukkit.getOfflinePlayers()
-                .filter { player -> it.contains(player.uniqueId) }
-                .forEach { player ->
-                gui.addItem(ItemBuilder.from(player.getSkull())
-                    .name(Component.text(player.name ?: "§8未知")).lore(Component.text("§6左键: 解除拉黑§r"))
-                    .asGuiItem {
-                        PluginMain.INSTANCE.unblock(session.player, player)
-                        session.refresh()
-                    })
-            }
+        PluginMain.INSTANCE.playerBlockSet[session.player.uniqueId]?.forEach {
+            val player = Bukkit.getOfflinePlayer(it)
+            gui.addItem(ItemBuilder.from(player.getSkull())
+                .name(Component.text(player.name ?: "§8未知")).lore(Component.text("§6左键: 解除拉黑§r"))
+                .asGuiItem {
+                    PluginMain.INSTANCE.unblock(session.player, player)
+                    session.refresh()
+                })
         }
         true
     })

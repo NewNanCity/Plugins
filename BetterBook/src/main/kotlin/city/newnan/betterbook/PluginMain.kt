@@ -4,6 +4,7 @@ import city.newnan.betterbook.book.Librarian
 import city.newnan.betterbook.book.applyBook
 import city.newnan.betterbook.book.findBookUUID
 import city.newnan.violet.config.ConfigManager2
+import city.newnan.violet.gui.GuiManager
 import city.newnan.violet.message.MessageManager
 import co.aikar.commands.PaperCommandManager
 import me.lucko.helper.Events
@@ -32,58 +33,75 @@ class PluginMain : ExtendedJavaPlugin() {
             setCache(ConfigManager2.CacheType.LFU, 16)
         }
     }
-    internal val messageManager: MessageManager by lazy { MessageManager(this) }
-    private val commandManager: PaperCommandManager by lazy { PaperCommandManager(this) }
+    val gui: GuiManager by lazy { GuiManager(this) }
+    val message: MessageManager by lazy { MessageManager(this) }
+    private val command: PaperCommandManager by lazy { PaperCommandManager(this) }
 
     override fun enable() {
-        messageManager setPlayerPrefix "§7[§6牛腩书局§7] §f"
+        message setPlayerPrefix "§7[§6牛腩书局§7] §f"
 
-        commandManager.enableUnstableAPI("help")
-        commandManager.registerCommand(Commands)
-        commandManager.locales.setDefaultLocale(Locale.SIMPLIFIED_CHINESE)
+        command.enableUnstableAPI("help")
+        command.registerCommand(Commands)
+        command.locales.setDefaultLocale(Locale.SIMPLIFIED_CHINESE)
 
         Librarian.enable()
+
+        // 直接阅读
         Events.subscribe(PlayerInteractEvent::class.java, EventPriority.MONITOR)
             .filter(EventFilters.ignoreCancelled())
             .filter { it.hasItem() }
             .filter { it.action == Action.RIGHT_CLICK_AIR
                     || (it.action == Action.RIGHT_CLICK_BLOCK && it.clickedBlock!!.type != Material.LECTERN) }
             .handler { event ->
-                event.item!!.findBookUUID(writable = false)?.also{ uuid ->
-                    Librarian[uuid]?.also {
+                event.item!!.findBookUUID(writable = false)?.also{ bookId ->
+                    Librarian[bookId]?.also {
                         it.readBook(event.player)
-                        event.isCancelled = true
                         event.item!!.itemMeta = (event.item!!.itemMeta as BookMeta?)
-                            ?.applyBook(it, uuid, toWrittenBook = true, addModifyInfo = false)
+                            ?.applyBook(it, bookId, toWrittenBook = true, addModifyInfo = false)
+                    } ?: run {
+                        message.printf(event.player, "§c书目已不存在,因此被销毁!")
+                        event.player.inventory.removeItem(event.item!!)
                     }
+                    event.isCancelled = true
                 }
             }
             .bindWith(this)
 
+        // 讲台阅读
         Events.subscribe(PlayerInteractEvent::class.java, EventPriority.MONITOR)
             .filter(EventFilters.ignoreCancelled())
             .filter { !it.player.isSneaking }
             .filter { it.action == Action.RIGHT_CLICK_BLOCK && it.clickedBlock!!.type == Material.LECTERN }
             .handler { event ->
-                (event.clickedBlock!!.state as Lectern).inventory.getItem(0)?.findBookUUID()
-                    ?.also { Librarian[it]?.readBook(event.player)?.also { event.isCancelled = true } }
+                (event.clickedBlock!!.state as Lectern).inventory.getItem(0)?.findBookUUID()?.also { bookId ->
+                    Librarian[bookId]?.readBook(event.player) ?: run {
+                        message.printf(event.player, "§c书目已不存在,因此被销毁!")
+                        (event.clickedBlock!!.state as Lectern).inventory.setItem(0, null)
+                    }
+                    event.isCancelled = true
+                }
             }
             .bindWith(this)
 
+        // 物品框阅读
         Events.subscribe(PlayerInteractEntityEvent::class.java, EventPriority.MONITOR)
             .filter(EventFilters.ignoreCancelled())
             .filter { !it.player.isSneaking }
             .filter { it.rightClicked.type == EntityType.ITEM_FRAME }
             .handler { event ->
-                (event.rightClicked as ItemFrame).item.findBookUUID()?.also {
-                    Librarian[it]?.readBook(event.player)?.also { event.isCancelled = true }
+                (event.rightClicked as ItemFrame).item.findBookUUID()?.also { bookId ->
+                    Librarian[bookId]?.readBook(event.player) ?: run {
+                        message.printf(event.player, "§c书目已不存在,因此被销毁!")
+                        (event.rightClicked as ItemFrame).setItem(null)
+                    }
+                    event.isCancelled = true
                 }
             }
             .bindWith(this)
     }
 
     override fun disable() {
-        commandManager.unregisterCommands()
+        command.unregisterCommands()
         configManager.cache?.clear()
     }
 }

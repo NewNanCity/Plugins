@@ -1,6 +1,8 @@
 package city.newnan.betterbook
 
 import city.newnan.betterbook.book.*
+import city.newnan.betterbook.gui.openOnlinePlayersGui
+import city.newnan.betterbook.gui.openPlayerBooksGui
 import co.aikar.commands.BaseCommand
 import co.aikar.commands.CommandHelp
 import co.aikar.commands.annotation.*
@@ -12,13 +14,18 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.BookMeta
 import java.util.*
 
-@CommandAlias("book|betterbook|bb")
+@CommandAlias("book|betterbook")
 object Commands : BaseCommand() {
-    @Default
     @HelpCommand
     @Subcommand("help")
     fun help(sender: CommandSender, help: CommandHelp) {
         help.showHelp()
+    }
+
+    @Subcommand("reload")
+    @CommandPermission("betterbook.reload")
+    fun reloadCommand(sender: CommandSender) {
+        Librarian.reload()
     }
 
     @Subcommand("publish|static")
@@ -27,33 +34,34 @@ object Commands : BaseCommand() {
         player.inventory.itemInMainHand.findBookUUID(written = false)?.also {
             val book = Librarian[it] ?: return@also
             if (book.creator != player.uniqueId && !player.hasPermission("betterbook.bypass")) {
-                PluginMain.INSTANCE.messageManager.printf(player, "只有原作者/OP/特别授权者能够出版原书！")
+                PluginMain.INSTANCE.message.printf(player, "只有原作者/OP/特别授权者能够出版原书！")
                 return@publishCommand
             }
             if (player.inventory.addItem(ItemStack(Material.WRITTEN_BOOK).apply {
                     itemMeta = (itemMeta as BookMeta?)?.applyBook(book, it, toWrittenBook = true, addModifyInfo = false)
                 }).size > 0) {
-                PluginMain.INSTANCE.messageManager.printf(player, "背包已满，无法出版图书！")
+                PluginMain.INSTANCE.message.printf(player, "背包已满，无法出版图书！")
             } else {
-                PluginMain.INSTANCE.messageManager.printf(player, "书目出版成功，修改内容将会同步到发布的书中！")
+                PluginMain.INSTANCE.message.printf(player, "书目出版成功，修改内容将会同步到发布的书中！")
             }
             return@publishCommand
         }
-        PluginMain.INSTANCE.messageManager.printf(player, "请用主手拿书与笔/书目未注册&导入！")
+        PluginMain.INSTANCE.message.printf(player, "请用主手拿书与笔/书目未注册&导入！")
     }
 
     @Subcommand("import|register")
     @Description("导入书目，如果书目已注册则会覆盖原书！")
     fun importCommand(player: Player) {
         var newBook = true
-        if (player.inventory.itemInMainHand.type == Material.WRITABLE_BOOK) {
+        val item = player.inventory.itemInMainHand
+        if ((item.type == Material.WRITABLE_BOOK || item.type == Material.WRITABLE_BOOK) && item.itemMeta != null) {
             // 检查手上的书是不是已经注册过
             var book: Book? = null
-            val bookId: UUID = player.inventory.itemInMainHand.findBookUUID(written = false)?.let {
+            val bookId: UUID = item.findBookUUID(written = true)?.let {
                 book = Librarian[it]
                 book?.run {
                     if (creator != player.uniqueId && !player.hasPermission("betterbook.bypass")) {
-                        PluginMain.INSTANCE.messageManager.printf(player, "只有原作者/OP/特别授权者能够导入已注册的原书！")
+                        PluginMain.INSTANCE.message.printf(player, "只有原作者/OP/特别授权者能够导入已注册的原书！")
                         return@importCommand
                     }
                     newBook = false
@@ -61,7 +69,7 @@ object Commands : BaseCommand() {
                 if (book == null) null else it
             } ?: Librarian.nextAvailableUUID
             // 创建新的书
-            val bookMeta = player.inventory.itemInMainHand.itemMeta as BookMeta
+            val bookMeta = item.itemMeta as BookMeta
             val now = Date()
             val book2 = Book(
                 title = if (bookMeta.hasDisplayName()) bookMeta.displayName else bookMeta.title ?: book?.title ?: "《无题》",
@@ -74,11 +82,11 @@ object Commands : BaseCommand() {
             // 添加到图书馆
             Librarian += bookId to book2
             // 信息更新到手上的书
-            player.inventory.itemInMainHand.itemMeta = bookMeta.applyBook(book2, bookId, toWrittenBook = false, addModifyInfo = true)
-            PluginMain.INSTANCE.messageManager.printf(player,
+            item.itemMeta = bookMeta.applyBook(book2, bookId, toWrittenBook = false, addModifyInfo = true)
+            PluginMain.INSTANCE.message.printf(player,
                 if (newBook) "书目注册并导入成功，现在可以出版了！" else "书目内容更新完毕，所有出版成书内容随之更新！")
         } else {
-            PluginMain.INSTANCE.messageManager.printf(player, "请用主手拿书与笔！")
+            PluginMain.INSTANCE.message.printf(player, "请用主手拿[书与笔]或者普通的[成书]！")
         }
     }
 
@@ -88,19 +96,19 @@ object Commands : BaseCommand() {
         player.inventory.itemInMainHand.findBookUUID()?.also {
             val book = Librarian[it] ?: return@also
             if (book.creator != player.uniqueId && !player.hasPermission("betterbook.bypass")) {
-                PluginMain.INSTANCE.messageManager.printf(player, "只有原作者/OP/特别授权者能够导出原书！")
+                PluginMain.INSTANCE.message.printf(player, "只有原作者/OP/特别授权者能够导出原书！")
                 return@exportCommand
             }
             if (player.inventory.addItem(ItemStack(Material.WRITABLE_BOOK).apply {
                     itemMeta = (itemMeta as BookMeta?)?.applyBook(book, it, toWrittenBook = false, addModifyInfo = true)
                 }).size > 0) {
-                PluginMain.INSTANCE.messageManager.printf(player, "背包已满，无法导出原书！")
+                PluginMain.INSTANCE.message.printf(player, "背包已满，无法导出原书！")
             } else {
-                PluginMain.INSTANCE.messageManager.printf(player, "原书导出成功，可以使用该书编辑内容！")
+                PluginMain.INSTANCE.message.printf(player, "原书导出成功，可以使用该书编辑内容！")
             }
             return@exportCommand
         }
-        PluginMain.INSTANCE.messageManager.printf(player, "请用主手拿书与笔或者成书！")
+        PluginMain.INSTANCE.message.printf(player, "请用主手拿书与笔或者成书！")
     }
 
     @Subcommand("strip|unbind")
@@ -109,15 +117,15 @@ object Commands : BaseCommand() {
         player.inventory.itemInMainHand.findBookUUID()?.also {
             val book = Librarian[it] ?: return@also
             if (book.creator != player.uniqueId && !player.hasPermission("betterbook.bypass")) {
-                PluginMain.INSTANCE.messageManager.printf(player, "只有原作者/OP/特别授权者能够解绑该书！")
+                PluginMain.INSTANCE.message.printf(player, "只有原作者/OP/特别授权者能够解绑该书！")
                 return@stripCommand
             }
             player.inventory.itemInMainHand.itemMeta!!.persistentDataContainer.remove(bookIdNbtKey)
-            PluginMain.INSTANCE.messageManager
+            PluginMain.INSTANCE.message
                 .printf(player, "已解绑该书，这本书变成一本普通的书，不再受书局管理，可以继续使用成书导出原书！")
             return@stripCommand
         }
-        PluginMain.INSTANCE.messageManager.printf(player, "请用主手拿书与笔或者成书！")
+        PluginMain.INSTANCE.message.printf(player, "请用主手拿书与笔或者成书！")
     }
 
     @Private
@@ -126,18 +134,18 @@ object Commands : BaseCommand() {
     @Description("获得指定 id 的书")
     fun uuidCommand(player: Player, uuidString: String) {
         kotlin.runCatching { UUID.fromString(uuidString) }
-            .onFailure{ PluginMain.INSTANCE.messageManager.printf(player, "UUID无效！") }
+            .onFailure{ PluginMain.INSTANCE.message.printf(player, "UUID无效！") }
             .onSuccess {
                 val book = Librarian[it]
                 if (book == null) {
-                    PluginMain.INSTANCE.messageManager.printf(player, "书目不存在！")
+                    PluginMain.INSTANCE.message.printf(player, "书目不存在！")
                 } else {
                     if (player.inventory.addItem(ItemStack(Material.WRITTEN_BOOK).apply {
                             itemMeta = (itemMeta as BookMeta?)?.applyBook(book, it, toWrittenBook = true, addModifyInfo = false)
                         }).size > 0) {
-                        PluginMain.INSTANCE.messageManager.printf(player, "背包已满，无法获得成书！")
+                        PluginMain.INSTANCE.message.printf(player, "背包已满，无法获得成书！")
                     } else {
-                        PluginMain.INSTANCE.messageManager.printf(player, "成书已放至背包！")
+                        PluginMain.INSTANCE.message.printf(player, "成书已放至背包！")
                     }
                 }
             }
@@ -148,7 +156,7 @@ object Commands : BaseCommand() {
     @Description("将书变成可编辑状态")
     fun editCommand(player: Player) {
         if (player.inventory.itemInMainHand.type != Material.WRITTEN_BOOK) {
-            PluginMain.INSTANCE.messageManager.printf(player, "请拿成书！")
+            PluginMain.INSTANCE.message.printf(player, "请拿成书！")
             return
         }
         if (player.inventory.itemInMainHand.findBookUUID() != null) {
@@ -157,7 +165,7 @@ object Commands : BaseCommand() {
         }
         (player.inventory.itemInMainHand.itemMeta as BookMeta).also {
             if (it.author?.equals(player.displayName) != true && !player.hasPermission("betterbook.bypass")) {
-                PluginMain.INSTANCE.messageManager.printf(player, "只有原作者/Op/有权限者能够将原书变成成书！")
+                PluginMain.INSTANCE.message.printf(player, "只有原作者/Op/有权限者能够将原书变成成书！")
                 return@editCommand
             }
             if (player.inventory.addItem(ItemStack(Material.WRITABLE_BOOK).apply {
@@ -170,10 +178,30 @@ object Commands : BaseCommand() {
                         newMeta.pages = it.pages.toList()
                     }
                 }).size > 0) {
-                PluginMain.INSTANCE.messageManager.printf(player, "背包已满，无法获得书！")
+                PluginMain.INSTANCE.message.printf(player, "背包已满，无法获得书！")
             } else {
-                PluginMain.INSTANCE.messageManager.printf(player, "书已放至背包！")
+                PluginMain.INSTANCE.message.printf(player, "书已放至背包！")
             }
+        }
+    }
+
+    @Default
+    @Subcommand("gui")
+    @Description("打开牛腩书局界面")
+    fun guiCommand(player: Player) {
+        val session = PluginMain.INSTANCE.gui[player]
+        session.clear()
+        openPlayerBooksGui(session)
+    }
+
+    @Subcommand("admin")
+    @Description("打开牛腩书局界面")
+    @CommandPermission("betterbook.bypass")
+    fun guiAdminCommand(player: Player) {
+        val session = PluginMain.INSTANCE.gui[player]
+        session.clear()
+        openOnlinePlayersGui(session) { target ->
+            openPlayerBooksGui(session, target)
         }
     }
 }

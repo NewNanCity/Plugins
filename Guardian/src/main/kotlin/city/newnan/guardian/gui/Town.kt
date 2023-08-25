@@ -17,8 +17,6 @@ fun openTownGui(session: PlayerGuiSession, who: org.bukkit.entity.Player, player
     val leader = town.leader?.getPlayer()
     var needUpdate = true
     var members = town.getMembers().toList()
-    val userNameMap = mutableMapOf<String, OfflinePlayer>()
-    Bukkit.getOfflinePlayers().forEach { userNameMap[it.name!!] = it }
 
     val townLevel = if (town.level < 0) {
         "§c已注销"
@@ -43,7 +41,7 @@ fun openTownGui(session: PlayerGuiSession, who: org.bukkit.entity.Player, player
         { _, _, _ ->
             if (needUpdate) {
                 val canEdit = who.hasPermission("guardian.town.write.other") || town.leader == player.id
-                val leaderPlayer = userNameMap[leader?.name]
+                val leaderPlayer = if (leader == null) null else Bukkit.getPlayer(leader.name)
                 // 镇长头像
                 if (leaderPlayer == null) {
                     gui.setItem(1, 1, ItemBuilder.from(Material.BLACK_STAINED_GLASS_PANE).name(Component.text("")).asGuiItem())
@@ -63,7 +61,7 @@ fun openTownGui(session: PlayerGuiSession, who: org.bukkit.entity.Player, player
                                     session.show()
                                     return@chatInput true
                                 }
-                                val target = userNameMap[input]
+                                val target = Bukkit.getPlayer(input)
                                 val record = input.findPlayer()
                                 if (target == null || record == null) {
                                     PluginMain.INSTANCE.message.printf(session.player, "§c找不到玩家: $input, 请重新输入, 或者输入§c cancel §a取消操作")
@@ -97,7 +95,7 @@ fun openTownGui(session: PlayerGuiSession, who: org.bukkit.entity.Player, player
                 // 成员列表
                 members.forEach { member ->
                     if (member.id == town.leader) return@forEach
-                    val memberPlayer = userNameMap[member.name] ?: return@forEach
+                    val memberPlayer = Bukkit.getPlayer(member.name) ?: return@forEach
                     gui.addItem(ItemBuilder.from(memberPlayer.getSkull())
                         .name(Component.text(member.name)).also {
                             if (canEdit) {

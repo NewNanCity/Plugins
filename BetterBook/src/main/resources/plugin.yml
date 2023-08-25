@@ -37,3 +37,5 @@ permissions:
   #    'Example2': true会继承父节点的权限，false会与父节点相反
   'betterbook.bypass':
     description: '略过检查权限'
+  betterbook.reload:
+    description: '重载插件'

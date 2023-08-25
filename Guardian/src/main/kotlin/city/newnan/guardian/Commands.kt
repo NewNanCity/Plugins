@@ -56,8 +56,7 @@ object Commands : BaseCommand() {
     @Subcommand("judgement list|ls")
     @CommandPermission("guardian.judgemental.edit")
     fun onListJudgement(sender: CommandSender) {
-        val offlinePlayerUUIDMap = Bukkit.getOfflinePlayers().associateBy { it.uniqueId }
-        val players = PluginMain.INSTANCE.judgementalPlayers.mapNotNull { offlinePlayerUUIDMap[it] }
+        val players = PluginMain.INSTANCE.judgementalPlayers.map { Bukkit.getOfflinePlayer(it) }.filter { it.hasPlayedBefore() }
         PluginMain.INSTANCE.message.also {
             it.printf(sender, "§6风纪委员列表:")
             it.printf(sender, "§f${players.joinToString("§7, §r") { p -> p.name ?: "§c未知" }}§r")
@@ -68,7 +67,7 @@ object Commands : BaseCommand() {
     @CommandPermission("guardian.judgemental.edit")
     @CommandCompletion("@players")
     fun onAddJudgement(sender: CommandSender, target: String) {
-        val p = Bukkit.getOfflinePlayers().find { it.name == target }
+        val p = Bukkit.getPlayer(target)
         if (p == null) {
             PluginMain.INSTANCE.message.printf(sender, "§c玩家 §f$target §c不存在!")
             return
@@ -85,19 +84,19 @@ object Commands : BaseCommand() {
     @Subcommand("judgement remove")
     @CommandPermission("guardian.judgemental.edit")
     @CommandCompletion("@players")
-    fun onRemoveJudgement(sender: CommandSender, target: String) {
-        val p = Bukkit.getOfflinePlayers().find { it.name == target }
+    fun onRemoveJudgement(sender: CommandSender, playerName: String) {
+        val p = Bukkit.getPlayer(playerName)
         if (p == null) {
-            PluginMain.INSTANCE.message.printf(sender, "§c玩家 §f$target §c不存在!")
+            PluginMain.INSTANCE.message.printf(sender, "§c玩家 §f$playerName §c不存在!")
             return
         }
         if (!PluginMain.INSTANCE.judgementalPlayers.contains(p.uniqueId)) {
-            PluginMain.INSTANCE.message.printf(sender, "§c玩家 §f$target §c不是风纪委员!")
+            PluginMain.INSTANCE.message.printf(sender, "§c玩家 §f$playerName §c不是风纪委员!")
             return
         }
         PluginMain.INSTANCE.judgementalPlayers.remove(p.uniqueId)
         PluginMain.INSTANCE.save()
-        PluginMain.INSTANCE.message.printf(sender, "§a玩家 §f$target §a已经不再是风纪委员!")
+        PluginMain.INSTANCE.message.printf(sender, "§a玩家 §f$playerName §a已经不再是风纪委员!")
         val player = p.player
         if (player != null && PluginMain.INSTANCE.permission.playerInGroup(player.world.name, player, PluginMain.INSTANCE.judgementalGroup)) {
             player.gameMode = GameMode.SURVIVAL
@@ -111,7 +110,7 @@ object Commands : BaseCommand() {
     @CommandCompletion("@players")
     @CommandPermission("guardian.lookup")
     fun onLookup(sender: CommandSender, playerName: String) {
-        val p = Bukkit.getOfflinePlayers().find { it.name == playerName }
+        val p = Bukkit.getPlayer(playerName)
         if (p == null) {
             PluginMain.INSTANCE.message.printf(sender, "§c玩家 §f$playerName §c不存在!")
             return

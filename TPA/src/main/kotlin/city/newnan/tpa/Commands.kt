@@ -5,10 +5,12 @@ import city.newnan.tpa.gui.openOnlinePlayersGui
 import co.aikar.commands.BaseCommand
 import co.aikar.commands.CommandHelp
 import co.aikar.commands.annotation.*
+import co.aikar.commands.annotation.Optional
 import co.aikar.commands.bukkit.contexts.OnlinePlayer
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import java.util.*
 
 @CommandAlias("tpa")
 object Commands : BaseCommand() {
@@ -29,8 +31,8 @@ object Commands : BaseCommand() {
     @Subcommand("block")
     @Description("屏蔽某玩家的传送请求")
     @CommandPermission("tpa.user")
-    fun block(sender: Player, name: String) {
-        val player = Bukkit.getOfflinePlayers().find { it.name == name }
+    fun block(sender: Player, playerName: String) {
+        val player = Bukkit.getPlayer(playerName)
         if (player != null) {
             if (sender == player) PluginMain.INSTANCE.messageManager.printf(sender, "?啥")
             else {
@@ -48,8 +50,9 @@ object Commands : BaseCommand() {
     @Description("取消屏蔽某玩家的传送请求")
     @CommandPermission("tpa.user")
     fun unblock(sender: Player, uuid: String) {
-        val player = Bukkit.getOfflinePlayers().find { it.uniqueId.toString() == uuid }
-        if (player != null) {
+        val id = UUID.fromString(uuid)
+        val player = Bukkit.getOfflinePlayer(id)
+        if (!player.hasPlayedBefore()) {
             if (sender == player) PluginMain.INSTANCE.messageManager.printf(sender, "?啥")
             else {
                 PluginMain.INSTANCE.unblock(sender, player)

@@ -4,6 +4,7 @@ import city.newnan.mcron.timeiterator.CronExpression
 import co.aikar.commands.BaseCommand
 import co.aikar.commands.CommandHelp
 import co.aikar.commands.annotation.*
+import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import java.util.*
 
@@ -48,7 +49,7 @@ object Commands : BaseCommand() {
     @CommandPermission("mcron.player.push")
     @CommandCompletion("@players @nothing")
     fun onAddPlayerOnJoin(sender: CommandSender, playerName: String, command: String) {
-        val uuid = PluginMain.INSTANCE.server.offlinePlayers.find { it.name == playerName }?.uniqueId?.run {
+        Bukkit.getPlayer(playerName)?.uniqueId?.run {
             PluginMain.INSTANCE.pushPlayerJoinTask(this, command)
             PluginMain.INSTANCE.messageManager.printf(sender, "已为玩家 §a§l$playerName§r 添加任务, 将会在玩家加入后执行!")
         } ?: run {

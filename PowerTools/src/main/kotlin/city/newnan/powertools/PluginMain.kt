@@ -36,6 +36,6 @@ class PluginMain : ExtendedJavaPlugin() {
     fun reload() {
         // config.yml
         configManager touch "config.yml"
-        val config = configManager.parse<ConfigFile>("config.yml")
+        // val config = configManager.parse<ConfigFile>("config.yml")
     }
 }

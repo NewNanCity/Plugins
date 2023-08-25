@@ -4,6 +4,7 @@ import city.newnan.foundation.gui.openFoundationTopGui
 import co.aikar.commands.BaseCommand
 import co.aikar.commands.CommandHelp
 import co.aikar.commands.annotation.*
+import org.bukkit.Bukkit
 import org.bukkit.block.CommandBlock
 import org.bukkit.command.BlockCommandSender
 import org.bukkit.command.CommandSender
@@ -105,7 +106,7 @@ object Commands : BaseCommand() {
             PluginMain.INSTANCE.messageManager.printf(sender, "§c基金会余额不足, 无法拨款!")
             return
         }
-        val targetAccount = PluginMain.INSTANCE.server.offlinePlayers.find { p -> p.name == target && p.hasPlayedBefore() }
+        val targetAccount = Bukkit.getPlayer(target)
         if (targetAccount == null) {
             PluginMain.INSTANCE.messageManager.printf(sender, "§c玩家 §f$target §r不存在!")
             return

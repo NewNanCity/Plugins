@@ -43,8 +43,8 @@ data class Book(
     }
 }
 
-private val dateFormatter = SimpleDateFormat("yyyy年M月d日")
-internal val bookIdNbtKey = NamespacedKey(PluginMain.INSTANCE, "book-uuid")
+val dateFormatter = SimpleDateFormat("yyyy年M月d日")
+val bookIdNbtKey = NamespacedKey(PluginMain.INSTANCE, "book-uuid")
 
 class UUIDDataType : PersistentDataType<ByteArray, UUID> {
     override fun toPrimitive(complex: UUID, context: PersistentDataAdapterContext): ByteArray {
@@ -79,10 +79,10 @@ internal fun BookMeta.applyBook(book: Book, bookId: UUID, toWrittenBook: Boolean
     setDisplayName(book.title)
     val info = mutableListOf<String>()
     if (toWrittenBook) {
-        info.add("§r§7${dateFormatter.format(book.created)} 初版§r")
-    } else {
         info.add("§r§6作者    §r§7${Bukkit.getOfflinePlayer(book.creator).name ?: "秩名"}§r")
         info.add("§r§6创建时间 §r§7${dateFormatter.format(book.created)}§r")
+    } else {
+        info.add("§r§7${dateFormatter.format(book.created)} 初版§r")
         pages = book.pages.toList()
     }
     if (addModifyInfo) {
@@ -92,4 +92,16 @@ internal fun BookMeta.applyBook(book: Book, bookId: UUID, toWrittenBook: Boolean
     info.add("§r§8§l[牛腩书局出版社]§r")
     lore = info
     return this
+}
+
+internal fun Book.toOriginalWritableBook(): ItemStack {
+    val item = ItemStack(Material.WRITABLE_BOOK)
+    item.itemMeta = (item.itemMeta as BookMeta?)?.also {
+        it.title = title
+        it.author = Bukkit.getOfflinePlayer(creator).name ?: "未知"
+        it.generation = BookMeta.Generation.ORIGINAL
+        it.pages = pages.toList()
+        it.setDisplayName(title)
+    }
+    return item
 }

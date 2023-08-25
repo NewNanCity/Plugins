@@ -153,7 +153,7 @@ class PluginMain : ExtendedJavaPlugin() {
             costPerSecond = (20.0 / tickPerCount) * costPerCount
             targetAccount = it.targetAccount?.let { name ->
                 if (name.isBlank()) return@let null
-                server.offlinePlayers.find { p -> p.name == name }?.also { p ->
+                Bukkit.getPlayer(name)?.also { p ->
                     messageManager.info("设置扣费转账账户为: ${p.name}")
                 }
             }
