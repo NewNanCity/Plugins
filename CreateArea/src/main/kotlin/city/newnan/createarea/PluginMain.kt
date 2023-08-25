@@ -141,12 +141,12 @@ class PluginMain : ExtendedJavaPlugin() {
         val player = p.player ?: return
         val pp = permission.getPrimaryGroup(createWorld, player)
         if (pp == defaultGroup && builders.containsKey(p)) {
-            permission.playerAddGroup(createWorld, player, builderGroup)
             permission.playerRemoveGroup(createWorld, player, defaultGroup)
+            permission.playerAddGroup(createWorld, player, builderGroup)
             messageManager.printf(player, "您的创造区已创建, 使用 §6/ctp§r 传送到自己的创造区, 使用 §9//wand§r 使用小木斧")
         } else if (pp == builderGroup && !builders.containsKey(p) && !player.hasPermission("createarea.bypass")) {
-            permission.playerAddGroup(createWorld, player, defaultGroup)
             permission.playerRemoveGroup(createWorld, player, builderGroup)
+            permission.playerAddGroup(createWorld, player, defaultGroup)
             messageManager.printf(player, "您你的创造区已被移除，无法在奎特世界建造!")
         }
     }

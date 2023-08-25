@@ -7,6 +7,14 @@ import com.fasterxml.jackson.annotation.JsonProperty
 data class ConfigFile(
     @JsonProperty("check-group")
     val checkGroup: Boolean = true,
+    @JsonProperty("group-world")
+    val groupWorld: String = "world",
+    @JsonProperty("newbie-group")
+    val newbieGroup: String = "Newbie",
+    @JsonProperty("judgemental-group")
+    val judgementalGroup: String = "Judgemental",
+    @JsonProperty("players-group")
+    val playersGroup: String = "Player",
     @JsonProperty("server-address")
     val serverAddress: String,
     @JsonProperty("server-name")

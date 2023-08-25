@@ -37,3 +37,11 @@ permissions:
   #    'Example2': true会继承父节点的权限，false会与父节点相反
   guardian.bypass:
     description: '略过检查权限'
+  guardian.lookup:
+    description: '查看玩家的信息'
+  guardian.town.read.other:
+    description: '查看其他玩家的城镇信息'
+  guardian.town.write.other:
+    description: '修改其他玩家的城镇信息'
+  guardian.judgemental.edit:
+    description: '增删风纪委员权限'
