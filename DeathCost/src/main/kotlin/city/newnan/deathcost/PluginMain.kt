@@ -80,7 +80,7 @@ class PluginMain : ExtendedJavaPlugin() {
             }
             targetAccount = it.deathCost.targetAccount?.let { name ->
                 if (name.isBlank()) return@let null
-                Bukkit.getPlayer(name)?.also { p ->
+                Bukkit.getOfflinePlayers().find { p -> p.name == name }?.also { p ->
                     messageManager.info("设置扣费转账账户为: ${p.name}")
                 }
             }

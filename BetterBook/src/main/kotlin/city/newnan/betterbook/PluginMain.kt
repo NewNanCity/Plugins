@@ -18,6 +18,7 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.block.Action
 import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.inventory.InventoryHolder
 import org.bukkit.inventory.meta.BookMeta
 import java.util.*
 
@@ -47,11 +48,12 @@ class PluginMain : ExtendedJavaPlugin() {
         Librarian.enable()
 
         // 直接阅读
-        Events.subscribe(PlayerInteractEvent::class.java, EventPriority.MONITOR)
-            .filter(EventFilters.ignoreCancelled())
+        Events.subscribe(PlayerInteractEvent::class.java, EventPriority.HIGHEST)
+            // IgnoreCancelled 会导致 RIGHT_CLICK_AIR 检测不到
             .filter { it.hasItem() }
-            .filter { it.action == Action.RIGHT_CLICK_AIR
-                    || (it.action == Action.RIGHT_CLICK_BLOCK && it.clickedBlock!!.type != Material.LECTERN) }
+            .filter {
+                it.action == Action.RIGHT_CLICK_AIR
+                    || (it.action == Action.RIGHT_CLICK_BLOCK && it.clickedBlock!!.state !is InventoryHolder) }
             .handler { event ->
                 event.item!!.findBookUUID(writable = false)?.also{ bookId ->
                     Librarian[bookId]?.also {
@@ -68,7 +70,7 @@ class PluginMain : ExtendedJavaPlugin() {
             .bindWith(this)
 
         // 讲台阅读
-        Events.subscribe(PlayerInteractEvent::class.java, EventPriority.MONITOR)
+        Events.subscribe(PlayerInteractEvent::class.java, EventPriority.HIGHEST)
             .filter(EventFilters.ignoreCancelled())
             .filter { !it.player.isSneaking }
             .filter { it.action == Action.RIGHT_CLICK_BLOCK && it.clickedBlock!!.type == Material.LECTERN }
@@ -84,7 +86,7 @@ class PluginMain : ExtendedJavaPlugin() {
             .bindWith(this)
 
         // 物品框阅读
-        Events.subscribe(PlayerInteractEntityEvent::class.java, EventPriority.MONITOR)
+        Events.subscribe(PlayerInteractEntityEvent::class.java, EventPriority.HIGHEST)
             .filter(EventFilters.ignoreCancelled())
             .filter { !it.player.isSneaking }
             .filter { it.rightClicked.type == EntityType.ITEM_FRAME }

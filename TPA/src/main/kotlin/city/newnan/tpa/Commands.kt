@@ -32,7 +32,7 @@ object Commands : BaseCommand() {
     @Description("屏蔽某玩家的传送请求")
     @CommandPermission("tpa.user")
     fun block(sender: Player, playerName: String) {
-        val player = Bukkit.getPlayer(playerName)
+        val player = Bukkit.getOfflinePlayers().find { p -> p.name == playerName }
         if (player != null) {
             if (sender == player) PluginMain.INSTANCE.messageManager.printf(sender, "?啥")
             else {

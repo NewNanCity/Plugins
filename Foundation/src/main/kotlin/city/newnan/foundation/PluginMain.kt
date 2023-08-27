@@ -175,7 +175,7 @@ class PluginMain : ExtendedJavaPlugin() {
         configManager.parse<ConfigFile>("config.yml").also {
             targetAccount = it.target?.let { name ->
                 if (name.isBlank()) return@let null
-                Bukkit.getPlayer(name)?.also { p ->
+                Bukkit.getOfflinePlayers().find { p -> p.name == name }?.also { p ->
                     messageManager.info("设置基金账户为: ${p.name}")
                 }
             }

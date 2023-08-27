@@ -13,7 +13,7 @@
 
 ## 一些需要注意的
 
-scoreboard、tp等不是线程安全的，需要切换至同步任务
+scoreboard、tp、dispatchCommand等不是线程安全的，需要切换至同步任务
 
 ```kotlin
 @CommandComplete("@players") // OnlinePlayers

@@ -49,7 +49,7 @@ object Commands : BaseCommand() {
     @CommandPermission("mcron.player.push")
     @CommandCompletion("@players @nothing")
     fun onAddPlayerOnJoin(sender: CommandSender, playerName: String, command: String) {
-        Bukkit.getPlayer(playerName)?.uniqueId?.run {
+        Bukkit.getOfflinePlayers().find { p -> p.name == playerName }?.uniqueId?.run {
             PluginMain.INSTANCE.pushPlayerJoinTask(this, command)
             PluginMain.INSTANCE.messageManager.printf(sender, "已为玩家 §a§l$playerName§r 添加任务, 将会在玩家加入后执行!")
         } ?: run {

@@ -19,9 +19,6 @@ fun openRailLineGui(session: PlayerGuiSession, editable: Boolean, lineO: RailLin
     session.open(stationGui, { type, gui, _ ->
         // Init
         if (type == UpdateType.Init) {
-            gui.setItem(6, 9, ItemBuilder.from(Material.BARRIER).name(Component.text("返回")).asGuiItem {
-                session.back()
-            })
             if (editable) {
                 gui.setItem(6, 1, ItemBuilder.from("cf7cdeefc6d37fecab676c584bf620832aaac85375e9fcbff27372492d69f".toSkull())
                     .name(Component.text("添加站点")).asGuiItem {

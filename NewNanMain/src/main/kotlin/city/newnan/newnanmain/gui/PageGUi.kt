@@ -1,4 +1,4 @@
-package city.newnan.railarea.gui
+package city.newnan.newnanmain.gui
 
 import city.newnan.violet.gui.PlayerGuiSession
 import city.newnan.violet.item.toSkull
@@ -7,7 +7,6 @@ import dev.triumphteam.gui.guis.Gui
 import dev.triumphteam.gui.guis.PaginatedGui
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
-import java.util.*
 
 fun pageGui(session: PlayerGuiSession, title: Component): PaginatedGui {
     val gui = Gui.paginated()

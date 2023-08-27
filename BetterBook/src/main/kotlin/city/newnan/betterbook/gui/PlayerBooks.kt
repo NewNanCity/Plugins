@@ -82,12 +82,13 @@ fun openPlayerBooksGui(session: PlayerGuiSession, target: OfflinePlayer? = null)
                             "§cshift+右键: 删除",
                             "§8预览: §r" + (book.pages.firstOrNull()?.let { it1 ->
                                 "§r§7${it1.substring(0, minOf(35, it1.length)).replace('\n', ' ')}...§r"
-                            } ?: "§r§8无内容§r")
+                            } ?: "§r§8无内容§r"),
+                            "§8UUID: $bookId§r"
                         )
                     }
                 }).asGuiItem {
                     val now = System.currentTimeMillis()
-                    if (now - lastClicked < 1000L) return@asGuiItem
+                    if (now - lastClicked < 300L) return@asGuiItem
                     lastClicked = now
                     if (it.isLeftClick) {
                         val amount = if (it.isShiftClick) 64 else 1

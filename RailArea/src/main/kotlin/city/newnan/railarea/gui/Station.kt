@@ -17,9 +17,6 @@ fun openStationGui (session: PlayerGuiSession, unavailableStations: Set<Station>
     session.open(pageGui(session, Component.text("§7[§3§l牛腩轨道交通§r§7]§r 所有可用站点")), { type, gui, _ ->
         // Init
         if (type == UpdateType.Init) {
-            gui.setItem(6, 9, ItemBuilder.from(Material.BARRIER).name(Component.text("返回")).asGuiItem {
-                session.back()
-            })
             gui.setItem(6, 1, ItemBuilder.from("9a2d891c6ae9f6baa040d736ab84d48344bb6b70d7f1a280dd12cbac4d777".toSkull())
                 .name(Component.text("创建站点")).asGuiItem {
                 handleStationInput(session, null) { newStation ->

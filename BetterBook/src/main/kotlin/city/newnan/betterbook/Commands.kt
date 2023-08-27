@@ -74,7 +74,7 @@ object Commands : BaseCommand() {
             val book2 = Book(
                 title = if (bookMeta.hasDisplayName()) bookMeta.displayName else bookMeta.title ?: book?.title ?: "《无题》",
                 creator = book?.creator ?: player.uniqueId,
-                modifier = bookMeta.author?.let { Bukkit.getPlayer(it)?.uniqueId } ?: player.uniqueId,
+                modifier = bookMeta.author?.let { Bukkit.getOfflinePlayers().find { p -> p.name == it }?.uniqueId } ?: player.uniqueId,
                 created = book?.created ?: now,
                 modified = now,
                 pages = bookMeta.pages.toList(),
@@ -202,6 +202,22 @@ object Commands : BaseCommand() {
         session.clear()
         openOnlinePlayersGui(session) { target ->
             openPlayerBooksGui(session, target)
+        }
+    }
+
+    @Subcommand("open")
+    @Description("打开某本书")
+    @CommandPermission("betterbook.open")
+    @CommandCompletion("@players")
+    fun openBook(sender: CommandSender, target: String, uuid: String) {
+        val players = Bukkit.selectEntities(sender, target).filterIsInstance<Player>()
+        if (players.isEmpty()) {
+            PluginMain.INSTANCE.message.printf(sender, "§c玩家不存在!")
+        }
+        Librarian[UUID.fromString(uuid)]?.also { book ->
+            players.forEach { player ->
+                book.readBook(player)
+            }
         }
     }
 }

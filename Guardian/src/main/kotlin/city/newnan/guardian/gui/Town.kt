@@ -41,7 +41,7 @@ fun openTownGui(session: PlayerGuiSession, who: org.bukkit.entity.Player, player
         { _, _, _ ->
             if (needUpdate) {
                 val canEdit = who.hasPermission("guardian.town.write.other") || town.leader == player.id
-                val leaderPlayer = if (leader == null) null else Bukkit.getPlayer(leader.name)
+                val leaderPlayer = if (leader == null) null else PluginMain.INSTANCE.playerNameMap[leader.name]
                 // 镇长头像
                 if (leaderPlayer == null) {
                     gui.setItem(1, 1, ItemBuilder.from(Material.BLACK_STAINED_GLASS_PANE).name(Component.text("")).asGuiItem())
@@ -49,6 +49,9 @@ fun openTownGui(session: PlayerGuiSession, who: org.bukkit.entity.Player, player
                     gui.setItem(1, 1, ItemBuilder.from(leaderPlayer.getSkull())
                         .name(Component.text("§6§l镇长§r§7: §f${leaderPlayer.name}"))
                         .asGuiItem())
+                }
+                if (town.qqGroup != null) {
+                    gui.setItem(1, 1, ItemBuilder.from(Material.BELL).name(Component.text("QQ群: §6§l${town.qqGroup}")).asGuiItem())
                 }
                 // 添加成员
                 if (canEdit) {
@@ -61,7 +64,7 @@ fun openTownGui(session: PlayerGuiSession, who: org.bukkit.entity.Player, player
                                     session.show()
                                     return@chatInput true
                                 }
-                                val target = Bukkit.getPlayer(input)
+                                val target = PluginMain.INSTANCE.playerNameMap[input]
                                 val record = input.findPlayer()
                                 if (target == null || record == null) {
                                     PluginMain.INSTANCE.message.printf(session.player, "§c找不到玩家: $input, 请重新输入, 或者输入§c cancel §a取消操作")
@@ -95,7 +98,7 @@ fun openTownGui(session: PlayerGuiSession, who: org.bukkit.entity.Player, player
                 // 成员列表
                 members.forEach { member ->
                     if (member.id == town.leader) return@forEach
-                    val memberPlayer = Bukkit.getPlayer(member.name) ?: return@forEach
+                    val memberPlayer = PluginMain.INSTANCE.playerNameMap[member.name] ?: return@forEach
                     gui.addItem(ItemBuilder.from(memberPlayer.getSkull())
                         .name(Component.text(member.name)).also {
                             if (canEdit) {

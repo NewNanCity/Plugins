@@ -66,26 +66,26 @@ object Commands : BaseCommand() {
     @Subcommand("judgement add")
     @CommandPermission("guardian.judgemental.edit")
     @CommandCompletion("@players")
-    fun onAddJudgement(sender: CommandSender, target: String) {
-        val p = Bukkit.getPlayer(target)
+    fun onAddJudgement(sender: CommandSender, playerName: String) {
+        val p = Bukkit.getOfflinePlayers().find { p -> p.name == playerName }
         if (p == null) {
-            PluginMain.INSTANCE.message.printf(sender, "§c玩家 §f$target §c不存在!")
+            PluginMain.INSTANCE.message.printf(sender, "§c玩家 §f$playerName §c不存在!")
             return
         }
         if (PluginMain.INSTANCE.judgementalPlayers.contains(p.uniqueId)) {
-            PluginMain.INSTANCE.message.printf(sender, "§c玩家 §f$target §c已经是风纪委员了!")
+            PluginMain.INSTANCE.message.printf(sender, "§c玩家 §f$playerName §c已经是风纪委员了!")
             return
         }
         PluginMain.INSTANCE.judgementalPlayers.add(p.uniqueId)
         PluginMain.INSTANCE.save()
-        PluginMain.INSTANCE.message.printf(sender, "§a玩家 §f$target §a已经成为风纪委员!")
+        PluginMain.INSTANCE.message.printf(sender, "§a玩家 §f$playerName §a已经成为风纪委员!")
     }
 
     @Subcommand("judgement remove")
     @CommandPermission("guardian.judgemental.edit")
     @CommandCompletion("@players")
     fun onRemoveJudgement(sender: CommandSender, playerName: String) {
-        val p = Bukkit.getPlayer(playerName)
+        val p = Bukkit.getOfflinePlayers().find { p -> p.name == playerName }
         if (p == null) {
             PluginMain.INSTANCE.message.printf(sender, "§c玩家 §f$playerName §c不存在!")
             return
@@ -110,7 +110,7 @@ object Commands : BaseCommand() {
     @CommandCompletion("@players")
     @CommandPermission("guardian.lookup")
     fun onLookup(sender: CommandSender, playerName: String) {
-        val p = Bukkit.getPlayer(playerName)
+        val p = Bukkit.getOfflinePlayers().find { p -> p.name == playerName }
         if (p == null) {
             PluginMain.INSTANCE.message.printf(sender, "§c玩家 §f$playerName §c不存在!")
             return

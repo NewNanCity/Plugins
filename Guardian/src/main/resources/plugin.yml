@@ -26,7 +26,7 @@ provides: ${project.provides}
 
 
 # 默认为 op
-default-permission: op
+default-permission: false
 # 权限节点, 可选
 permissions:
   # 模板

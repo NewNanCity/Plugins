@@ -104,7 +104,7 @@ object Commands : BaseCommand() {
             PluginMain.INSTANCE.updateArea(sender, selection.range.minX, selection.range.maxX, selection.range.minZ, selection.range.maxZ)
             PluginMain.INSTANCE.messageManager.printf(sender, "§a已为自己创建创造区域!")
         } else {
-            Bukkit.getPlayer(target)?.run {
+            Bukkit.getOfflinePlayers().find { p -> p.name == target }?.run {
                 PluginMain.INSTANCE.updateArea(this, selection.range.minX, selection.range.maxX, selection.range.minZ, selection.range.maxZ)
                 PluginMain.INSTANCE.messageManager.printf(sender, "§a已为玩家 §c$target§r §a创建创造区域!")
             } ?: PluginMain.INSTANCE.messageManager.printf(sender, "§c玩家 §a$target§r §c不存在!")

@@ -61,15 +61,18 @@ object Commands : BaseCommand() {
             PluginMain.INSTANCE.messageManager.printf(sender, "只能在命令方块中使用!")
             return
         }
-        if (selector != "@p") {
-            PluginMain.INSTANCE.messageManager.printf(sender, "暂时只能用@p!")
-            return
+        try {
+            Bukkit.selectEntities(sender, selector).filterIsInstance<Player>().onEach {
+                PluginMain.INSTANCE.messageManager.printf(sender, "已选择玩家 §a${it.name} §r捐赠!")
+                donate(it, amount)
+            }.also {
+                if (it.isEmpty()) {
+                    PluginMain.INSTANCE.messageManager.printf(sender, "选择器 §a$selector §r未选择到任何玩家!")
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-        // find nearest player
-        sender.block.world.players.minByOrNull { entity -> entity.location.distance(sender.block.location) }?.let { entity ->
-                PluginMain.INSTANCE.messageManager.printf(sender, "已选择玩家 §a${entity.name} §r捐赠!")
-                donate(entity, amount)
-            } ?: run { PluginMain.INSTANCE.messageManager.printf(sender, "附近没有玩家!") }
     }
 
     @Subcommand("query")
@@ -106,7 +109,7 @@ object Commands : BaseCommand() {
             PluginMain.INSTANCE.messageManager.printf(sender, "§c基金会余额不足, 无法拨款!")
             return
         }
-        val targetAccount = Bukkit.getPlayer(target)
+        val targetAccount = Bukkit.getOfflinePlayers().find { p -> p.name == target }
         if (targetAccount == null) {
             PluginMain.INSTANCE.messageManager.printf(sender, "§c玩家 §f$target §r不存在!")
             return

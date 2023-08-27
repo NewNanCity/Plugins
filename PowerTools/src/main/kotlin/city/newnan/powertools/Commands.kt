@@ -45,7 +45,7 @@ object Commands : BaseCommand() {
     @Description("根据玩家名获取头颅")
     @CommandCompletion("@players")
     fun onPlayerHead(sender: Player, playerName: String) {
-        Bukkit.getPlayer(playerName)?.let {
+        Bukkit.getOfflinePlayers().find { p -> p.name == playerName }?.let {
             if (sender.inventory.addItem(it.getSkull(1)).size > 0) {
                 PluginMain.INSTANCE.messageManager.printf(sender, "§c你的背包已满!")
                 return

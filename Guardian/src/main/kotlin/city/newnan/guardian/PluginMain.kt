@@ -16,8 +16,11 @@ import net.milkbowl.vault.economy.Economy
 import net.milkbowl.vault.permission.Permission
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
+import org.bukkit.OfflinePlayer
 import org.bukkit.event.EventPriority
 import org.bukkit.event.player.PlayerChangedWorldEvent
+import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerQuitEvent
 import org.ktorm.dsl.eq
 import org.ktorm.dsl.update
 import java.util.*
@@ -39,6 +42,7 @@ class PluginMain : ExtendedJavaPlugin() {
     val command: PaperCommandManager by lazy { PaperCommandManager(this) }
     val gui: GuiManager by lazy { GuiManager(this) }
     val message: MessageManager by lazy { MessageManager(this) }
+    val playerNameMap = mutableMapOf<String, OfflinePlayer>()
     private var database: HikariDataSource? = null
     lateinit var permission: Permission
     lateinit var economy: Economy
@@ -65,6 +69,13 @@ class PluginMain : ExtendedJavaPlugin() {
         command.locales.setDefaultLocale(Locale.SIMPLIFIED_CHINESE)
         command.registerCommand(Commands)
 
+        if (playerNameMap.isEmpty()) {
+            Bukkit.getOfflinePlayers().forEach {
+                if (!it.hasPlayedBefore() || it.name == null) return@forEach
+                playerNameMap[it.name!!] = it
+            }
+        }
+
         refreshServerLock()
         lockOnlinePlayers()
         Bukkit.getOnlinePlayers().forEach { addPlayerIp(it) }
@@ -73,6 +84,10 @@ class PluginMain : ExtendedJavaPlugin() {
             where { it.id eq DBManager.serverId }
         }
         enableTrigger()
+
+        Events.subscribe(PlayerJoinEvent::class.java)
+            .handler { playerNameMap[it.player.name] = it.player }
+            .bindWith(this)
 
         // 玩家切换世界时触发，用于让风纪委员与其状态一致
         Events.subscribe(PlayerChangedWorldEvent::class.java, EventPriority.MONITOR)
@@ -87,9 +102,22 @@ class PluginMain : ExtendedJavaPlugin() {
                 } else if (!from && to) {
                     permission.playerRemoveGroup(event.from.name, player, judgementalGroup)
                     player.gameMode = GameMode.SURVIVAL
+                    player.allowFlight = false
                     Bukkit.getServer().dispatchCommand(Bukkit.getServer().consoleSender, "vanish ${player.name} disable")
                 }
             }
+            .bindWith(this)
+        Events.subscribe(PlayerQuitEvent::class.java, EventPriority.MONITOR)
+            .handler { event ->
+                val player = event.player
+                if (permission.playerInGroup(player.world.name, player, judgementalGroup)) {
+                    permission.playerRemoveGroup(player.world.name, player, judgementalGroup)
+                    player.gameMode = GameMode.SURVIVAL
+                    player.allowFlight = false
+                    Bukkit.getServer().dispatchCommand(Bukkit.getServer().consoleSender, "vanish ${player.name} disable")
+                }
+            }
+            .bindWith(this)
     }
 
     private fun reload() {

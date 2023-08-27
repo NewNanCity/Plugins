@@ -75,7 +75,7 @@ fun openEditBookGui(session: PlayerGuiSession, targetId: UUID, oldBook: Pair<UUI
                                         title = if (meta.hasDisplayName()) meta.displayName else meta.title ?: oldBook?.second?.title ?: "《无题》",
                                         creator = oldBook?.second?.creator ?: targetId,
                                         created = oldBook?.second?.created ?: now,
-                                        modifier = meta.author?.let { Bukkit.getPlayer(it)?.uniqueId } ?: session.player.uniqueId,
+                                        modifier = meta.author?.let { Bukkit.getOfflinePlayers().find{ p -> p.name == it }?.uniqueId } ?: session.player.uniqueId,
                                         modified = now,
                                         pages = meta.pages.toList()
                                     )

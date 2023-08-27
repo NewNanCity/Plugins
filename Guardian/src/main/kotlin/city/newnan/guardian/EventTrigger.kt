@@ -77,6 +77,16 @@ fun PluginMain.enableTrigger() {
                     return@run
                 }
                 addPlayerIp(gamePlayer, player)
+                // 设置城镇称号
+                Schedulers.sync().run {
+                    if (player.town == null) {
+                        PluginMain.INSTANCE.server.dispatchCommand(PluginMain.INSTANCE.server.consoleSender,
+                        "newnan prefix player remove ${gamePlayer.uniqueId} Town")
+                    } else {
+                        PluginMain.INSTANCE.server.dispatchCommand(PluginMain.INSTANCE.server.consoleSender,
+                        "newnan prefix player set ${gamePlayer.uniqueId} Town ${player.town!!.id}")
+                    }
+                }
                 if (player.inOtherServer()) {
                     // 在其他服务器上线
                     gamePlayer.kickAsync("你已在其他服务器上线")

@@ -16,11 +16,6 @@ fun openFreeAreaGui (session: PlayerGuiSession) {
     val player = session.player
     val key = PluginMain.INSTANCE.unknownStation to PluginMain.INSTANCE.unknownLine
     session.open(pageGui(session, Component.text("§7[§3§l牛腩轨道交通§r§7]§r 游离区域")), { type, gui, _ ->
-        if (type == UpdateType.Init) {
-            gui.setItem(6, 9, ItemBuilder.from(Material.BARRIER).name(Component.text("返回")).asGuiItem {
-                session.back()
-            })
-        }
         gui.clearPageItems()
         PluginMain.INSTANCE.lineStationAreas[key]?.forEach { area ->
             val item = ItemStack(Material.RAIL).also {
