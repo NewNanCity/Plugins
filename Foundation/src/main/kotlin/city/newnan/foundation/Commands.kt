@@ -109,7 +109,7 @@ object Commands : BaseCommand() {
             PluginMain.INSTANCE.messageManager.printf(sender, "§c基金会余额不足, 无法拨款!")
             return
         }
-        val targetAccount = Bukkit.getOfflinePlayers().find { p -> p.name == target }
+        val targetAccount = PluginMain.INSTANCE.playerNameMap[target]
         if (targetAccount == null) {
             PluginMain.INSTANCE.messageManager.printf(sender, "§c玩家 §f$target §r不存在!")
             return
@@ -131,28 +131,31 @@ object Commands : BaseCommand() {
             session.clear()
             openFoundationTopGui(session)
         } else {
-            val list = PluginMain.INSTANCE.getTop {
-                PluginMain.INSTANCE.messageManager.printf(sender, "§f基金会数据统计中, 请稍候...")
+            val list = PluginMain.INSTANCE.getTop { list ->
+                if (list == null) {
+                    PluginMain.INSTANCE.messageManager.printf(sender, "§f基金会数据统计中, 请稍候...")
+                } else {
+                    // each page 10 items
+                    val maxPage = (list.size + 9) / 10
+                    if (page < 1 || page > maxPage) {
+                        PluginMain.INSTANCE.messageManager.printf(sender, "§c页码超出范围!")
+                        return@getTop
+                    }
+                    val start = (page - 1) * 10
+                    val end = (start + 10).coerceAtMost(list.size)
+                    PluginMain.INSTANCE.messageManager.printf(sender, "§8======================== §6牛腩基金会慈善榜§r§8 =========================")
+                    val pageStart = "§8".padEnd(30 - page.toString().length, '=')
+                    val pageEnd = "§8".padEnd(30 - maxPage.toString().length, '=')
+                    for (i in start until end) {
+                        val record = list[i]
+                        val s1 = "§8[§a${i + 1}§8] §f§l${record.player.name ?: "§8未知"}"
+                        val s2 = "§r§7-  §a§l${record.active} §r§2(+${record.passive}被动)§r"
+                        val paddings = "".padEnd(80 - s1.length - s2.length, ' ')
+                        PluginMain.INSTANCE.messageManager.printf(sender, "$s1$paddings$s2")
+                    }
+                    PluginMain.INSTANCE.messageManager.printf(sender, "$pageStart §f第§a§l $page §r§7/§a§l $maxPage §r§f页§r $pageEnd")
+                }
             }
-            // each page 10 items
-            val maxPage = (list.size + 9) / 10
-            if (page < 1 || page > maxPage) {
-                PluginMain.INSTANCE.messageManager.printf(sender, "§c页码超出范围!")
-                return
-            }
-            val start = (page - 1) * 10
-            val end = (start + 10).coerceAtMost(list.size)
-            PluginMain.INSTANCE.messageManager.printf(sender, "§8======================== §6牛腩基金会慈善榜§r§8 =========================")
-            val pageStart = "§8".padEnd(30 - page.toString().length, '=')
-            val pageEnd = "§8".padEnd(30 - maxPage.toString().length, '=')
-            for (i in start until end) {
-                val record = list[i]
-                val s1 = "§8[§a${i + 1}§8] §f§l${record.player.name ?: "§8未知"}"
-                val s2 = "§r§7-  §a§l${record.active} §r§2(+${record.passive}被动)§r"
-                val paddings = "".padEnd(80 - s1.length - s2.length, ' ')
-                PluginMain.INSTANCE.messageManager.printf(sender, "$s1$paddings$s2")
-            }
-            PluginMain.INSTANCE.messageManager.printf(sender, "$pageStart §f第§a§l $page §r§7/§a§l $maxPage §r§f页§r $pageEnd")
         }
     }
 }

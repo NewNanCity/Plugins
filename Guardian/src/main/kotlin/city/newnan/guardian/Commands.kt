@@ -6,6 +6,7 @@ import co.aikar.commands.BaseCommand
 import co.aikar.commands.CommandHelp
 import co.aikar.commands.annotation.*
 import co.aikar.commands.annotation.Optional
+import me.lucko.helper.Schedulers
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.command.CommandSender
@@ -116,27 +117,33 @@ object Commands : BaseCommand() {
             return
         }
         val r = playerName.findPlayer()
-        if (r == null) {
-            PluginMain.INSTANCE.message.printf(sender, "§c玩家 §f$playerName §c不存在!")
-            return
-        }
-        val ips = DBManager.db.playerIps.filter { it.id eq r.id }.map { it.ip }
+        val ips = if (r == null) emptyList() else DBManager.db.playerIps.filter { it.id eq r.id }.map { it.ip }
         PluginMain.INSTANCE.message.also {
+            it.printf(sender, "§8===============================================")
             it.printf(sender, "§7昵称:   §f${p.name}")
             it.printf(sender, "§7UUID:    §f${p.uniqueId}")
-            it.printf(sender, "§7重生点: §f${p.bedSpawnLocation?.world?.name} ${p.bedSpawnLocation?.blockX} ${p.bedSpawnLocation?.blockY} ${p.bedSpawnLocation?.blockZ}")
-            it.printf(sender, "§7在线时长: §f${millisecondToDuration(p.getStatistic(org.bukkit.Statistic.PLAY_ONE_MINUTE) * 50L)}")
-            it.printf(sender, "§7QQ:      §f${r.qq ?: "无"} ${if (r.qq == null) "" else if (r.inQQGroup) "§a[已加入]" else "§c[未加入]"}")
-            it.printf(sender, "§7频道:    §f${r.qqguild ?: "无"} ${if (r.qqguild == null) "" else if (r.inQQGuild) "§a[已加入]" else "§c[未加入]"}")
-            it.printf(sender, "§7Discord: §f${r.discord ?: "无"} ${if (r.discord == null) "" else if (r.inDiscord) "§a[已加入]" else "§c[未加入]"}")
+            it.printf(sender, "§7现金:   §f${PluginMain.INSTANCE.economy.getBalance(p)} §7₦")
+            if (p.bedSpawnLocation == null)
+                it.printf(sender, "§7重生点: §f无")
+            else
+                it.printf(sender, "§7重生点: §f${p.bedSpawnLocation!!.world?.name} ${p.bedSpawnLocation!!.blockX} ${p.bedSpawnLocation!!.blockY} ${p.bedSpawnLocation!!.blockZ}")
             it.printf(sender, "§7第一次登录时间:   §f${if (p.firstPlayed > 0) millisecondToTime(p.firstPlayed) else "§7未登录过"}")
             it.printf(sender, "§7最后一次登录时间: §f${if (p.lastPlayed > 0) millisecondToTime(p.lastPlayed) else "§7未登录过"}")
-            if (r.notBan()) it.printf(sender, "§7封禁状态: §a未封禁")
-            else if (r.tmpBan()) it.printf(sender, "§7封禁状态: §e临时封禁 §7至 §f${r.banExpire!!.format(expireFormatter)}")
-            else if (r.forceBan()) it.printf(sender, "§7封禁状态: §c永久封禁")
-            it.printf(sender, "§7小镇: §f${r.town?.name ?: "§7未加入小镇"}")
-            it.printf(sender, "§7现金: §f${PluginMain.INSTANCE.economy.getBalance(p)} §7₦")
-            it.printf(sender, "§7历史IP: §f${ips.joinToString(", ")}")
+            it.printf(sender, "§7在线时长: §f${millisecondToDuration(p.getStatistic(org.bukkit.Statistic.PLAY_ONE_MINUTE) * 50L)}")
+
+            if (r != null) {
+                it.printf(sender, "§7QQ:      §f${r.qq ?: "无"} ${if (r.qq == null) "" else if (r.inQQGroup) "§a[已加入]" else "§c[未加入]"}")
+                it.printf(sender, "§7频道:    §f${r.qqguild ?: "无"} ${if (r.qqguild == null) "" else if (r.inQQGuild) "§a[已加入]" else "§c[未加入]"}")
+                it.printf(sender, "§7Discord: §f${r.discord ?: "无"} ${if (r.discord == null) "" else if (r.inDiscord) "§a[已加入]" else "§c[未加入]"}")
+                if (r.notBan()) it.printf(sender, "§7封禁状态: §a未封禁")
+                else if (r.tmpBan()) it.printf(sender, "§7封禁状态: §e临时封禁 §7至 §f${r.banExpire!!.format(expireFormatter)}")
+                else if (r.forceBan()) it.printf(sender, "§7封禁状态: §c永久封禁")
+                it.printf(sender, "§7小镇: §f${r.town?.name ?: "§7未加入小镇"}")
+                it.printf(sender, "§7历史IP: §f${ips.joinToString(", ")}")
+            } else {
+                it.printf(sender, "§c该玩家未绑定过!")
+            }
+            it.printf(sender, "§8===============================================")
         }
     }
 
@@ -147,19 +154,24 @@ object Commands : BaseCommand() {
             PluginMain.INSTANCE.message.printf(sender, "§c你没有权限查看其他小镇的信息!")
             return
         }
-        val player = sender.name.findPlayer()
-        val town = if (townName == null) player?.town else townName.findTown()
-        if (town == null) {
-            if (townName == null) {
-                PluginMain.INSTANCE.message.printf(sender, "§c你还没有加入任何小镇!")
-            } else {
-                PluginMain.INSTANCE.message.printf(sender, "§c小镇 §f${townName} &c不存在!")
+        PluginMain.INSTANCE.message.printf(sender, "§7查询中, 请稍候...")
+        Schedulers.async().run {
+            val player = sender.name.findPlayer()
+            val town = if (townName == null) player?.town else townName.findTown()
+            Schedulers.sync().run {
+                if (town == null) {
+                    if (townName == null) {
+                        PluginMain.INSTANCE.message.printf(sender, "§c你还没有加入任何小镇!")
+                    } else {
+                        PluginMain.INSTANCE.message.printf(sender, "§c小镇 §f${townName} &c不存在!")
+                    }
+                } else {
+                    val session = PluginMain.INSTANCE.gui[sender]
+                    session.clear()
+                    openTownGui(session, sender, player!!, town)
+                }
             }
-            return
         }
-        val session = PluginMain.INSTANCE.gui[sender]
-        session.clear()
-        openTownGui(session, sender, player!!, town)
     }
 }
 

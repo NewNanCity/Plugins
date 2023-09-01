@@ -85,7 +85,7 @@ class PluginMain : ExtendedJavaPlugin() {
             .handler { cancelFly(it.player, false) }
             .bindWith(this)
 
-        Schedulers.async().runRepeating( Runnable {
+        Schedulers.async().runRepeating({ _ ->
             if (flyingPlayers.size > 0) {
                 // 不能在遍历的时候删除元组，所以需要暂时记录
                 val toDeleteFlyingPlayer = ArrayList<Player>()
@@ -117,6 +117,7 @@ class PluginMain : ExtendedJavaPlugin() {
                             player.sendTitle("§c余额即将耗尽, 请尽快结束飞行!", null, 1, 7, 2)
                         }
                         player.flySpeed = flySpeed
+                        player.allowFlight = true
                     } else {
                         // 如果玩家没钱了，就踢出去
                         // 不能直接从里面删除，不太好，会让迭代器受损，所以先登记，for完了再删

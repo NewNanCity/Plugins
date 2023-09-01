@@ -70,8 +70,15 @@ class PluginMain : ExtendedJavaPlugin() {
             .handler { checkPlayer(it.player) }
             .bindWith(this)
         Events.subscribe(PlayerChangedWorldEvent::class.java, EventPriority.MONITOR)
-            .filter { it.from.name == createWorld }
-            .handler { it.player.gameMode = org.bukkit.GameMode.SURVIVAL }
+            .filter { it.player.world.name != createWorld }
+            .handler {
+                it.player.gameMode = org.bukkit.GameMode.SURVIVAL
+                it.player.allowFlight = false
+                it.player.isFlying = false
+                it.player.flySpeed = 0.2f
+                it.player.walkSpeed = 0.2f
+                it.player.isHealthScaled = false
+            }
             .bindWith(this)
     }
 

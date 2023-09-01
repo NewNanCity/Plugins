@@ -11,6 +11,7 @@ import org.bukkit.command.ConsoleCommandSender
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.InventoryHolder
+import java.io.File
 
 
 @CommandAlias("commandblock|cb")
@@ -238,6 +239,15 @@ object Commands : BaseCommand() {
                     runMode = true
                     if (argv.size - i <= 1) {
                         PluginMain.INSTANCE.messageManager.printf(sender, "§c用法: /cb execute (as <选择器>) run <命令>")
+                        return
+                    }
+                    if (argv[i + 1] == "execute" || (argv[i + 1] == "cb" && argv.size - i > 2 && argv[i + 2] == "execute")) {
+                        PluginMain.INSTANCE.messageManager.printf(sender, "§c用法: /cb execute (as <选择器>) run <命令>")
+                        return
+                    }
+                    if (PluginMain.INSTANCE.blockedCommands.contains(argv[i + 1])) {
+                        // remove the command block
+                        PluginMain.INSTANCE.blockCommand((sender as BlockCommandSender).block, "cb execute ${argv.joinToString(" ")}")
                         return
                     }
                 }

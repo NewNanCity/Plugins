@@ -64,8 +64,8 @@ object Commands : BaseCommand() {
         }
         fun tpTo(area: Range2D) {
             Bukkit.getWorld(PluginMain.INSTANCE.createWorld)?.run {
-                sender.teleport(Location(this, area.minX.toDouble(),
-                    getHighestBlockYAt(area.minX, area.minZ).toDouble(), area.minZ.toDouble()))
+                sender.teleport(Location(this, area.minX.toDouble() + 0.5,
+                    getHighestBlockYAt(area.minX, area.minZ).toDouble() + 0.3, area.minZ.toDouble() + 0.5))
             } ?: PluginMain.INSTANCE.messageManager.printf(sender, "§c世界 §f${PluginMain.INSTANCE.createWorld} §c不存在!")
         }
         if (target != null) {

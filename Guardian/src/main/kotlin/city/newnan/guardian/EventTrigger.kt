@@ -17,9 +17,11 @@ import java.util.*
 fun PluginMain.inPlayerGroup(player: OfflinePlayer) =
     permission.playerInGroup(groupWorld, player, playersGroup)
 fun PluginMain.inNewbieGroup(player: OfflinePlayer) =
-    permission.playerInGroup(groupWorld, player, newbieGroup)
-fun PluginMain.toPlayerGroup(player: OfflinePlayer) =
+    permission.playerInGroup(groupWorld, player, newbieGroup) && !permission.playerInGroup(groupWorld, player, playersGroup)
+fun PluginMain.toPlayerGroup(player: OfflinePlayer) {
+    permission.playerRemoveGroup(groupWorld, player, newbieGroup)
     permission.playerAddGroup(groupWorld, player, playersGroup)
+}
 fun org.bukkit.entity.Player.kickAsync(msg: String) = Schedulers.sync().run { kickPlayer(msg) }
 
 val expireFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy年MM月dd日", Locale.CHINA)

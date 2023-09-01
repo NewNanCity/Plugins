@@ -16,6 +16,7 @@ import net.milkbowl.vault.economy.Economy
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import org.bukkit.event.EventPriority
+import org.bukkit.event.player.PlayerJoinEvent
 import java.io.File
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -52,6 +53,8 @@ class PluginMain : ExtendedJavaPlugin() {
     private var patchPassiveTransferMap = mutableMapOf<UUID, BigDecimal>()
     private var topCache: List<RecordDisplay>? = null
     private val dateFormatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+    val playerUUIDMap = mutableMapOf<UUID, OfflinePlayer>()
+    val playerNameMap = mutableMapOf<String, OfflinePlayer>()
 
     private val recordsStrReader: ObjectReader
     private val recordsStrWriter: ObjectWriter
@@ -76,6 +79,14 @@ class PluginMain : ExtendedJavaPlugin() {
         economy = server.servicesManager.getRegistration(Economy::class.java)?.provider
             ?: throw Exception("Vault economy service not found!")
 
+        if (playerNameMap.isEmpty() || playerUUIDMap.isEmpty()) {
+            Bukkit.getOfflinePlayers().forEach { player ->
+                if (player.name == null || !player.hasPlayedBefore()) return@forEach
+                playerUUIDMap[player.uniqueId] = player
+                playerNameMap[player.name!!] = player
+            }
+        }
+
         reload()
         messageManager setPlayerPrefix "§7[§6牛腩基金§7] §f"
 
@@ -83,6 +94,12 @@ class PluginMain : ExtendedJavaPlugin() {
         commandManager.enableUnstableAPI("help")
         commandManager.registerCommand(Commands)
         commandManager.locales.setDefaultLocale(Locale.SIMPLIFIED_CHINESE)
+
+        Events.subscribe(PlayerJoinEvent::class.java, EventPriority.MONITOR)
+            .handler {
+                playerNameMap[it.player.name] = it.player
+                playerUUIDMap[it.player.uniqueId] = it.player
+            }.bindWith(this)
 
         Events.subscribe(UserBalanceUpdateEvent::class.java, EventPriority.MONITOR)
             .filter { targetAccount != null }
@@ -175,7 +192,7 @@ class PluginMain : ExtendedJavaPlugin() {
         configManager.parse<ConfigFile>("config.yml").also {
             targetAccount = it.target?.let { name ->
                 if (name.isBlank()) return@let null
-                Bukkit.getOfflinePlayers().find { p -> p.name == name }?.also { p ->
+                playerNameMap[name]?.also { p ->
                     messageManager.info("设置基金账户为: ${p.name}")
                 }
             }
@@ -208,19 +225,24 @@ class PluginMain : ExtendedJavaPlugin() {
         patchPassiveTransferMap[account.uniqueId] = patchPassiveTransferMap.getOrDefault(account.uniqueId, BigDecimal.ZERO) + amount
     }
 
-    internal fun getTop(onUpdate: () -> Unit): List<RecordDisplay> {
-        if (topCache != null) return topCache!!
-        onUpdate()
-        Schedulers.sync().runLater({ topCache = null }, 1200L).bindWith(this)
-        val list = mutableListOf<RecordDisplay>()
-        for (record in recordsReader.readValues<RecordDouble>(File(dataFolder, "data.csv"))) {
-            val player = Bukkit.getOfflinePlayer(record.id)
-            if (!player.hasPlayedBefore()) continue
-            list.add(RecordDisplay(player, record.active, record.passive))
+    private var lock = false
+    internal fun getTop(onUpdate: (List<RecordDisplay>?) -> Unit) {
+        if (topCache != null) return onUpdate(topCache!!)
+        if (lock) return
+        lock = true
+        onUpdate(null)
+        Schedulers.async().run {
+            val list = mutableListOf<RecordDisplay>()
+            for (record in recordsReader.readValues<RecordDouble>(File(dataFolder, "data.csv"))) {
+                val player = playerUUIDMap[record.id] ?: continue
+                list.add(RecordDisplay(player, record.active, record.passive))
+            }
+            list.sortByDescending { record -> record.passive + record.active }
+            topCache = list
+            onUpdate(topCache!!)
+            Schedulers.sync().runLater({ topCache = null }, 1200L).bindWith(this)
+            lock = false
         }
-        list.sortByDescending { record -> record.passive + record.active }
-        topCache = list
-        return topCache!!
     }
 
     fun appendAllocationLog(date: Date, who: OfflinePlayer?, target: OfflinePlayer, amount: Double, reason: String) {
