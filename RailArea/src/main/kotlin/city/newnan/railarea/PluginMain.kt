@@ -494,7 +494,7 @@ class PluginMain : ExtendedJavaPlugin() {
             areas.map {
                 val station = stationIdMap[it.station]
                 val line = lineIdMap[it.line]
-                if (station != null && line != null && station.lines.contains(line)) {
+                if (station != null && line != null && station.lines.contains(line) && line.stations.contains(station)) {
                     return@map RailArea(world, it.range3D, it.direction, it.stopPoint, station, line, it.reverse)
                 } else {
                     return@map RailArea(world, it.range3D, it.direction, it.stopPoint, unknownStation, unknownLine, it.reverse)
