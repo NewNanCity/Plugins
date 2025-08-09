@@ -318,16 +318,23 @@ flowchart LR
 ### 🔄 贡献流程
 
 ```mermaid
-gitgraph
-    commit id: "Fork"
-    branch feature
-    checkout feature
-    commit id: "开发"
-    commit id: "测试"
-    commit id: "文档"
-    checkout main
-    merge feature
-    commit id: "合并"
+graph LR
+    A[🍴 Fork 项目] --> B[🌿 创建分支]
+    B --> C[💻 开发功能]
+    C --> D[🧪 测试验证]
+    D --> E[📝 完善文档]
+    E --> F[📤 提交 PR]
+    F --> G[🔄 代码审查]
+    G --> H[✅ 合并主分支]
+
+    style A fill:#e1f5fe
+    style B fill:#f3e5f5
+    style C fill:#e8f5e8
+    style D fill:#fff3e0
+    style E fill:#fce4ec
+    style F fill:#e0f2f1
+    style G fill:#f1f8e9
+    style H fill:#e8eaf6
 ```
 
 </div>
@@ -338,7 +345,7 @@ gitgraph
 
 <div align="center">
 
-### �️ 特别鸣谢
+### 🎉 特别鸣谢
 
 > 🧪 **NSrank**
 > 感谢 NSrank 提供认真细致的测试工作，为项目质量保障做出了重要贡献
@@ -349,7 +356,7 @@ gitgraph
 
 ---
 
-### �🌟 感谢开源生态
+### 🎊 感谢开源生态
 
 [![PaperMC](https://img.shields.io/badge/PaperMC-00ADD8?style=for-the-badge&logo=minecraft&logoColor=white)](https://papermc.io/)
 [![Adventure](https://img.shields.io/badge/Adventure-FF6B6B?style=for-the-badge&logo=github&logoColor=white)](https://docs.adventure.kyori.net/)
