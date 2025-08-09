@@ -1,0 +1,208 @@
+core:
+  plugin:
+    reloaded: ExternalBook 插件重载成功
+    reload_failed: ExternalBook 插件重载失败
+  error:
+    player_only: <red>此命令只能由玩家执行
+    invalid_uuid: <red>无效的UUID格式
+  common:
+    invalid_book_id: <red>无效的书籍ID格式
+commands:
+  common:
+    librarian_not_available: <red>图书馆服务不可用，请联系管理员
+    log_librarian_not_available: 用户 {0} 的图书管理员不可用
+    invalid_book_id: <red>无效的书籍ID格式
+  help:
+    description: 显示帮助信息
+    query: 获取命令帮助
+  main:
+    description: ExternalBook主命令
+  reload:
+    description: 重载插件配置
+    success: <green>插件配置重载成功！
+    failed: '<red>插件配置重载失败: {0}'
+    log_success: 配置重载成功
+    log_failed: 配置重载失败
+  import:
+    description: 将书籍导入图书馆
+    success_new: <green>书籍注册并导入成功，现在可以出版了！
+    success_update: <green>书籍内容更新完毕，所有出版成书内容随之更新！
+    invalid_item: <red>请用主手拿[书与笔]或者普通的[成书]！
+    no_permission: <red>只有原作者/OP/特别授权者能够导入已注册的原书！
+    failed: <red>导入书籍失败
+    log_success: 用户 {0} 的书籍导入成功
+    log_failed: 用户 {0} 的书籍导入失败
+  export:
+    description: 从图书馆导出书籍
+    success: <green>原书导出成功，可以使用该书编辑内容！
+    not_found: <red>未找到要导出的书籍
+    not_author: <red>只有原作者可以导出此书
+    inventory_full: <red>背包已满，无法导出原书！
+    failed: <red>导出书籍失败
+    invalid_item: <red>请在主手持有一本[成书]！
+    log_opened: 用户 {0} 的书籍导出已打开
+    log_failed: 用户 {0} 的书籍导出失败
+  publish:
+    description: 在图书馆发布书籍
+    success: <green>书目出版成功，修改内容将会同步到发布的书中！
+    not_found: <red>未找到要发布的书籍
+    not_author: <red>只有原作者可以发布此书
+    inventory_full: <red>背包已满，无法出版图书！
+    failed: <red>发布书籍失败
+    invalid_item: <red>请在主手持有一本[成书]！
+    log_success: 用户 {0} 的书籍发布成功
+    log_failed: 用户 {0} 的书籍发布失败
+  strip:
+    description: 从图书馆管理中解绑书籍
+    success: <green>已解绑该书，这本书变成一本普通的书，不再受书局管理！
+    not_found: <red>未找到要解绑的书籍
+    not_author: <red>只有原作者可以解绑此书
+    failed: <red>解绑书籍失败
+    invalid_item: <red>请在主手持有一本[成书]！
+    log_success: 用户 {0} 的书籍解绑成功
+    log_failed: 用户 {0} 的书籍解绑失败
+  open:
+    description: 为玩家打开书籍
+    success: '<green>已为玩家 {0} 打开书籍: {1}'
+    book_not_found: <red>指定的书籍不存在
+    failed: <red>打开书籍失败
+    player: 目标玩家
+    ulid: 书籍ULID
+    log_success: 为玩家 {0} 打开书籍成功
+    log_failed: 为玩家 {0} 打开书籍失败
+  give:
+    description: 将书籍给予玩家
+    success: <green>已将书籍 {1} 给予玩家 {0}！
+    book_not_found: <red>指定的书籍不存在！
+    inventory_full: <red>玩家 {0} 的背包已满，书籍已掉落在地上！
+    failed: <red>给予书籍失败
+    player: 目标玩家
+    book_id: 书籍ID
+    success_get: '<green>您收到了一本书: {0}'
+    log_success: 成功给予玩家 {0} 书籍
+    log_failed: 给予玩家 {0} 书籍失败
+  admin:
+    description: 图书馆管理员命令
+    gui_opening: <green>正在打开管理员界面...
+    gui_failed: <red>打开管理员界面失败
+    log_failed: 用户 {0} 的管理员命令执行失败
+  gui:
+    description: 打开书籍管理界面
+    opening: <green>正在打开书籍管理界面...
+    failed: <red>打开书籍管理界面失败
+    log_opened: 用户 {0} 的书籍管理界面已打开
+    log_failed: 用户 {0} 的界面打开失败
+gui:
+  editbook:
+    upload_button:
+      untitled: 《无题》
+  common:
+    back: 返回
+    previous_page: 上一页
+    next_page: 下一页
+    unknown_player: <dark_gray>未知
+  edit_book:
+    title_edit: '<gray>[<dark_aqua><bold>牛腩书局<reset><gray>]<reset> 编辑书目: <black><bold>{0}'
+    title_new: <gray>[<dark_aqua><bold>牛腩书局<reset><gray>]<reset> 录入新书
+    upload_hint: <dark_gray>请将编辑好内容的[书与笔]放在上面一格,然后点击铁砧上传
+    inventory_full_export: <red>背包已满，无法导出原书！
+    inventory_full_original: <red>背包已满，无法导出原书!
+    download_editable:
+      name: 下载一本可以编辑的书
+      lore: |
+        <yellow>点击后将会获得一本可编辑的书(书与笔),
+        <yellow>您可以用这本书进行内容编辑,这本书的所有权依旧属于你
+        <yellow>编辑完成后,将其放入右侧的格子内,点击上传完成编辑
+        <aqua>如你之前已经下载过同一本书,也可以用之前的
+        <red>注意: 之前下载的书的内容可能不是最新的, 上传覆盖后将无法恢复
+    export_original:
+      name: 导出为书本原件
+      lore: |
+        <red>注意: 和上面的<white>[下载可编辑的书]<red>不同
+        <red>点击本按钮将生成一本真正意义上的原件,
+        <red>即包含文本内容的普通[书与笔]
+        <red>所生成的书将解除与牛腩书局的任何关联,
+        <red>这就意味着别人可以随意修改这本书的内容,并可将其占为己有
+    new_book_hint:
+      lore: |
+        由于现在是在添加一本新书
+        因此没有什么可以下载的旧内容
+        直接将一本[书与笔]或[成书]放在右边的格子即可
+    upload_button:
+      cannot_upload: <red>无法上传
+      can_upload: <green>上传
+      checking: <yellow>检查中...
+      checking_hint: <white>正在检查书籍信息，请稍候...
+      no_book_hint: |
+        <white>请将编辑好内容的[书与笔]或[成书]
+        <white>放在右侧一格,然后再点击铁砧上传!
+      no_librarian_hint: <red>图书管理员未初始化，无法上传书籍
+      wrong_type_hint: <white>类型有误,请放入[书与笔]或[成书]!
+      existing_book_new_mode: |
+        <white>待上传的书是已存在于牛腩书局中的另一本书:
+          标题: <dark_aqua>{0}
+          作者: <dark_aqua>{1}
+          创建时间: <dark_aqua>{2}
+      existing_book_edit_mode: |
+        <white>待上传的书是已存在于牛腩书局中的另一本书:
+          标题: <dark_aqua>{0}
+          作者: <dark_aqua>{1}
+          创建时间: <dark_aqua>{2}
+      upload_hint_new: <white>点击铁砧, 将书上传至牛腩书局!
+      upload_hint_edit: <white>点击铁砧, 更新原来的内容!
+      unknown_author: <dark_gray>未知
+  player_books:
+    title: <gray>[<dark_aqua><bold>牛腩书局<reset><gray>]<reset> {0} 的所有书籍
+    add_modify: <gold>添加/修改
+    close: 关闭
+    delete_confirm_message: |
+      <red>你正在删除一本已经登记的书, 该书删除后, 将无法恢复, 游戏内所有该书的成书副本也会被删除! <gold>但在删除之后, 会给你一本该书的可编辑原件, 还可再次导入. <white>输入
+      <green>Y <white>确认删除, 输入其他内容则取消删除
+    delete_inventory_full: <red>背包已满，无法导出原书!
+    delete_success: <green>已删除!
+    delete_cancelled: <red>已取消删除!
+    chat_input_busy: <red>你正在进行其他输入, 请先取消之!
+    book_display:
+      created_time: <reset><gold>创建时间 <reset><gray>{0}<reset>
+      modified_time: <reset><gold>修改时间 <reset><gray>{0}<reset>
+      last_modifier: <reset><gold>最后修改 <reset><gray>{0}<reset>
+      anonymous: 秩名
+      left_click: '<light_purple>左键: 打印成书'
+      right_click: '<light_purple>右键: 编辑'
+      shift_right_click: '<red>shift+右键: 删除'
+      preview: '<dark_gray>预览: <reset>'
+      preview_content: <reset><gray>{0}...<reset>
+      no_content: <reset><dark_gray>无内容<reset>
+      ulid: '<dark_gray>ULID: {0}<reset>'
+  online_players:
+    title: <gray>[<dark_aqua><bold>牛腩书局<reset><gray>]<reset> 书局成员
+  player_not_found: <red>该玩家从未进入过服务器！
+  book_not_found: <red>书籍不存在！
+  save_failed: <red>保存失败
+  inventory_full: <red>背包已满，无法出版图书！
+  operation_failed: <red>操作失败
+  delete_failed: <red>删除失败
+events:
+  book_not_found: <red>书目已不存在，因此被销毁！
+  book_open_failed: <red>打开书籍失败
+  book_query_failed: <red>查询书籍失败
+book:
+  unknown_author: 未知
+  written_book_lore: |
+    <gold>作者    <gray>{0}
+    <gold>创建时间 <gray>{1}
+    <dark_gray><bold>[牛腩书局出版社]
+  written_book_with_modify_info: |
+    <gold>作者    <gray>{0}
+    <gold>创建时间 <gray>{1}
+    <gold>最后修改 <gray>{2}
+    <gold>修改时间 <gray>{3}
+    <dark_gray><bold>[牛腩书局出版社]
+  writable_book_lore: |
+    <gray>{0} 初版
+    <dark_gray><bold>[牛腩书局出版社]
+  writable_book_with_modify_info: |
+    <gray>{0} 初版
+    <gold>最后修改 <gray>{1}
+    <gold>修改时间 <gray>{2}
+    <dark_gray><bold>[牛腩书局出版社]

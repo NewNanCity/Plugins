@@ -1,0 +1,131 @@
+core:
+  plugin:
+    reloading: <yellow>Guardian plugin reloading...</yellow>
+    reloaded: <green>Guardian plugin reloaded</green>
+  error:
+    player_only: <red>This command can only be executed by players</red>
+    operation_failed: '<red>Operation failed: {0}</red>'
+    player_not_found: '<red>Player not found: {0}</red>'
+commands:
+  common:
+    no_permission: <red>You don't have permission to perform this action</red>
+  main:
+    description: Guardian main command
+  help:
+    description: Show help information
+    query: Query for specific command help
+  reload:
+    description: Reload plugin configuration
+    success: <green>Configuration reloaded successfully</green>
+    failed: '<red>Configuration reload failed: {0}</red>'
+    log_success: Plugin reloaded by {0}
+    log_failed: Failed to reload plugin for {0}
+  judgemental:
+    description: Manage judgemental mode features
+    enabled: <green>Judgemental mode enabled</green>
+    disabled: <red>Judgemental mode disabled</red>
+    not_authorized: <red>You don't have permission to use this feature</red>
+    log_enabled: Judgemental mode enabled
+    log_disabled: Judgemental mode disabled
+    log_failed: Judgemental mode operation failed
+  judgement_list:
+    description: View judgemental players list
+    header: <gold>===== Judgemental Players List =====</gold>
+    empty: <gray>No judgemental players currently</gray>
+    log_success: Judgement list query successful
+  judgement_add:
+    description: Add judgemental player
+    player: Player name to add
+    success: '<green>Successfully added judgemental player: {0}</green>'
+    already_exists: <yellow>Player {0} is already in judgement list</yellow>
+    player_not_found: '<red>Player not found: {0}</red>'
+    log_success: 'Added judgemental player: {0}'
+    log_failed: 'Failed to add judgemental player: {0}'
+  judgement_remove:
+    description: Remove judgemental player
+    player: Player name to remove
+    success: '<green>Successfully removed judgemental player: {0}</green>'
+    not_exists: <yellow>Player {0} is not in judgement list</yellow>
+    player_not_found: '<red>Player not found: {0}</red>'
+    log_success: 'Removed judgemental player: {0}'
+    log_failed: 'Failed to remove judgemental player: {0}'
+  town:
+    description: View town information
+    town_name: Town name
+    not_found: <red>Town {0} does not exist</red>
+    no_town: <red>You haven't joined any town yet</red>
+    gui_opening: <green>Opening town GUI...</green>
+    gui_failed: <red>Failed to open town GUI</red>
+    log_success: 'Town information query successful: {0}'
+    log_failed: 'Town information query failed: {0}'
+  lookup:
+    description: Query detailed player information
+    player: Player name to query
+    header: '<gold>===== Player Info: {0} =====</gold>'
+    footer: <gray>Query completed</gray>
+    player_not_found: '<red>Player not found: {0}</red>'
+    not_bound: <red>Player not bound</red>
+    name_label: '<gray>Name: </gray><white>{0}</white>'
+    uuid_label: '<gray>UUID: </gray><white>{0}</white>'
+    cash_label: '<gray>Cash: </gray><white>{0}</white>'
+    bed_spawn_label: '<gray>Bed Spawn: </gray><white>{0}</white>'
+    bed_spawn_none: <gray>Not set</gray>
+    first_played_label: '<gray>First Played: </gray><white>{0}</white>'
+    last_played_label: '<gray>Last Played: </gray><white>{0}</white>'
+    play_time_label: '<gray>Play Time: </gray><white>{0}</white>'
+    never_played: <gray>Never played</gray>
+    qq_label: '<gray>QQ: </gray><white>{0}</white>'
+    guild_label: '<gray>Guild: </gray><white>{0}</white>'
+    discord_label: '<gray>Discord: </gray><white>{0}</white>'
+    ban_status_none: <green>Not banned</green>
+    ban_status_temp: <yellow>Temporarily banned</yellow>
+    ban_status_perm: <red>Permanently banned</red>
+    town_label: '<gray>Town: </gray><white>{0}</white>'
+    town_none: <gray>No town</gray>
+    ip_list_label: '<gray>IP History: </gray><white>{0}</white>'
+    status_joined: <green>[Joined]</green>
+    status_not_joined: <red>[Not joined]</red>
+    info_none: <gray>No information</gray>
+    log_success: 'Player information query successful: {0}'
+    log_failed: 'Player information query failed: {0}'
+gui:
+  town:
+    title: <gray>[<aqua><bold>Newnan Town</bold></aqua>]</gray> <bold>{0}</bold> {1}
+    level_cancelled: <red>Cancelled</red>
+    leader_label: '<gold><bold>Mayor</bold></gold><gray>: </gray><white>{0}</white>'
+    qq_group_label: '<gold><bold>QQ Group</bold></gold><gray>: </gray><white>{0}</white>'
+    qq_label: '<gray>QQ: </gray><white>{0}</white>'
+    ban_label: '<gray>Banned: </gray><white>{0}</white>'
+    ban_yes: <red>Yes</red>
+    ban_no: <green>No</green>
+    unknown: Unknown
+    right_click_remove: '<gold>Right click: Remove member</gold>'
+    previous_page: Previous Page
+    next_page: Next Page
+    close: Close
+    add_member_button: <green><bold>Add Member</bold></green>
+    input_player_name: <green>Please type the player name to add in chat, or type </green><red>cancel</red><green> to abort</green>
+    operation_cancelled: <red>Operation cancelled</red>
+    player_not_found: '<red>Player not found: {0}, please re-enter, or type </red><red>cancel</red><green> to abort</green>'
+    player_already_in_town: |
+      <red>Player: {0} has already joined another town, please re-enter, or type </red><red>cancel</red><green> to abort</green>
+    player_added_success: '<green>Successfully added player: {0}</green>'
+    player_removed_success: '<green>Successfully removed player: {0}</green>'
+    input_in_progress: <red>You have another input in progress, please cancel it first!</red>
+    member_lore_editable: |
+      <gray>QQ: </gray><white>{0}</white>
+      <gray>Banned: </gray><white>{1}</white>
+
+      <gold>Right click: Remove member</gold>
+    member_lore_readonly: |
+      <gray>QQ: </gray><white>{0}</white>
+      <gray>Banned: </gray><white>{1}</white>
+player:
+  judgemental:
+    fake_logout_broadcast_message: <yellow>{0} left the game</yellow>
+    fake_login_broadcast_message: <yellow>{0} joined the game</yellow>
+log:
+  info:
+    plugin_loaded: Guardian plugin loaded
+  error:
+    initialization_failed: 'Initialization failed: {0}'

@@ -1,0 +1,115 @@
+core:
+  plugin:
+    reload_failed: '<red>TPA Plugin reload failed: {0}</red>'
+  error:
+    operation_failed: '<red>Operation failed: {0}</red>'
+commands:
+  common:
+    player_only: <red>This command can only be executed by players</red>
+  main:
+    description: Main TPA command
+  help:
+    description: Display help information
+    query: Query to search for specific command help
+  reload:
+    description: Reload plugin configuration
+    success: <green>Configuration reloaded successfully</green>
+    failed: '<red>Configuration reload failed: {0}</red>'
+    log_success: Plugin reloaded by {0}
+    log_failed: Failed to reload plugin for {0}
+  tpa_there:
+    description: Send teleport request to a player to teleport to their location
+    player_arg: Target player name
+    self_request: <red>You cannot send a teleport request to yourself</red>
+  tpa_here:
+    description: Send teleport request to a player to teleport them to your location
+    player_arg: Target player name
+    self_request: <red>You cannot send a teleport request to yourself</red>
+  accept:
+    description: Accept a player's teleport request
+    id_arg: Request ID
+    request_expired: <red>Request has expired</red>
+  reject:
+    description: Reject a player's teleport request
+    id_arg: Request ID
+    request_expired: <red>Request has expired</red>
+  block:
+    description: Block teleport requests from a player
+    player_arg: Player name to block
+    self_block: <red>You cannot block yourself</red>
+    success: <green>Blocked TPA requests from player <white>{0}</white></green>
+    hint: You can use <green>/tpa blocklist</green> to view the block list, or <green>/tpa unblock {0}</green> to unblock
+    usage_hint: You can use <green>/tpa blocklist</green> to view the block list, or <green>/tpa unblock {0}</green> to unblock
+    already_blocked: <yellow>You have already blocked this player</yellow>
+  unblock:
+    description: Unblock teleport requests from a player
+    player_arg: Player name to unblock
+    self_unblock: <red>You cannot unblock yourself</red>
+    success: <green>Unblocked TPA requests from player <white>{0}</white></green>
+    not_blocked: <yellow>You haven't blocked this player</yellow>
+  tpa:
+    cooldown_active: <red>Please wait {0} seconds before sending another request</red>
+    target_blocked_you: <red>You cannot send requests to this player as they have blocked you</red>
+    requester_world_blocked: <red>TPA is not allowed in your current world</red>
+    target_world_blocked: <red>TPA is not allowed in the target player's world</red>
+  response:
+    not_your_request: <red>This is not your request</red>
+    request_expired: <red>Request has expired</red>
+    accepted: <green>You have accepted the teleport request</green>
+    rejected: <red>You have rejected the teleport request</red>
+gui:
+  common:
+    back: <white>Back</white>
+    previous_page: <yellow>Previous Page</yellow>
+    next_page: <yellow>Next Page</yellow>
+  player_list:
+    title: §7[§6TPA§7] Select Online Player
+    player_entry_name: <gold>{0}</gold>
+    player_entry_lore: |
+      <gray>Player: <white>{0}</white>
+      <gray>World: <white>{1}</white>
+
+      <green>Left click to teleport to them</green>
+      <green>Right click to invite them to you</green>
+      <red>Shift+Right click to block this player</red>
+    no_players_hint_name: <red>No available players</red>
+    no_players_hint_lore: |
+      <gray>There are no other online players</gray>
+      <gray>or all players have been blocked</gray>
+    show_blocked_players_name: <green>Show blocked players</green>
+    show_blocked_players_lore: |
+      <gray>Click to show blocked players</gray>
+      <gray>This will open the blocked players list</gray>
+  block_list:
+    title: §7[§6TPA§7] Blocked Players
+    unblock_lore: <yellow>Click to unblock</yellow>
+    empty_list_name: <gray>No blocked players</gray>
+tpa:
+  request:
+    incoming_tpa: |
+      <gold>{0}</gold> <white>wants to teleport to you~</white>
+       <bold><green><hover:show_text:'<green>Accept request, you will be teleported to the other player</green>'><click:run_command:'/tpa-accept {1}'>[Accept]</click></hover></green>
+       <red><hover:show_text:'<red>Reject the request</red>'><click:run_command:'/tpa-reject {1}'>[Reject]</click></hover></red>
+       <dark_gray><hover:show_text:'<yellow>Future teleport requests from this player will be blocked</yellow>'><click:run_command:'/tpa-block {2}'>[Block]</click></hover></dark_gray></bold>
+    incoming_tpahere: |
+      <gold>{0}</gold> <white>invites you to visit them~</white>
+       <bold><green><hover:show_text:'<green>Accept request, the other player will be teleported to you</green>'><click:run_command:'/tpa-accept {1}'>[Accept]</click></hover></green>
+       <red><hover:show_text:'<red>Reject the request</red>'><click:run_command:'/tpa-reject {1}'>[Reject]</click></hover></red>
+       <dark_gray><hover:show_text:'<yellow>Future teleport requests from this player will be blocked</yellow>'><click:run_command:'/tpa-block {2}'>[Block]</click></hover></dark_gray></bold>
+  teleport:
+    countdown_from: You will teleport to the other player in <red>{0}</red> seconds
+    countdown_to: The other player will teleport to you in <red>{0}</red> seconds
+    success_from: <green>You have teleported to the other player</green>
+    success_to: <green>The other player has teleported to you</green>
+    cancelled_offline: <red>The other player is offline</red>
+    cancelled_world: <red>The other player's world doesn't allow TPA</red>
+  session:
+    accepted: <green>The other player has accepted your request</green>
+    rejected: <red>The other player has rejected your request</red>
+  separator: '--------------------'
+log:
+  info:
+    module_initialized: Module {0} initialized
+  error:
+    config_error: 'Configuration error: {0}'
+    teleport_error: 'Teleport error: {0}'

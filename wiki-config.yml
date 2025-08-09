@@ -1,0 +1,129 @@
+# GitHub Wiki 配置文件
+# 用于配置 Wiki 文档的生成和同步
+
+# Wiki 基本信息
+wiki:
+  title: "GUI 模块用户教程"
+  description: "现代化的 Minecraft GUI 框架完整教程"
+  language: "zh-CN"
+  
+# 文档结构配置
+structure:
+  # 主页文件
+  home: "README.md"
+  
+  # 侧边栏配置
+  sidebar:
+    enabled: true
+    sections:
+      - title: "基础教程"
+        icon: "📚"
+        pages:
+          - { file: "intro.md", title: "GUI 模块介绍", icon: "📖" }
+          - { file: "quick-start.md", title: "快速开始", icon: "🚀" }
+          - { file: "concepts.md", title: "基础概念", icon: "🎯" }
+      
+      - title: "功能指南"
+        icon: "🛠️"
+        pages:
+          - { file: "basic-gui.md", title: "基础GUI", icon: "🖱️" }
+          - { file: "paginated-gui.md", title: "分页GUI", icon: "📄" }
+          - { file: "scrolling-gui.md", title: "滚动GUI", icon: "📜" }
+          - { file: "storage-gui.md", title: "存储GUI", icon: "📦" }
+          - { file: "session-management.md", title: "会话管理", icon: "🎭" }
+          - { file: "task-system.md", title: "任务系统", icon: "⚡" }
+          - { file: "layout-schemes.md", title: "布局方案", icon: "🎨" }
+          - { file: "event-handling.md", title: "事件处理", icon: "🖱️" }
+          - { file: "chat-input.md", title: "聊天输入", icon: "💬" }
+      
+      - title: "高级主题"
+        icon: "🎓"
+        pages:
+          - { file: "lifecycle.md", title: "生命周期管理", icon: "🔧" }
+          - { file: "architecture.md", title: "架构设计", icon: "🏗️" }
+          - { file: "configuration.md", title: "配置和扩展", icon: "⚙️" }
+      
+      - title: "参考资料"
+        icon: "📋"
+        pages:
+          - { file: "api-reference.md", title: "API参考", icon: "📋" }
+          - { file: "best-practices.md", title: "最佳实践", icon: "💡" }
+          - { file: "troubleshooting.md", title: "故障排除", icon: "🔧" }
+          - { file: "examples.md", title: "示例代码", icon: "📝" }
+  
+  # 页脚配置
+  footer:
+    enabled: true
+    template: |
+      ---
+      📝 **文档版本**: {date}  
+      🔄 **自动同步**: 此文档由 GitHub Actions 自动同步  
+      📖 **源码**: [查看源码]({repository_url})
+
+# 链接转换规则
+link_conversion:
+  # 内部链接转换规则
+  internal:
+    # 移除文件扩展名
+    remove_extension: true
+    # 转换为 Wiki 页面名称
+    convert_to_wiki_name: true
+  
+  # 外部链接处理
+  external:
+    # 保持外部链接不变
+    preserve: true
+
+# 内容处理规则
+content_processing:
+  # 移除的内容模式
+  remove_patterns:
+    - pattern: '---\n\n\*\*返回目录\*\* → \[📚 README\]\([^)]+\)'
+      description: "移除返回目录链接"
+    
+    - pattern: '---\n\n\*\*下一步\*\* → '
+      replacement: '---\n\n**下一步** → '
+      description: "简化下一步链接格式"
+  
+  # 替换规则
+  replacements:
+    - pattern: '\[([^\]]+)\]\(([^)]+)\.md\)'
+      replacement: '[\\1](\\2)'
+      description: "移除 Markdown 链接中的 .md 扩展名"
+
+# 同步配置
+sync:
+  # 触发条件
+  triggers:
+    - "push to main/master"
+    - "docs/gui/** changes"
+    - "manual dispatch"
+  
+  # 目标分支
+  target_branch: "wiki"
+  
+  # 提交信息模板
+  commit_message_template: "📚 同步文档更新: {original_commit_message}"
+  
+  # 自动创建的文件
+  auto_generated_files:
+    - "_Sidebar.md"
+    - "_Footer.md"
+
+# 验证规则
+validation:
+  # 检查链接有效性
+  check_links: true
+  
+  # 检查必需文件
+  required_files:
+    - "Home.md"
+    - "GUI-模块介绍.md"
+    - "快速开始.md"
+    - "API参考.md"
+  
+  # 文件大小限制 (KB)
+  max_file_size: 1024
+  
+  # 总文档大小限制 (MB)
+  max_total_size: 10

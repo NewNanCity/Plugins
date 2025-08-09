@@ -1,0 +1,20 @@
+# 经济缓存数据模板
+# 此文件用作经济缓存数据的模板
+
+# 财富统计
+wealth:
+  # 总财富
+  total: 0
+  # 价值资源统计
+  valued-resource-count: {}
+  # 最后更新时间
+  last-update: 0
+
+# 货币发行量
+currency-issuance: 0
+
+# 国库余额
+national-treasury: 0
+
+# 商品数据
+commodities: {}

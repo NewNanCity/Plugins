@@ -1,0 +1,111 @@
+# CreateArea 插件中文语言文件
+# 遵循五层架构的 i18n Key 分类体系
+
+# ==================== 核心系统层 (Core System Layer) ====================
+core:
+  plugin:
+    enabled: "<green>CreateArea 插件已启用</green>"
+    disabled: "<red>CreateArea 插件已禁用</red>"
+    reloading: "<yellow>CreateArea 插件重载中...</yellow>"
+    reloaded: "<green>CreateArea 插件重载完成</green>"
+    reload_failed: "<red>CreateArea 插件重载失败: {0}</red>"
+
+  error:
+    no_permission: "<red>您没有权限执行此操作</red>"
+    player_only: "<red>此命令只能由玩家执行</red>"
+    operation_failed: "<red>操作失败: {0}</red>"
+    invalid_args: "<red>参数错误: {0}</red>"
+    player_not_found: "<red>找不到玩家: {0}</red>"
+    world_not_found: "<red>找不到世界: {0}</red>"
+
+  success:
+    operation_completed: "<green>操作完成</green>"
+
+# ==================== 命令系统层 (Command System Layer) ====================
+commands:
+  help:
+    description: "显示帮助信息"
+    header: "<gold>===== {0} 帮助 =====</gold>"
+    footer: "<gray>使用 /createarea help 查看更多帮助</gray>"
+
+  reload:
+    description: "重载插件配置"
+    success: "<green>配置重载成功</green>"
+    failed: "<red>配置重载失败: {0}</red>"
+    log_success: "插件配置已被 {0} 重载"
+    log_failed: "插件配置重载失败，操作者: {0}"
+
+  tp:
+    description: "传送到创造区域"
+    player_arg: "目标玩家名称"
+    success_self: "<green>已将您传送到您的创造区域！</green>"
+    success_other: "<green>已将您传送到玩家 {0} 的创造区域！</green>"
+    area_not_found_self: "<red>您没有创建创造区域！</red>"
+    area_not_found_other: "<red>玩家 {0} 的创造区域不存在！</red>"
+
+  set:
+    description: "设置创造区域"
+    player_arg: "目标玩家名称"
+    success_self: "<green>已为您创建创造区域！</green>"
+    success_other: "<green>已为玩家 {0} 创建创造区域！</green>"
+    no_selection: "<red>请先用小木斧选择一个区域，高度无所谓，只关注水平区域！</red>"
+    worldedit_not_found: "<red>未找到WorldEdit插件，无法使用此功能！</red>"
+
+  delete:
+    description: "删除创造区域"
+    player_arg: "目标玩家名称"
+    success_self: "<green>已删除您的创造区域！</green>"
+    success_other: "<green>已删除玩家 {0} 的创造区域！</green>"
+    area_not_found_self: "<red>您没有创造区域可以删除！</red>"
+    area_not_found_other: "<red>玩家 {0} 没有创造区域可以删除！</red>"
+
+  gui:
+    description: "打开创造区域管理界面"
+
+# ==================== 图形界面层 (GUI Layer) ====================
+gui:
+  common:
+    back: "<white>返回</white>"
+    close: "<red>关闭</red>"
+    confirm: "<green>确认</green>"
+    previous_page: "<yellow>上一页</yellow>"
+    next_page: "<yellow>下一页</yellow>"
+
+  area_list:
+    title: "<gold>创造区域管理</gold>"
+    area_entry: "<yellow>{0}的创造区</yellow>"
+    no_areas: "<gray>暂无创造区域</gray>"
+
+# ==================== 业务领域层 (Business Domain Layer) ====================
+area:
+  created: "<green>创造区域已创建</green>"
+  deleted: "<red>创造区域已删除</red>"
+  teleported: "<green>已传送到创造区域</green>"
+  permission_updated: "<yellow>权限组已更新</yellow>"
+  dynmap_synced: "<blue>Dynmap标记已同步</blue>"
+
+permission:
+  group_added: "<green>已添加到权限组: {0}</green>"
+  group_removed: "<red>已从权限组移除: {0}</red>"
+  check_failed: "<red>权限检查失败</red>"
+
+# ==================== 日志系统层 (Logging Layer) ====================
+log:
+  info:
+    plugin_loaded: "CreateArea 插件已加载"
+    config_loaded: "配置文件已加载"
+    area_created: "创造区域已创建，玩家: {0}"
+    area_deleted: "创造区域已删除，玩家: {0}"
+    dynmap_connected: "Dynmap 连接成功"
+
+  error:
+    initialization_failed: "初始化失败: {0}"
+    service_error: "服务错误: {0}"
+    worldedit_error: "WorldEdit 错误: {0}"
+    dynmap_error: "Dynmap 错误: {0}"
+    vault_error: "Vault 错误: {0}"
+
+  warning:
+    worldedit_not_found: "未找到 WorldEdit 插件"
+    dynmap_not_found: "未找到 Dynmap 插件"
+    vault_not_found: "未找到 Vault 插件"

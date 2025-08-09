@@ -1,0 +1,58 @@
+core:
+  error:
+    no_permission: <red>You don't have permission to perform this operation
+    operation_failed: '<red>Operation failed: {0}'
+commands:
+  help:
+    description: Show command help information
+    query: Command to query
+  fly:
+    description: Toggle flight status
+    player_only: This command can only be used by players
+    player_or_selector: Please specify a player name or selector
+    log_toggled_self: Player {0} toggled their own flight status
+    log_toggled_by_admin: Admin {0} toggled flight status for player {1}
+  list:
+    description: Show list of currently flying players
+  reload:
+    description: Reload plugin configuration
+    failed: '<red>Configuration reload failed: {0}'
+    log_success: Admin {0} reloaded configuration
+    log_failed: Admin {0} failed to reload configuration
+feefly:
+  config:
+    reload_failed: FeeFly configuration reload failed
+  economy:
+    target_account_set: 'Set fee transfer target account to: {0}'
+  error:
+    creative_mode: <red>Cannot use fee-based flying in creative or spectator mode!
+    already_flying: <red>You are already flying, no need for fee-based flying!
+    already_in_fee_flying: <red>You are already in fee-based flying!
+    insufficient_balance: <red>Insufficient balance to enable flying!
+    command_cooldown: <red>Command used too frequently, please wait {0} seconds before trying again!
+  fly:
+    started: <green>Fee-based flying enabled! Double-tap space to start flying.
+    normal_started: <green>Flying enabled!
+    normal_ended: <yellow>Flying disabled!
+    ended: <yellow>Flying has ended!
+    free_flight: <gold><bold>#Free Flying# <gray>Enjoy your free flight, {0}!
+    status: '<gold><bold>#Flying# <gray>Time remaining: {0} (Balance: {1} ₦)'
+    low_balance_title: <red>Balance running low!
+    low_balance_subtitle: <yellow>Please end flying soon
+    state_restored: Successfully restored flying status for {0} players
+    state_restore_failed: Failed to restore flying status
+  time:
+    seconds: '{0} seconds'
+    minutes_seconds: '{0} minutes {1} seconds'
+    hours_minutes_seconds: '{0} hours {1} minutes {2} seconds'
+    days_hours_minutes_seconds: '{0} days {1} hours {2} minutes {3} seconds'
+  command:
+    flying_count: '<gold>Current flying players: <yellow>{0}'
+    reload_success: <green>Configuration reloaded successfully!
+    toggled_for_player: <green>Toggled flying status for player <yellow>{0}<green>.
+    detailed_info_header: <gold>=== Detailed Flight Information ===
+    no_flying_players: <gray>No players are currently flying
+    player_detail: '<gray>{0}: Flying for {1}, Balance: {2}'
+log:
+  error:
+    service_error: 'Service error: {0}'

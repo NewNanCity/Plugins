@@ -1,0 +1,26 @@
+commands:
+  help:
+    description: Show help information
+    query: Help query keywords
+  main:
+    description: MCron main command
+  reload:
+    description: Reload plugin configuration
+    failed: "<red>Configuration reload failed: {0}</red>"
+    log_success: "Configuration reloaded by {0}"
+    log_failed: "Configuration reload failed by {0}: {1}"
+  executed: "<green>Task executed successfully</green>"
+  execution_failed: "<red>Task execution failed: {0}</red>"
+  invalid_sleep_time: "<red>Invalid sleep time: {0}</red>"
+
+reload_success: "<green>MCron configuration reloaded successfully</green>"
+
+listeners:
+  registered: "Event listeners registered successfully"
+
+mcron:
+  config:
+    reload_failed: "<red>MCron configuration reload failed: {0}</red>"
+  server:
+    loaded: "MCron server components loaded"
+    ready_task_failed: "<red>Ready task execution failed: {0}</red>"

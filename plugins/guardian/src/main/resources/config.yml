@@ -1,0 +1,18 @@
+check-group: true
+server-address: localhost:25565
+server-name: MyServer
+group-world: world
+newbie-group: Newbie
+players-group: Player
+mysql:
+  host: localhost
+  port: 3306
+  database: guardian
+  username: root
+  password: "123456"
+  params:
+    useUnicode: "true"
+    characterEncoding: "UTF-8"
+    useSSL: "false"
+    allowPublicKeyRetrieval: "true"
+    serverTimezone: "Asia/Shanghai"

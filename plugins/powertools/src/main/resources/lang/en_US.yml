@@ -1,0 +1,34 @@
+core:
+  plugin:
+    reload_failed: '<red>PowerTools plugin reload failed: {0}</red>'
+  error:
+    player_only: <red>This command can only be executed by players</red>
+commands:
+  help:
+    description: Show help information
+    header: <gold>===== {0} Help =====</gold>
+    footer: <gray>Use /powertools help for more help</gray>
+    query: Help query keywords
+  main:
+    description: PowerTools main command
+  reload:
+    description: Reload plugin configuration
+    success: <green>Configuration reloaded successfully</green>
+    failed: '<red>Configuration reload failed: {0}</red>'
+    log_success: Plugin configuration reloaded by {0}
+    log_failed: 'Plugin configuration reload failed, operator: {0}'
+  skull:
+    description: Skull related commands
+    url:
+      description: Get skull from texture URL
+      arg: Texture URL or texture ID
+    player:
+      description: Get skull from player name
+      arg: Player name
+    url_or_player:
+      arg: Texture URL or player name
+    success: <green>Successfully obtained skull!</green>
+    inventory_full: <red>Your inventory is full!</red>
+    player_not_found: <red>Player {0} does not exist or has never joined the server!</red>
+    invalid_url: <red>Invalid texture URL!</red>
+    feature_disabled: <red>This feature has been disabled by administrator!</red>

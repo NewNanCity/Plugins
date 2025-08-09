@@ -1,0 +1,17 @@
+core:
+  plugin:
+    disabled: <red>MCPatch plugin disabled</red>
+    reload_failed: '<red>MCPatch plugin reload failed: {0}</red>'
+security:
+  anti_world_download:
+    player_kicked: <red>Player {0} kicked for using WDL</red>
+    violation_logged: <yellow>WDL violation logged</yellow>
+  contraband:
+    item_removed: <yellow>Contraband item {0} has been removed</yellow>
+    items_found: <red>Found {1} contraband items in {0}'s container</red>
+  anti_crash:
+    dispenser_blocked: <red>Blocked dispenser placement at dangerous location</red>
+log:
+  info:
+    module_initialized: Module {0} initialized
+    security_event_logged: Security event logged

@@ -1,0 +1,27 @@
+# NewNanMain 插件配置文件
+# 牛腩小镇主插件配置
+
+# 调试模式
+debug: false
+
+# 消息前缀设置
+player-prefix: "§7[§6牛腩小镇§7] §f"
+console-prefix: "[NewNanMain] "
+
+# 前缀系统设置
+prefix-settings:
+  # 启用自动检查
+  enable-auto-check: true
+  # 玩家加入时检查
+  check-on-join: true
+  # 切换世界时检查
+  check-on-world-change: true
+
+# 传送系统设置
+teleport-settings:
+  # 启用传送功能
+  enable-teleport: true
+  # 传送延迟（秒）
+  teleport-delay: 0
+  # 传送冷却时间（秒）
+  teleport-cooldown: 0

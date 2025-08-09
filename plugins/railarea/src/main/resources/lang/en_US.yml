@@ -1,0 +1,281 @@
+core:
+  plugin:
+    reload_failed: <red>Plugin reload failed</red>
+gui:
+  common:
+    back: <gray>Back</gray>
+    previous_page: <yellow>Previous Page</yellow>
+    next_page: <yellow>Next Page</yellow>
+    cycle_line: Loop Line
+    no_cycle_line: Shuttle Line
+  rail_lines:
+    title_edit: <gray>[<dark_aqua><bold>NewNan Railway<reset><gray>]<reset> All Lines</gray>
+    title_select: <gray>[<gold><bold>NewNan Railway<reset><gray>]<reset> Select Line</gray>
+    add_line: Add Line
+    line_name: <color:{0}>{1}</color:{0}>
+    line_lore: |-
+      <gray>Line ID: {0}
+      <gray>Stations: {1}
+      <gray>Type: {2}
+    line_operations_edit: |-
+      
+      <green>Left Click: Edit line stations
+      <green>Right Click: Toggle loop/shuttle mode
+      <green>Shift+Left Click: Edit line
+      <green>Shift+Right Click: Delete line</green>
+    line_operations_select: |-
+      
+      <green>Left Click: Select line</green>
+    line_added: <green>Line <color:{0}>{1}</color:{0}> has been added!</green>
+    line_updated: <green>Line <color:{0}>{1}</color:{0}> has been updated!</green>
+    line_deleted: <green>Line <color:{0}>{1}</color:{0}> has been deleted!</green>
+    delete_confirm: <red>Confirm deletion of line <color:{0}>{1}</color:{0}>? This will remove all stations from the line (stations themselves will not be deleted)! Reply Y to confirm, anything else to cancel</red>
+    free_area_management: <yellow>Free Areas</yellow>
+    free_area_management_lore: |-
+      <gray>These areas have been orphaned due to</gray>
+      <gray>their line or station being deleted,</gray>
+      <gray>waiting for reassignment</gray>
+
+      <green>Left Click: Open free area management</green>
+  rail_line:
+    title_edit: <gray>[<dark_aqua><bold>NewNan Railway<reset><gray>]<reset> <gray>[<bold><color:{0}>{1}</color:{0}><reset><gray>]<reset> All Stations</gray>
+    title_select: <gray>[<gold><bold>NewNan Railway<reset><gray>]<reset> Select Station</gray>
+    add_station: Add Station
+    add_station_lore: |-
+      Click to add a new station to this line
+      New station will be added at the end of the line
+    left_return_yes: 'Left Return: <green>Yes</green>'
+    left_return_no: 'Left Return: <red>No</red>'
+    right_return_yes: 'Right Return: <green>Yes</green>'
+    right_return_no: 'Right Return: <red>No</red>'
+    return_description: |-
+      Whether trains can return to the opposite
+      direction when reaching the terminal station
+    station_name: <yellow>{0}</yellow>
+    station_lore: |
+      <gray>Station ID: {0}
+    station_operations_edit: |-
+      
+      <green>Left Click: Select station
+      <green>Right Click: Remove station
+    station_operations_select: |-
+      
+      <green>Left Click: Select station</green>
+    station_operations_shift_left: |
+      
+      <green>Shift+Left Click: Move station left</green>
+    station_operations_shift_right: |
+      
+      <green>Shift+Right Click: Move station right</green>
+    station_added: <green>Station {0} has been added to the line!</green>
+    station_removed: <green>Station {0} has been removed from the line!</green>
+    remove_station_confirm: <red>Confirm removal of station {0} from the line? Reply Y to confirm, anything else to cancel</red>
+    left_return_updated: <green>Left return setting has been updated!</green>
+    right_return_updated: <green>Right return setting has been updated!</green>
+  station:
+    title: <gray>[<dark_aqua><bold>NewNan Railway<reset><gray>]<reset> All Available Stations</gray>
+    create_station: Create Station
+    create_station_lore: |-
+      Click to create a new station
+      New station will be added to the system
+    station_lore: |-
+      <gray>Station ID: {0}
+      <gray>Lines using this station: {1}
+    station_operations: |-
+      
+      <green>Left Click: Select station
+      <green>Shift+Left Click: Edit station
+      {2}
+    station_created: <green>Station {0} has been created!</green>
+    station_updated: <green>Station {0} has been updated!</green>
+    station_deleted: <green>Station {0} has been deleted!</green>
+    delete_confirm: <red>Confirm deletion of station {0}? Reply Y to confirm, anything else to cancel</red>
+    station_in_use: '<red>Station {0} is being used by the following lines and cannot be deleted: {1}</red>'
+    delete_operation: Delete Station
+    delete_operation_in_use: <red>Cannot delete station in use</red>
+  rail_area:
+    title: <gray>[<dark_aqua><bold>NewNan Railway<reset><gray>]<reset> <color:{0}>{1}-{2}</color:{0}> Railway Areas</gray>
+    add_area: Add Area
+    add_area_lore: |-
+      <green>Show blocked players</green>
+      <gray>Click to show blocked players</gray>
+      <gray>This will open the blocked players list</gray>
+    area_name: <white>{0} <color:{1}>{2}</color:{1}> Towards <gold>{3}</gold></white>
+    area_lore: |-
+      {0}
+      {1}
+      <gray>World: {2}
+      <gray>Range: ({3}, {4}, {5}) - ({6}, {7}, {8})
+      <gray>Stop Point: ({9}, {10}, {11})
+      <gray>Direction: {12}
+
+      <green>Left Click: Show area
+      <green>Right Click: Teleport to area
+      <green>Shift+Left Click: Edit area
+      <green>Shift+Right Click: Delete area</green>
+    area_added: <green>Area has been added!</green>
+    area_updated: <green>Area has been updated!</green>
+    area_deleted: <green>Area has been deleted!</green>
+    area_update_failed: '<red>Area update failed: {0}</red>'
+    area_delete_failed: '<red>Area deletion failed: {0}</red>'
+    area_add_failed: '<red>Area addition failed: {0}</red>'
+    delete_confirm: <red>Confirm deletion of area ({0}, {1}, {2})? Reply Y to confirm, anything else to cancel</red>
+    teleported: <green>Teleported to area ({0}, {1}, {2})</green>
+    teleport_failed: '<red>Teleportation failed: {0}</red>'
+    start_station: <purple>This is the starting station</purple>
+    previous_station: '<gray>Previous Station: <purple>{0}</purple></gray>'
+    end_station: <purple>This is the terminal station</purple>
+    next_station: '<gray>Next Station: <purple>{0}</purple></gray>'
+  free_area:
+    title: <gray>[<dark_aqua><bold>NewNan Railway<reset><gray>]<reset> Free Areas</gray>
+    area_lore: |-
+      <gray>World: {0}
+      <gray>Range: ({1}, {2}, {3}) - ({4}, {5}, {6})
+      <gray>Stop Point: ({7}, {8}, {9})
+      <gray>Direction: {10}
+      <red>Not assigned to any specific station and line
+
+      <green>Left Click: Show area
+      <green>Right Click: Teleport to area
+      <green>Shift+Left Click: Edit area
+      <green>Shift+Right Click: Delete area</green>
+    area_updated: <green>Free area has been updated!</green>
+    area_deleted: <green>Free area {0} has been deleted!</green>
+    delete_confirm: <red>Confirm deletion of free area? Reply Y to confirm, anything else to cancel</red>
+    teleported: <green>Teleported to free area</green>
+    teleport_failed: '<red>Teleportation failed: {0}</red>'
+    update_failed: '<red>Free area update failed: {0}</red>'
+    delete_failed: '<red>Free area deletion failed: {0}</red>'
+  reverse:
+    title: <gray>[<dark_aqua><bold>NewNan Railway<reset><gray>]<reset> Select Direction</gray>
+    selection_name: Towards <gold>{0}</gold>
+input:
+  common:
+    cancelled: <gray>Cancelled</gray>
+    chat_input_busy: <red>You are already in another input process, please cancel it first!</red>
+    unknown_command: <red>Unknown command! </red>
+  station:
+    prompt: <yellow>Please set station name</yellow>
+    help: |-
+      <gold>=== Station Configuration Help ===</gold>
+      Enter commands directly in chat, no / symbol needed.
+      <yellow>name: Set station name</yellow>
+      <yellow>cancel: Cancel setup</yellow>
+      <yellow>ok: Confirm setup</yellow>
+    edit_prompt: 'Started setting up station <green>{0}<reset>, please set the station properties:'
+    name_set: 'Name set to: {0}'
+    name_exists: <red>Station {0} already exists!</red>
+    name_required: <red>Please set the name first!</red>
+    save_failed: '<red>Failed to save station: {0}</red>'
+  rail_line:
+    prompt: <yellow>Please set line name and color</yellow>
+    help: |-
+      <gold>=== Line Configuration Help ===</gold>
+      Enter commands directly in chat, no / symbol needed.
+      <yellow>name: Set line name</yellow>
+      <yellow>color: Set line color</yellow>
+      <yellow>cancel: Cancel setup</yellow>
+      <yellow>ok: Confirm setup</yellow>
+    name_set: 'Name set to: {0}'
+    name_exists: <red>Line {0} already exists!</red>
+    name_required: <red>Please enter a name!</red>
+    color_set: 'Color set to: <color:{0}>{1}</color:{0}>'
+    color_required: <red>Please enter a color</red>
+    color_format_error: <red>Color format error! Please use</red>
+    name_color_required: <red>Please set name and color first!</red>
+    save_failed: '<red>Failed to save line: {0}</red>'
+  area:
+    prompt: 'Started setting up area, please set the area properties:'
+    edit_prompt: 'Started setting up area <green>{0}({1})<reset>, please set the area properties:'
+    preview: |-
+      <gold>=== Area Configuration Preview ===</gold>
+      <yellow>Station: {0}</yellow>
+      <yellow>Line: {1}</yellow>
+      <yellow>Direction: {2}</yellow>
+      <yellow>World: {3}</yellow>
+      <yellow>Area: {4}</yellow>
+      <yellow>Stop Point: {5}</yellow>
+      <yellow>Direction: {6}</yellow>
+    help: |-
+      <gold>=== Area Configuration Help ===</gold>
+      Enter commands directly in chat, no / symbol needed.
+      <yellow>station: Set station</yellow>
+      <yellow>area: Set area range</yellow>
+      <yellow>stop: Set stop point</yellow>
+      <yellow>dir: Set direction</yellow>
+      <yellow>preview: Preview current settings</yellow>
+      <yellow>cancel: Cancel setup</yellow>
+      <yellow>ok: Confirm setup</yellow>
+    preview_not_set: <red>Not set</red>
+    station_selected: '<green>Selected station: {0}</green>'
+    worldedit_not_installed: <red>WorldEdit plugin is not installed!</red>
+    select_area_first: <red>Please select an area with the wooden axe first!</red>
+    wrong_world: <red>Please switch to the world where the selected area is located!</red>
+    single_point_error: <red>Did you accidentally type 'stop' instead of 'area'? Please select a larger area!</red>
+    area_set: 'Area range set to: {0} <green>({1}, {2}, {3}) - ({4}, {5}, {6})</green>'
+    area_format_error: <red>Area range format error! Please use 'world x1 y1 z1 x2 y2 z2' format!</red>
+    world_not_exists: <red>World {0} does not exist!</red>
+    must_in_area_world: <red>You must be in the area's world!</red>
+    direction_set: 'Direction set to: <green>{0}</green>'
+    face_cardinal_direction: <red>Please face a cardinal direction (North, South, East, West)!</red>
+    select_rail_first: <red>Please select a rail with the wooden axe first, note that it should be a 1x1 selection!</red>
+    stop_point_set: 'Based on your wooden axe selection, stop point (rail) set to: <green>({0}, {1}, {2})</green>'
+    stop_format_error: <red>Block format error! Please use 'x y z' format!</red>
+    must_be_rail: <red>Please select a rail with the wooden axe first, note that it should be a 1x1 selection!</red>
+    stop_must_in_area: <red>Stop point must be within the area!</red>
+    station_required: <red>Please set the station first!</red>
+    area_range_required: <red>Please set the area range first!</red>
+    stop_point_required: <red>Please set the stop point first!</red>
+    direction_required: <red>Please set the direction first!</red>
+    create_failed: '<red>Failed to create area: {0}</red>'
+    commands: |-
+      <gold>=== Area Configuration Commands ===</gold>
+      Enter commands directly in chat, no / symbol needed.
+      <yellow>station: Set station</yellow>
+      <yellow>area: Set area range</yellow>
+      <yellow>stop: Set stop point</yellow>
+      <yellow>dir: Set direction</yellow>
+      <yellow>preview: Preview current settings</yellow>
+      <yellow>cancel: Cancel setup</yellow>
+      <yellow>ok: Confirm setup</yellow>
+    direction_selected: '<green>Direction selected: {0}</green>'
+commands:
+  common:
+    player_only: <red>This command can only be executed by players</red>
+  help:
+    description: Show help information
+    query: Query help for specific commands
+  main:
+    description: RailArea plugin main command
+  railarea:
+    gui_opened: <green>Management interface opened</green>
+    gui_failed: <red>Failed to open interface</red>
+    log_success: Player {0} successfully opened the management interface
+    log_failed: Player {0} failed to open the management interface
+  reload:
+    description: Reload plugin configuration
+    success: <green>Configuration reloaded successfully</green>
+    failed: '<red>Configuration reload failed: {0}</red>'
+    log_success: Player {0} successfully reloaded the plugin configuration
+    log_failed: Player {0} failed to reload the plugin configuration
+  new_area:
+    description: Create a new railway area
+    area_added: <green>Railway area successfully added!</green>
+    area_add_failed: '<red>Failed to add railway area: {0}</red>'
+
+events:
+  core:
+    arrived_title: '<gold><bold>{0}</bold></gold> Station'
+    arrived_subtitle_solo: 'Thank you for riding NewNan Metro <color:{1}>{0}</color:{1}>'
+    arrived_subtitle_switchable: 'Transfer available to {0}'
+    under_board_title: 'NewNan Metro <color:{1}>{0}</color:{1}> {2}'
+    under_board_subtitle_terminal: <orange><bold>This is the terminal station, please board at the opposite platform</bold></orange>
+    under_board_subtitle: '<gray><bold>Towards <purple>{0}</purple>, Next Station: <purple>{1}</purple></bold></gray>'
+    start_title: 'Next Station <gold><bold>{0}</bold></gold>'
+    start_subtitle_switchable: 'Transfer available to {0}'
+    start_subtitle_solo: ''
+    terminal_actionbar: '<red>This is the terminal station, please board at the opposite platform</red>'
+    non_terminal_actionbar: '<red>Right-click the rail to board</red> <bold><color:{0}>{1}</color:{0}></bold> <red>train</red>'
+    arrived_terminal_message: <green>Train has arrived at the terminal station, thank you for riding!</green>
+    start_message: <green>Train has started, please hold tight and stay safe</green>
+    waiting_message: 'Train will depart in <yellow>{0}</yellow> seconds, you may wait aboard or disembark now'

@@ -1,0 +1,49 @@
+logger:
+  module:
+    initialized: DeathCostModule 已初始化
+    reloaded: DeathCostModule 已重新加载
+    config_load_failed: 加载 DeathCostModule 配置时发生错误
+  config:
+    target_account_set: '设置扣费转账账户为: {0}'
+death:
+  cost_deducted: <red>你重生了，消耗 <yellow>{0} ₦</yellow>，<hover:show_text:'Shift+点击插入指令'><aqua><insert:'/back'>/back</insert></aqua></hover>可快速回到死亡地点。
+  broadcast_message: <gray>玩家 <yellow>{0}</yellow> 死亡，扣除 <yellow>{1} ₦</yellow>。
+  console_message: 玩家 {0} 死亡，扣除 {1} ₦。
+  no_cost: <green>你拥有死亡免费权限，本次死亡不扣费。
+common:
+  enabled: 启用
+  disabled: 禁用
+commands:
+  help:
+    description: 显示命令帮助
+    query: 查询特定命令用法
+  main:
+    description: DeathCost 主命令
+  reload:
+    description: 重载插件配置
+    success: <green>插件配置已重载！
+  status:
+    description: 显示插件状态
+    error: <red>获取状态信息时发生错误
+    log_error: 记录状态错误失败
+    header: <gold>=== DeathCost 插件状态 ===
+    version: '<gray>插件版本: <white>{0}'
+    enabled: '<gray>插件状态: <white>{0}'
+    cost_mode: '<gray>扣费模式: <white>{0}'
+    mode_simple: 简单模式
+    mode_complex: 复杂模式
+    simple_cost: '<gray>简单扣费: <white>{0}'
+    cost_fixed: '<gray>固定扣费: <white>{0}'
+    cost_percent: '<gray>百分比扣费: <white>{0}%'
+    complex_tiers: '<gray>复杂层级: <white>{0}'
+    target_account: '<gray>目标账户: <white>{0}'
+    no_target: 无
+    player_message: '<gray>玩家消息: <white>{0}'
+    broadcast_message: '<gray>广播消息: <white>{0}'
+    console_message: '<gray>控制台消息: <white>{0}'
+warning:
+  simple_mode_no_config: 简单扣费模式启用，但是没有设置扣费模式，将不会有任何扣费。
+  complex_mode_no_config: 复杂扣费模式启用，但是没有设置扣费模式，将不会有任何扣费。
+plugin:
+  config:
+    reload_failed: 插件配置重新加载失败

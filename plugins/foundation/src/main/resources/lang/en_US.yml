@@ -1,0 +1,108 @@
+error:
+  no_permission: <red>You don't have permission to execute this command!
+  operation_failed: '<red>Operation failed: {0}'
+commands:
+  help:
+    description: Show help information
+    query: Query parameter
+  main:
+    description: Foundation plugin main command
+  reload:
+    description: Reload plugin configuration
+    success: <green>Plugin reloaded successfully!
+  donate:
+    description: Donate money to the foundation
+    amount: Donation amount
+    success: <green>Successfully donated {0} to the foundation!
+    player_only: <red>This command can only be executed by players
+    player_or_selector: Player or selector
+    deposit_failed: <red>Failed to deposit to foundation account
+    insufficient_balance: <red>Insufficient balance, cannot donate {0}
+    invalid_amount: '<red>Invalid donation amount: {0}'
+    no_target_account: <red>No donation target account specified
+    withdraw_failed: <red>Failed to withdraw funds from foundation account
+  query:
+    description: Query player transaction records
+    player: Target player
+    header: <yellow>=== Transaction records for {0} ===
+    no_record: <gray>Player {0} has no transaction records
+    active_donations: '<gray>Active donations: <white>{0}'
+    passive_donations: '<gray>Passive allocations: <white>{0}'
+    total_donations: '<gray>Total: <white>{0}'
+    log_failed: Failed to query player records
+  balance:
+    description: View foundation balance
+    header: <yellow>=== Foundation Balance Information ===
+    account: '<gray>Foundation account: <white>{0}'
+    amount: '<gray>Current balance: <white>{0}'
+    active_donations: '<gray>Active donations: <white>{0}'
+    passive_donations: '<gray>Passive allocations: <white>{0}'
+    log_failed: Failed to query balance
+    foundation_account_not_set: <red>Foundation account not set, please contact administrator
+  allocate:
+    description: Allocate funds to player
+    player: Target player
+    amount: Allocation amount
+    reason: Allocation reason
+    success: '<green>Successfully allocated {0} to {1}, reason: {2}'
+    failed: '<red>Allocation failed: {0}'
+    insufficient_foundation_balance: <red>Insufficient foundation balance
+    invalid_amount: <red>Please enter a valid amount
+    invalid_reason: <red>Please enter allocation reason
+    no_target_account: <red>Foundation account not set, please contact administrator
+    log_success: Allocation successful
+  top:
+    description: Show donation leaderboard
+    header: <yellow>=== Donation Leaderboard ===
+    entry: <gray>{0}. <white>{1} <yellow>{2}
+    page: Page number
+    console: <red>This command can only be executed by players
+    invalid_page: <red>Invalid page number
+    out_of_range: <red>Page number out of range
+    log_failed: Failed to display leaderboard
+  error:
+    operation_failed: '<red>Operation failed: {0}'
+foundation:
+  plugin:
+    target_account_set: 'Foundation account set to: {0}'
+    target_account_not_set: Foundation account not set, plugin will not work!
+  config:
+    reload_failed: Foundation configuration reload failed
+gui:
+  common:
+    back: <gray>Back
+    back_desc: <gray>Click to go back
+    next_page: <gray>Next page
+    previous_page: <gray>Previous page
+    back_lore: <gray>Click to go back
+  top:
+    title: <gold>Foundation Donation Leaderboard
+    rank: '<gray>Rank #{0} - <white>{1}'
+    rank_self: '<green>Rank #{0} - <gold>You'
+    detailed_stats_header: <gold>=== Detailed Statistics ===
+    operation_failed: Operation failed
+    player_active: '<green>Active: <white>{0}'
+    player_details_header: '<gold>=== Player Details: {0} ==='
+    player_passive: '<yellow>Passive: <white>{0}'
+    player_total: '<gold>Total: <white>{0}'
+    stats: <gold>Statistics
+    stats_average: '<gray>Average per player: <white>{0}'
+    stats_grand_total: '<gray>Grand total: <white>{0}'
+    stats_total_active: '<gray>Total active donations: <white>{0}'
+    stats_total_passive: '<gray>Total passive allocations: <white>{0}'
+    stats_total_players: '<gray>Total players: <white>{0}'
+    rank_lore: |-
+      <green>Active donations: <white>{1}
+      <yellow>Passive allocations: <white>{2}
+      <gold>Total donations: <white>{3}
+
+      <gray>Click to view detailed statistics
+    page_lore: |-
+      <gray>Page {0} of {1}
+    stats_lore: |-
+      <gray>Total players: <white>{0}
+      <gray>Total active donations: <white>{1}
+      <gray>Total passive allocations: <white>{2}
+      <gray>Grand total: <white>{3}
+
+      <gray>Click to view detailed statistics

@@ -1,0 +1,298 @@
+# BetterCommandBlock 插件配置文件
+
+# 被禁止的命令列表
+# 这些命令将被阻止在命令方块中执行
+blocked-commands:
+# 权限相关命令
+- op
+- minecraft:op
+- deop
+- minecraft:deop
+
+# 封禁相关命令
+- ban
+- minecraft:ban
+- banlist
+- minecraft:banlist
+- ban-ip
+- minecraft:ban-ip
+- pardon
+- minecraft:pardon
+- pardon-ip
+- minecraft:pardon-ip
+
+# 白名单相关命令
+- whitelist
+- minecraft:whitelist
+
+# 踢出玩家命令
+- kick
+- minecraft:kick
+
+# 服务器控制命令
+- stop
+- minecraft:stop
+- save-all
+- minecraft:save-all
+- save-off
+- minecraft:save-off
+- save-on
+- minecraft:save-on
+- reload
+- minecraft:reload
+
+# 调试和信息命令
+- debug
+- minecraft:debug
+- testfor
+- minecraft:testfor
+- seed
+- minecraft:seed
+
+# 游戏模式命令
+- defaultgamemode
+- minecraft:defaultgamemode
+
+# 数据包命令
+- datapack
+- minecraft:datapack
+- data
+- minecraft:data
+
+# 发布命令
+- publish
+- minecraft:publish
+
+# Bukkit/Paper 特定命令
+- timings
+- bukkit:timings
+- plugins
+- bukkit:plugins
+- pl
+- bukkit:pl
+- bukkit:reload
+- rl
+- bukkit:rl
+- ver
+- version
+- bukkit:ver
+- bukkit:version
+
+# 调试模式
+debug: false
+
+# 日志配置
+logging:
+  # 是否启用文件日志
+  file-logging-enabled: false
+  # 日志文件前缀
+  log-file-prefix: "BetterCommandBlock_"
+  # 日志级别 (TRACE, DEBUG, INFO, WARN, ERROR)
+  log-level: INFO
+
+# 消息配置
+message:
+  # 玩家消息前缀
+  player-prefix: "§7[§6命令方块加强§7] §f"
+  # 控制台消息前缀
+  console-prefix: "[BetterCommandBlock] "
+
+# 防火墙配置
+# 新的高性能命令方块防火墙，基于前缀树算法
+firewall:
+  # 是否启用防火墙
+  enabled: true
+
+  # 白名单命令列表（这些命令将被允许执行）
+  whitelist-commands:
+  # 基础安全命令
+  - say
+  - minecraft:say
+  - tell
+  - minecraft:tell
+  - msg
+  - minecraft:msg
+  - tellraw
+  - minecraft:tellraw
+  - title
+  - minecraft:title
+  - playsound
+  - minecraft:playsound
+  - particle
+  - minecraft:particle
+
+  # 传送命令（会被坐标验证器验证）
+  - tp
+  - minecraft:tp
+  - teleport
+  - minecraft:teleport
+
+  # 物品命令（会被物品验证器验证）
+  - give
+  - minecraft:give
+
+  # 方块命令（会被坐标验证器验证）
+  - setblock
+  - minecraft:setblock
+  - fill
+  - minecraft:fill
+
+  # 实体命令（会被验证器验证）
+  - summon
+  - minecraft:summon
+
+  # 时间和天气命令
+  - time
+  - minecraft:time
+  - weather
+  - minecraft:weather
+
+  # 游戏规则命令
+  - gamerule
+  - minecraft:gamerule
+
+  # 经验命令
+  - xp
+  - minecraft:xp
+  - experience
+  - minecraft:experience
+
+  # 效果命令
+  - effect
+  - minecraft:effect
+
+  # 记分板命令
+  - scoreboard
+  - minecraft:scoreboard
+
+  # 执行命令（会被ExecuteValidator验证）
+  - execute
+  - minecraft:execute
+
+  # 安全物品列表
+  safe-items:
+  # 基础方块
+  - minecraft:dirt
+  - dirt
+  - minecraft:grass_block
+  - grass_block
+  - minecraft:stone
+  - stone
+  - minecraft:cobblestone
+  - cobblestone
+  - minecraft:oak_log
+  - oak_log
+  - minecraft:oak_planks
+  - oak_planks
+  - minecraft:sand
+  - sand
+  - minecraft:gravel
+  - gravel
+  - minecraft:clay
+  - clay
+
+  # 建筑材料
+  - minecraft:bricks
+  - bricks
+  - minecraft:stone_bricks
+  - stone_bricks
+  - minecraft:oak_stairs
+  - oak_stairs
+  - minecraft:oak_slab
+  - oak_slab
+  - minecraft:glass
+  - glass
+  - minecraft:wool
+  - wool
+  - minecraft:white_wool
+  - white_wool
+
+  # 工具（基础）
+  - minecraft:wooden_sword
+  - wooden_sword
+  - minecraft:wooden_pickaxe
+  - wooden_pickaxe
+  - minecraft:stone_sword
+  - stone_sword
+  - minecraft:stone_pickaxe
+  - stone_pickaxe
+
+  # 食物
+  - minecraft:bread
+  - bread
+  - minecraft:apple
+  - apple
+  - minecraft:cooked_beef
+  - cooked_beef
+  - minecraft:carrot
+  - carrot
+  - minecraft:potato
+  - potato
+  - minecraft:wheat
+  - wheat
+
+  # 装饰物品
+  - minecraft:torch
+  - torch
+  - minecraft:lantern
+  - lantern
+
+  # 最大物品数量
+  max-item-quantity: 64
+
+  # 是否允许自定义命名空间的物品
+  allow-custom-namespaces: false
+
+  # 最大坐标范围
+  max-coordinate-range: 1000.0
+
+  # 是否允许相对坐标（~）
+  allow-relative-coordinates: true
+
+  # 是否允许局部坐标（^）
+  allow-local-coordinates: true
+
+  # 允许的选择器类型
+  allowed-selectors:
+  - "@s"
+
+  # 选择器最大范围
+  max-selector-range: 100.0
+
+  # 是否允许直接使用玩家名
+  allow-player-names: true
+
+  # 最大目标数量
+  max-target-count: 1
+
+  # Execute命令最大递归深度
+  max-execute-depth: 10
+
+  # 是否销毁被阻止的命令方块
+  destroy-blocked-command-blocks: true
+
+  # 性能配置
+  performance:
+    # 验证超时时间（毫秒）
+    validation-timeout-ms: 100
+    # 命令缓存大小
+    command-cache-size: 1000
+    # 缓存过期时间（秒）
+    cache-expire-seconds: 300
+    # 是否启用异步验证
+    async-validation: false
+
+  # 监控配置
+  monitoring:
+    # 是否启用统计收集
+    enable-statistics: true
+    # 统计更新间隔（秒）
+    statistics-interval-seconds: 30
+    # 是否记录详细日志
+    detailed-logging: false
+    # 是否记录允许的命令
+    log-allowed-commands: false
+    # 日志文件最大大小（MB）
+    max-log-file-size-mb: 10
+    # 保留的日志文件数量
+    log-file-retention-count: 5

@@ -1,0 +1,74 @@
+############ 插件基础信息 ############
+# 插件主类
+main: ${main}
+# 插件名称
+name: ${name}
+# 插件版本
+version: ${version}
+# 插件描述
+description: ${description}
+# 加载时机
+load: ${load}
+# 作者
+authors: ${authors}
+# 网站
+website: ${website}
+# 日志前缀
+prefix: ${prefix}
+# 最低Minecraft版本
+api-version: ${apiVersion}
+# 依赖插件
+depend: ${depend}
+# 软依赖(loadafter)
+softdepend: ${softdepend}
+loadbefore: ${loadbefore}
+
+############ 插件权限信息 ############
+# 权限的默认赋予对象，默认是op
+default-permission: op
+# 权限节点
+permissions:
+  createarea.use:
+    description: '使用CreateArea基本功能'
+    default: true
+  createarea.tp.self:
+    description: '传送到自己的创造区域'
+    default: true
+  createarea.tp.other:
+    description: '传送到他人的创造区域'
+    default: op
+  createarea.set.self:
+    description: '设置自己的创造区域'
+    default: op
+  createarea.set.other:
+    description: '设置他人的创造区域'
+    default: op
+  createarea.delete.self:
+    description: '删除自己的创造区域'
+    default: op
+  createarea.delete.other:
+    description: '删除他人的创造区域'
+    default: op
+  createarea.gui.all:
+    description: '查看所有创造区域GUI'
+    default: op
+  createarea.reload:
+    description: '重载插件配置'
+    default: op
+  createarea.bypass:
+    description: '绕过权限组检查'
+    default: op
+  createarea.*:
+    description: '所有CreateArea权限'
+    default: op
+    children:
+      createarea.use: true
+      createarea.tp.self: true
+      createarea.tp.other: true
+      createarea.set.self: true
+      createarea.set.other: true
+      createarea.delete.self: true
+      createarea.delete.other: true
+      createarea.gui.all: true
+      createarea.reload: true
+      createarea.bypass: true

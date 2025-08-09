@@ -1,0 +1,36 @@
+# 插件基本信息
+name: ${name}
+version: ${version}
+main: ${main}
+api-version: ${apiVersion}
+load: ${load}
+authors: ${authors}
+description: ${description}
+website: ${website}
+prefix: ${prefix}
+
+# 插件依赖关系
+depend: ${depend}
+softdepend: ${softdepend}
+loadbefore: ${loadbefore}
+
+# 默认权限
+default-permission: op
+
+# 权限节点
+permissions:
+  better-command-block.admin:
+    description: 管理员权限
+    default: op
+    children:
+      better-command-block.reload: true
+      better-command-block.execute: true
+  better-command-block.reload:
+    description: 重载插件配置
+    default: op
+  better-command-block.execute:
+    description: 允许执行增强的execute命令
+    default: op
+  better-command-block.read:
+    description: 允许查看命令方块内容
+    default: false

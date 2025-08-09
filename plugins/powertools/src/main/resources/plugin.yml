@@ -1,0 +1,46 @@
+############ 插件基础信息 ############
+# 插件主类
+main: ${main}
+# 插件名称
+name: ${name}
+# 插件版本
+version: ${version}
+# 插件描述
+description: ${description}
+# 加载时机
+load: ${load}
+# 作者
+authors: ${authors}
+# 网站
+website: ${website}
+# 日志前缀
+prefix: ${prefix}
+# 最低Minecraft版本
+api-version: ${apiVersion}
+# 依赖插件
+depend: ${depend}
+# 软依赖(loadafter)
+softdepend: ${softdepend}
+loadbefore: ${loadbefore}
+
+############ 插件权限信息 ############
+# 权限的默认赋予对象，默认是op
+default-permission: op
+# 权限节点
+permissions:
+  powertools.use:
+    description: '使用PowerTools基本功能'
+    default: true
+  powertools.skull:
+    description: '使用头颅相关功能'
+    default: true
+  powertools.reload:
+    description: '重载插件配置'
+    default: op
+  powertools.*:
+    description: '所有PowerTools权限'
+    default: op
+    children:
+      powertools.use: true
+      powertools.skull: true
+      powertools.reload: true

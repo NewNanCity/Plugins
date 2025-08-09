@@ -1,0 +1,72 @@
+# 中文语言文件示例
+# 用于演示 i18n 模块的使用
+
+plugin:
+  enabled: "&a插件已启用"
+  disabled: "&c插件已禁用"
+  loading: "&e正在加载插件..."
+  reloading: "&e正在重载插件..."
+
+welcome:
+  message: "&a欢迎 &e{0} &a来到服务器！"
+  first_join: "&6这是 &e{0} &6第一次加入服务器，让我们欢迎他！"
+  returning: "&b欢迎回来，&e{0}&b！"
+
+goodbye:
+  message: "&7玩家 &e{0} &7离开了服务器"
+  kick: "&c玩家 &e{0} &c被踢出服务器"
+  ban: "&4玩家 &e{0} &4被封禁"
+
+server:
+  info: "&b服务器信息：在线 &e{0}&b/&e{1} &b人"
+  status: "&a服务器运行正常"
+  maintenance: "&c服务器正在维护中"
+  restart: "&e服务器将在 &c{0} &e秒后重启"
+
+commands:
+  help:
+    title: "&6=== 帮助菜单 ==="
+    usage: "&e用法: &f{0}"
+    description: "&7{0}"
+  
+  reload:
+    success: "&a配置重载成功！"
+    failed: "&c配置重载失败：{0}"
+  
+  save:
+    success: "&a数据保存成功！"
+    failed: "&c数据保存失败：{0}"
+
+errors:
+  permission: "&c你没有权限执行此命令！"
+  command: "&c未知命令，请使用 /help 查看帮助"
+  player_not_found: "&c找不到玩家：{0}"
+  invalid_argument: "&c无效的参数：{0}"
+  internal_error: "&c内部错误，请联系管理员"
+
+messages:
+  loading: "&e正在加载..."
+  saving: "&e正在保存..."
+  processing: "&e正在处理..."
+  completed: "&a完成！"
+  cancelled: "&c已取消"
+  timeout: "&c操作超时"
+
+ui:
+  buttons:
+    confirm: "&a确认"
+    cancel: "&c取消"
+    back: "&7返回"
+    next: "&e下一页"
+    previous: "&e上一页"
+  
+  titles:
+    main_menu: "主菜单"
+    settings: "设置"
+    player_info: "玩家信息"
+
+notifications:
+  info: "&b[信息] &f{0}"
+  warning: "&e[警告] &f{0}"
+  error: "&c[错误] &f{0}"
+  success: "&a[成功] &f{0}"

@@ -1,0 +1,18 @@
+commands:
+  main:
+    description: Main RailExpress command
+  help:
+    description: Display help information
+    query: Query to search for specific command help
+  reload:
+    description: Reload plugin configuration
+    success: <green>Configuration file reloaded
+    failed: '<red>Error occurred while reloading configuration: {0}'
+    log_success: Plugin reloaded by {0}
+    log_failed: Failed to reload plugin for {0}
+railexpress:
+  plugin:
+    events_registered: Event listeners registered
+  config:
+    reload_failed: Failed to reload configuration
+    worlds_loaded: Loaded configuration for {0} worlds

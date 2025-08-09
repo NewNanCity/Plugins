@@ -1,0 +1,80 @@
+core:
+  plugin:
+    reload_failed: '<red>BetterCommandBlock plugin reload failed: {0}</red>'
+  error:
+    command_block_only: <red>This command can only be executed in command blocks</red>
+    operation_failed: '<red>Operation failed: {0}</red>'
+commands:
+  help:
+    description: Show help information
+    query: Help query keywords
+  reload:
+    success: <green>Configuration reloaded successfully</green>
+    failed: '<red>Configuration reload failed: {0}</red>'
+    description: Reload plugin configuration
+  pick:
+    success: <green>Successfully picked {1} from {0} container</green>
+    no_container_down: <red>No container below the command block</red>
+    no_container_up: <red>No container above the command block</red>
+    source_empty: <red>Source container is empty</red>
+    target_full: <red>Target container is full</red>
+    invalid_type: <red>Invalid pick type, use random-slot or random-item</red>
+    invalid_direction: <red>Invalid direction, use up or down</red>
+    description: Randomly pick items from containers
+  scoreboard:
+    success: <green>Randomly set scoreboard {0} value to {1} ~ {2}</green>
+    objective_not_found: '<red>Scoreboard objective not found: {0}</red>'
+    target_not_found: '<red>Target not found: {0}</red>'
+    invalid_mode: <red>Invalid mode, use set, add, or sub</red>
+    description: Randomly set scoreboard scores
+  execute:
+    success: <green>Command execution completed</green>
+    blocked_command: <red>Command {0} blocked by security policy</red>
+    entity_not_found: '<red>Entity not found: {0}</red>'
+    recursive_execute: <red>Recursive execute commands are not allowed</red>
+    description: Execute enhanced execute commands
+view:
+  command_content: '<yellow>Command block command: <white>{0}</white></yellow>'
+firewall:
+  commands:
+    status:
+      success: |
+        <gold>===== Firewall Status =====</gold>
+        <yellow>Status:</yellow> {0}
+        <yellow>Trie size:</yellow> {1} nodes
+        <yellow>Whitelist commands:</yellow> {2}
+        <yellow>Validators:</yellow> {3}
+        <yellow>Config version:</yellow> {4}
+      description: Show firewall status information
+    stats:
+      success: |
+        <gold>===== Firewall Statistics =====</gold>
+        <yellow>Total commands:</yellow> {0}
+        <yellow>Blocked:</yellow> {1} ({2}%)
+        <yellow>Allowed:</yellow> {3} ({4}%)
+        <yellow>Validation errors:</yellow> {5}
+        <yellow>Average validation time:</yellow> {6}ns
+        <yellow>Trie size:</yellow> {7} nodes
+        <yellow>Top commands:</yellow>
+        {8}
+      reset_success: <green>Firewall statistics reset</green>
+      description: Show or reset firewall statistics
+    test:
+      command_safe: '<green>Command is safe: {0}</green>'
+      command_blocked: '<red>Command is blocked: {0}</red>'
+      description: Test if a command would be blocked by firewall
+    reload:
+      success: <green>Firewall configuration reloaded successfully</green>
+      failed: '<red>Firewall configuration reload failed: {0}</red>'
+      description: Reload firewall configuration
+log:
+  info:
+    command_registered: Command {0} registered
+  error:
+    initialization_failed: 'Initialization failed: {0}'
+    command_execution_failed: 'Command execution failed: {0}'
+    event_handling_failed: 'Event handling failed: {0}'
+  warning:
+    unsafe_operation: 'Unsafe operation: {0}'
+  debug:
+    player_interaction: Player {0} interacted with command block

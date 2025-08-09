@@ -1,0 +1,161 @@
+# ============================================================================
+# 通用i18n模板 - 中文简体 (zh_CN)
+# ============================================================================
+# 此文件为通用i18n模板，适用于所有插件开发
+# 使用方式：复制到你的插件项目中，根据需要修改和扩展
+# 格式：MiniMessage (支持 <color> 标签和现代化样式)
+# ============================================================================
+
+# ============================================================================
+# 1. 核心系统层 (Core System Layer)
+# ============================================================================
+core:
+  plugin:
+    enabled: "<green>插件已启用</green>"
+    disabled: "<red>插件已禁用</red>"
+    reload_completed: "<green>插件重载完成</green>"
+    reload_failed: "<red>插件重载失败: {0}</red>"
+    
+  config:
+    reloaded: "<green>配置文件已重载</green>"
+    reload_failed: "<red>配置重载失败: {0}</red>"
+    file_not_found: "<red>配置文件不存在: {0}</red>"
+    
+  error:
+    no_permission: "<red>您没有权限执行此操作</red>"
+    operation_failed: "<red>操作失败: {0}</red>"
+    player_not_found: "<red>找不到玩家: {0}</red>"
+    player_offline: "<red>玩家 {0} 不在线</red>"
+    
+  success:
+    operation_completed: "<green>操作成功完成</green>"
+    data_saved: "<green>数据已保存</green>"
+    
+  validation:
+    amount_invalid: "<red>金额无效，必须大于0</red>"
+    amount_too_large: "<red>金额过大，最大值为 {0}</red>"
+    parameter_missing: "<red>缺少必要参数: {0}</red>"
+    format_invalid: "<red>格式错误，正确格式: {0}</red>"
+
+# ============================================================================
+# 2. 命令系统层 (Command System Layer)
+# ============================================================================
+commands:
+  help:
+    header: "<gold>===== {0} 帮助 =====</gold>"
+    usage: "<yellow>用法: {0}</yellow>"
+    description: "<gray>描述: {0}</gray>"
+    permission: "<gray>权限: {0}</gray>"
+    
+  validation:
+    command_not_found: "<red>命令不存在: {0}</red>"
+    invalid_usage: "<red>用法错误，请使用 {0}</red>"
+    player_only: "<red>此命令只能由玩家执行</red>"
+    console_only: "<red>此命令只能在控制台执行</red>"
+    
+  # 通用命令响应模板
+  # 具体命令应该按照以下格式添加：
+  # [command_name]:
+  #   success: "<green>{command_name} 执行成功</green>"
+  #   error: "<red>{command_name} 执行失败: {0}</red>"
+  #   info: "<gray>{command_name} 信息: {0}</gray>"
+  
+  reload:
+    success: "<green>重载成功</green>"
+    error: "<red>重载失败: {0}</red>"
+    info: "<gray>正在重载...</gray>"
+
+# ============================================================================
+# 3. 图形界面层 (GUI Layer)
+# ============================================================================
+gui:
+  common:
+    # 通用按钮
+    back: "<white>返回</white>"
+    close: "<red>关闭</red>"
+    next: "<green>下一页</green>"
+    previous: "<green>上一页</green>"
+    confirm: "<green>确认</green>"
+    cancel: "<red>取消</red>"
+    
+    # 通用标题
+    main_menu: "<gold>主菜单</gold>"
+    settings: "<gold>设置</gold>"
+    
+    # 通用提示
+    click_to_select: "<gray>点击选择</gray>"
+    shift_click_hint: "<gray>Shift+点击: {0}</gray>"
+    
+    # 通用状态
+    enabled: "<green>已启用</green>"
+    disabled: "<red>已禁用</red>"
+    online: "<green>在线</green>"
+    offline: "<red>离线</red>"
+    loading: "<yellow>加载中...</yellow>"
+    
+    # 通用描述
+    no_items: "<gray>暂无物品</gray>"
+    no_data: "<gray>暂无数据</gray>"
+    page_indicator: "<gray>第 {0}/{1} 页</gray>"
+
+# ============================================================================
+# 4. 业务领域层 (Business Domain Layer)
+# ============================================================================
+# 此部分应该根据具体插件的业务逻辑来定义
+# 以下是一些常见业务域的示例：
+
+# 示例：死亡扣费插件
+death:
+  cost_deducted: "<red>死亡扣除 {0} 金币</red>"
+  insufficient_balance: "<red>余额不足，无法扣除死亡费用</red>"
+  broadcast_message: "<gray>玩家 {0} 死亡，扣除 {1} 金币</gray>"
+  
+# 示例：飞行插件
+fly:
+  started: "<green>飞行开始，每分钟消耗 {0} 金币</green>"
+  ended: "<red>飞行结束</red>"
+  insufficient_balance: "<red>余额不足，无法继续飞行</red>"
+  time_remaining: "<gray>剩余飞行时间: {0} 分钟</gray>"
+  
+# 示例：传送插件
+tpa:
+  request_sent: "<green>传送请求已发送给 {0}</green>"
+  request_received: "<yellow>{0} 请求传送到您身边</yellow>"
+  request_accepted: "<green>传送请求已接受</green>"
+  request_denied: "<red>传送请求已拒绝</red>"
+
+# ============================================================================
+# 5. 日志系统层 (Logging Layer)
+# ============================================================================
+# 注意：日志消息通常不需要颜色格式化，使用纯文本
+log:
+  info:
+    plugin_loaded: "插件已加载"
+    config_loaded: "配置文件已加载"
+    service_started: "服务已启动: {0}"
+    
+  warn:
+    config_outdated: "配置文件版本过旧，建议更新"
+    performance_warning: "性能警告: {0}"
+    
+  error:
+    plugin_load_failed: "插件加载失败: {0}"
+    config_load_failed: "配置加载失败: {0}"
+    service_error: "服务错误: {0}"
+
+# ============================================================================
+# 6. 插件特定配置 (Plugin-specific Configuration)
+# ============================================================================
+# 在这里添加你的插件特定的i18n键值对
+# 遵循上述分类规则和命名约定
+
+plugin:
+  # 插件名称和描述
+  name: "我的插件"
+  description: "这是一个示例插件"
+  version: "版本 {0}"
+  
+  # 插件特定的成功/错误消息
+  feature:
+    enabled: "<green>功能已启用</green>"
+    disabled: "<red>功能已禁用</red>"

@@ -1,0 +1,214 @@
+core:
+  plugin:
+    reload_failed: '<red>插件重载失败: {0}</red>'
+  error:
+    world_not_found: '<red>世界不存在: {0}</red>'
+commands:
+  help:
+    description: 显示帮助信息
+    query: 帮助查询关键字
+  main:
+    description: 主命令
+  reload:
+    description: 重载插件
+    success: <green>重载成功</green>
+    failed: '<red>重载失败: {0}</red>'
+    log_success: 已由 {0} 执行重载
+    log_failed: 重载失败，执行者 {0}
+  prefix:
+    set:
+      description: 设置前缀
+      success: "<green>已为 {0} 设置前缀 {1}</green>"
+    remove:
+      description: 移除前缀
+      success: "<green>已移除 {0} 的前缀 {1}</green>"
+    activate:
+      description: 激活前缀
+      success: "<green>已激活 {0} 的前缀 {1}</green>"
+    deactivate:
+      description: 停用前缀
+      success: "<green>已停用 {0} 的前缀</green>"
+    player:
+      arg: 玩家
+    namespace:
+      arg: 命名空间
+    key:
+      arg: 键
+    not_found: '<red>前缀不存在: {0}</red>'
+  gui:
+    description: 打开主界面
+    opened: <green>主界面已打开</green>
+prefix:
+  removed: <green>前缀已禁用</green>
+  activated: '<green>前缀已启用: {0}</green>'
+teleport:
+  success: <green>传送成功</green>
+  failed: <red>传送失败</red>
+  point_not_found: <red>传送点不存在</red>
+  no_permission: <red>无权限</red>
+  cooldown: <yellow>冷却 {0} 秒</yellow>
+log:
+  info:
+    prefix_updated: '前缀已更新: {0}'
+    teleport_executed: '已执行传送: {0}'
+  warning:
+    vault_not_found: 未找到 Vault
+  error:
+    vault_error: Vault 错误 {0}
+    prefix_error: 前缀错误 {0}
+    teleport_error: 传送错误 {0}
+gui:
+  main:
+    title: 主菜单
+    teleport: 传送
+    prefix: 前缀
+    fly: 飞行
+    tpa: 传送请求
+    book: 图书
+    create_area: 创造区
+    charity: 公益
+    achievement: 成就
+    town: 城镇
+    guide: 指南
+    inspect: 查询
+    admin: 管理
+  admin:
+    title: 管理菜单
+    teleport_system: 传送系统
+    prefix_system: 前缀系统
+    book_system: 书籍系统
+    create_area: 创造区
+    rail_system: 铁路系统
+  teleport:
+    title: 传送点
+    no_points: 暂无传送点
+    manage_title: 管理传送点
+    builtin:
+      bed:
+        name: 床
+        desc: 最近一次睡觉的床
+      home:
+        name: 家
+        desc: 你的家
+      resource:
+        name: 资源世界
+        desc: 资源世界出生点
+      resource_nether:
+        name: 资源地狱
+        desc: 资源地狱出生点
+    world_line: '世界: {0}'
+    coords_line: '坐标: {0} {1} {2}'
+    permission_line: '权限: {0}'
+    cooldown_line: '冷却: {0}s'
+    action:
+      teleport: 传送
+      edit: 编辑
+      delete: 删除
+      left_click_teleport: 左键传送
+      left_click: 左键
+      right_click_edit: 右键编辑
+      shift_right_click_delete: Shift+右键删除
+    add_point:
+      title: 添加传送点
+      desc1: 创建一个自定义传送点
+      desc2: 名称/图标可稍后设置
+      action: 点击开始创建
+    point_desc: '传送点: {0}'
+    delete_confirm: 确认删除 {0}?
+    added_success: 已添加 {0}
+    updated_success: 已更新 {0}
+    deleted_success: 已删除 {0}
+    name_exists: '名称已存在: {0}'
+  prefix:
+    title: 玩家前缀
+    no_prefixes: 暂无前缀
+    player:
+      info:
+        current: '当前: {0}'
+        current_none: '当前: 无'
+        available_count: '可用: {0}'
+        select_prompt: 选择一个前缀
+    item:
+      namespace_line: '命名空间: {0}'
+      key_line: '键: {0}'
+      status_enabled: '状态: 启用'
+      status_disabled: '状态: 禁用'
+      action:
+        disable: 点击禁用
+        enable: 点击启用
+    clean_invalid: '已清理失效: {0}'
+    global:
+      manage_title: 管理前缀 ({0})
+      namespace_manage_title: 命名空间
+      namespace:
+        item_count: '数量: {0}'
+        item:
+          action:
+            view: 查看前缀
+            delete: 删除命名空间
+        add:
+          title: 添加命名空间
+          desc1: 创建命名空间
+          desc2: 需要唯一名称
+          action: 点击输入名称
+        delete_confirm: 删除命名空间 {0}?
+      item:
+        name: '键: {0}'
+        content: '内容: {0}'
+        action:
+          edit: 编辑内容
+          delete: 删除前缀
+      add:
+        title: 添加前缀
+        desc1: '命名空间: {0}'
+        desc2: 创建新前缀
+        action: 点击输入
+      delete_confirm: 删除前缀 {0}?
+      added: 已添加前缀 {0}
+      updated: 已更新前缀 {0}
+      deleted: 已删除前缀 {0}
+      namespace_status:
+        created: '命名空间已创建: {0}'
+        exists: '命名空间已存在: {0}'
+        deleted: '命名空间已删除: {0}'
+  common:
+    back: 返回
+    next: 下一页
+    previous: 上一页
+    previous_page: 上一页
+    next_page: 下一页
+input:
+  common:
+    chat_input_busy: <red>您正在进行其他输入</red>
+    cancelled: <gray>操作已取消</gray>
+    unknown_command: <red>未知输入指令</red>
+  teleport:
+    help: '指令: name | location | icon | permission | ok | cancel'
+    prompt: '请输入传送点信息:'
+    edit_prompt: '编辑传送点 {0}:'
+    name_required: 必须先设置名称
+    name_exists: '名称已存在: {0}'
+    name_set: '名称已设置: {0}'
+    location_required: 必须先设置位置
+    location_set: '位置已设置: {0}, {1}, {2} 世界: {3}'
+    icon_required: 必须先设置图标
+    icon_set: '图标已设置: {0}'
+    permission_set: '权限已设置: {0}'
+    save_failed: '保存失败: {0}'
+  prefix:
+    help: '指令: name | text | ok | cancel'
+    prompt: '请输入前缀信息:'
+    edit_prompt: '编辑前缀 {0}:'
+    name_required: 必须先设置名称
+    name_set: '名称已设置: {0}'
+    text_required: 必须先设置内容
+    text_set: '内容已设置: {0}'
+    save_failed: '保存失败: {0}'
+  namespace:
+    help: '指令: name | ok | cancel'
+    prompt: '请输入命名空间信息:'
+    edit_prompt: '编辑命名空间 {0}:'
+    name_required: 必须先设置名称
+    name_exists: '名称已存在: {0}'
+    name_set: '名称已设置: {0}'
+    save_failed: '保存失败: {0}'

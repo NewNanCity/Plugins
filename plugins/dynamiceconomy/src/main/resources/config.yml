@@ -1,0 +1,39 @@
+# DynamicEconomy 插件配置文件
+# 动态经济系统配置
+
+# 调试模式
+debug: false
+
+# 消息前缀设置
+player-prefix: "§7[§6动态经济§7] §f"
+console-prefix: "[DynamicEconomy] "
+
+# 国库所有者（用于维持国库余额）
+owner: "Server"
+
+# 排除的世界（不统计财富的世界）
+exclude-worlds:
+  - "world_nether"
+  - "world_the_end"
+
+# 经济系统设置
+economy-settings:
+  # 启用财富跟踪
+  enable-wealth-tracking: true
+  # 启用货币发行
+  enable-currency-issuance: true
+  # 国库余额阈值
+  national-treasury-threshold: 500000
+  # 财富更新间隔（秒）
+  wealth-update-interval: 300
+
+# 商品系统设置
+commodity-settings:
+  # 启用动态定价
+  enable-dynamic-pricing: true
+  # 价格更新间隔（秒）
+  price-update-interval: 60
+  # 最大价格比例
+  max-price-ratio: 10.0
+  # 最小价格比例
+  min-price-ratio: 1.0

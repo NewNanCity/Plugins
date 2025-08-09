@@ -1,0 +1,17 @@
+core:
+  plugin:
+    disabled: <red>MCPatch 插件已禁用</red>
+    reload_failed: '<red>MCPatch 插件重载失败: {0}</red>'
+security:
+  anti_world_download:
+    player_kicked: <red>玩家 {0} 因使用WDL被踢出</red>
+    violation_logged: <yellow>WDL违规已记录到日志</yellow>
+  contraband:
+    item_removed: <yellow>违禁物品 {0} 已被删除</yellow>
+    items_found: <red>在 {0} 的容器中发现 {1} 个违禁物品</red>
+  anti_crash:
+    dispenser_blocked: <red>阻止在危险位置放置发射器</red>
+log:
+  info:
+    module_initialized: 模块 {0} 已初始化
+    security_event_logged: 安全事件已记录

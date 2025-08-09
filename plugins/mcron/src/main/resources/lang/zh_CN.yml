@@ -1,0 +1,26 @@
+commands:
+  help:
+    description: 显示帮助信息
+    query: 帮助查询关键词
+  main:
+    description: MCron 主命令
+  reload:
+    description: 重载插件配置
+    failed: "<red>配置重载失败: {0}</red>"
+    log_success: "配置已由 {0} 重载"
+    log_failed: "配置重载失败，操作者 {0}: {1}"
+  executed: "<green>任务执行成功</green>"
+  execution_failed: "<red>任务执行失败: {0}</red>"
+  invalid_sleep_time: "<red>无效的休眠时间: {0}</red>"
+
+reload_success: "<green>MCron 配置重载成功</green>"
+
+listeners:
+  registered: "事件监听器注册成功"
+
+mcron:
+  config:
+    reload_failed: "<red>MCron 配置重载失败: {0}</red>"
+  server:
+    loaded: "MCron 服务器组件已加载"
+    ready_task_failed: "<red>就绪任务执行失败: {0}</red>"

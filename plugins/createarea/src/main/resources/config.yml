@@ -1,0 +1,27 @@
+# CreateArea 插件配置文件
+# 现代化的创造区域管理插件配置
+
+# 调试模式
+debug: false
+
+# 消息前缀设置
+player-prefix: "§7[§6牛腩创造§7] §f"
+console-prefix: "[CreateArea] "
+
+# 创造世界名称
+world: "create_world"
+
+# 权限组设置
+default-group: "Visitor"
+builder-group: "Builder"
+
+# Dynmap集成设置
+dynmap-settings:
+  # 是否启用Dynmap集成
+  enabled: true
+
+  # 标记集ID
+  marker-set-id: "NewNanCity.CreateArea"
+
+  # 标记集标签
+  marker-set-label: "创造区"

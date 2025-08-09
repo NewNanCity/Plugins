@@ -1,0 +1,214 @@
+core:
+  plugin:
+    reload_failed: '<red>Plugin reload failed: {0}</red>'
+  error:
+    world_not_found: '<red>World not found: {0}</red>'
+commands:
+  help:
+    description: Show help information
+    query: Help query keywords
+  main:
+    description: Main command
+  reload:
+    description: Reload plugin
+    success: <green>Reloaded successfully</green>
+    failed: '<red>Reload failed: {0}</red>'
+    log_success: Reload executed by {0}
+    log_failed: Reload failed by {0}
+  prefix:
+    set:
+      description: Set player prefix
+      success: "<green>Set prefix for {0} to {1}</green>"
+    remove:
+      description: Remove player prefix
+      success: "<green>Removed prefix {1} from {0}</green>"
+    activate:
+      description: Activate player prefix
+      success: "<green>Activated prefix namespace {1} for {0}</green>"
+    deactivate:
+      description: Deactivate player prefix
+      success: "<green>Deactivated prefix for {0}</green>"
+    player:
+      arg: Player
+    namespace:
+      arg: Namespace
+    key:
+      arg: Key
+    not_found: '<red>Prefix not found: {0}</red>'
+  gui:
+    description: Open main GUI
+    opened: <green>Main GUI opened</green>
+prefix:
+  removed: <green>Prefix disabled</green>
+  activated: '<green>Prefix activated: {0}</green>'
+teleport:
+  success: <green>Teleported.</green>
+  failed: <red>Teleport failed.</red>
+  point_not_found: <red>Point not found.</red>
+  no_permission: <red>No permission.</red>
+  cooldown: <yellow>Cooldown {0}s</yellow>
+log:
+  info:
+    prefix_updated: 'Prefix updated: {0}'
+    teleport_executed: 'Teleport executed: {0}'
+  warning:
+    vault_not_found: Vault not found
+  error:
+    vault_error: Vault error {0}
+    prefix_error: Prefix error {0}
+    teleport_error: Teleport error {0}
+gui:
+  main:
+    title: Main Menu
+    teleport: Teleport
+    prefix: Prefix
+    fly: Fly
+    tpa: TPA
+    book: Book
+    create_area: Create Area
+    charity: Charity
+    achievement: Achievement
+    town: Town
+    guide: Guide
+    inspect: Inspect
+    admin: Admin
+  admin:
+    title: Admin Menu
+    teleport_system: Teleport System
+    prefix_system: Prefix System
+    book_system: Book System
+    create_area: Create Area System
+    rail_system: Rail System
+  teleport:
+    title: Teleport Points
+    no_points: No teleport points yet.
+    manage_title: Manage Teleport Points
+    builtin:
+      bed:
+        name: Bed
+        desc: Last bed you slept in.
+      home:
+        name: Home
+        desc: Your personal home point.
+      resource:
+        name: Resource
+        desc: Resource world spawn.
+      resource_nether:
+        name: Resource Nether
+        desc: Resource nether spawn.
+    world_line: 'World: {0}'
+    coords_line: 'XYZ: {0} {1} {2}'
+    permission_line: 'Perm: {0}'
+    cooldown_line: 'CD: {0}s'
+    action:
+      teleport: Teleport
+      edit: Edit
+      delete: Delete
+      left_click_teleport: Left click to teleport
+      left_click: Left click
+      right_click_edit: Right click to edit
+      shift_right_click_delete: Shift+Right click to delete
+    add_point:
+      title: Add Point
+      desc1: Create a custom teleport point.
+      desc2: You can set name/icon later.
+      action: Click to start creation.
+    point_desc: 'Point: {0}'
+    delete_confirm: Confirm delete {0}?
+    added_success: Added point {0}
+    updated_success: Updated point {0}
+    deleted_success: Deleted point {0}
+    name_exists: 'Name already exists: {0}'
+  prefix:
+    title: Player Prefixes
+    no_prefixes: No prefixes available.
+    player:
+      info:
+        current: 'Current: {0}'
+        current_none: 'Current: (none)'
+        available_count: 'Available: {0}'
+        select_prompt: Choose a prefix.
+    item:
+      namespace_line: 'Namespace: {0}'
+      key_line: 'Key: {0}'
+      status_enabled: 'Status: Enabled'
+      status_disabled: 'Status: Disabled'
+      action:
+        disable: Click to disable
+        enable: Click to enable
+    clean_invalid: 'Removed invalid: {0}'
+    global:
+      manage_title: Manage Prefixes ({0})
+      namespace_manage_title: Namespaces
+      namespace:
+        item_count: 'Count: {0}'
+        item:
+          action:
+            view: View prefixes
+            delete: Delete namespace
+        add:
+          title: Add Namespace
+          desc1: Create a namespace.
+          desc2: Unique name required.
+          action: Click to input name.
+        delete_confirm: Delete namespace {0}?
+      item:
+        name: 'Key: {0}'
+        content: 'Content: {0}'
+        action:
+          edit: Edit content
+          delete: Delete prefix
+      add:
+        title: Add Prefix
+        desc1: 'Namespace: {0}'
+        desc2: Create new prefix.
+        action: Click to input.
+      delete_confirm: Delete prefix {0}?
+      added: Added prefix {0}
+      updated: Updated prefix {0}
+      deleted: Deleted prefix {0}
+      namespace_status:
+        created: 'Namespace created: {0}'
+        exists: 'Namespace already exists: {0}'
+        deleted: 'Namespace deleted: {0}'
+  common:
+    back: Back
+    next: Next
+    previous: Previous
+    previous_page: Previous Page
+    next_page: Next Page
+input:
+  common:
+    chat_input_busy: <red>Already waiting for another input!</red>
+    cancelled: <gray>Operation cancelled</gray>
+    unknown_command: <red>Unknown input command</red>
+  teleport:
+    help: 'Commands: name | location | icon | permission | ok | cancel'
+    prompt: 'Enter teleport point info:'
+    edit_prompt: 'Editing teleport point {0}:'
+    name_required: Name required before save
+    name_exists: 'Name exists: {0}'
+    name_set: 'Name set: {0}'
+    location_required: Location required before save
+    location_set: 'Location set: {0}, {1}, {2} world: {3}'
+    icon_required: Icon required before save
+    icon_set: 'Icon set: {0}'
+    permission_set: 'Permission set: {0}'
+    save_failed: 'Save failed: {0}'
+  prefix:
+    help: 'Commands: name | text | ok | cancel'
+    prompt: 'Enter prefix info:'
+    edit_prompt: 'Editing prefix {0}:'
+    name_required: Name required
+    name_set: 'Name set: {0}'
+    text_required: Text required
+    text_set: 'Text set: {0}'
+    save_failed: 'Save failed: {0}'
+  namespace:
+    help: 'Commands: name | ok | cancel'
+    prompt: 'Enter namespace info:'
+    edit_prompt: 'Editing namespace {0}:'
+    name_required: Name required
+    name_exists: 'Name exists: {0}'
+    name_set: 'Name set: {0}'
+    save_failed: 'Save failed: {0}'

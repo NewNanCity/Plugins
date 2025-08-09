@@ -1,0 +1,26 @@
+# TPA插件配置文件
+# 现代化的传送请求插件配置
+
+# 是否启用插件
+enable: true
+
+# 冷却时间（秒）- 发送请求后的冷却时间
+cool-down-seconds: 15
+
+# 传送延迟时间（秒）- 接受请求后的传送倒计时
+delay-seconds: 3
+
+# 请求过期时间（秒）- 请求的有效期
+expired-seconds: 60
+
+# 禁用TPA的世界列表
+exclude-worlds: []
+
+# 调试模式 - 启用详细日志和性能监控
+debug: false
+
+# 玩家消息前缀
+player-prefix: "§7[§6TPA§7] §f"
+
+# 控制台消息前缀
+console-prefix: "[TPA] "

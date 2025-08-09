@@ -1,0 +1,20 @@
+# PowerTools 插件配置文件
+# 现代化的实用工具插件配置
+
+# 调试模式
+debug: false
+
+# 消息前缀设置
+player-prefix: "§7[§6PowerTools§7] §f"
+console-prefix: "[PowerTools] "
+
+# 头颅设置
+skull-settings:
+  # 单次命令最大获取头颅数量
+  max-skulls-per-command: 64
+
+  # 启用URL头颅功能
+  enable-url-skulls: true
+
+  # 启用玩家头颅功能
+  enable-player-skulls: true

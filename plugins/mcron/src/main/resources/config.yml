@@ -1,0 +1,69 @@
+# MCron 现代化定时任务插件配置文件
+# 版本: ${version}
+
+version: ${version}
+
+# 玩家前缀
+player-message-prefix: "§7[§6MCron§7] §r"
+# 控制台前缀
+console-message-prefix: "[MCron] "
+
+# 是否启用文件日志
+file-logging: true
+
+# 时区配置
+timezone:
+  # 时区偏移量，支持格式: Z, +8, +08:00, -05:30等
+  offset: "+8"
+  # 是否自动检测服务器时区
+  auto-detect: false
+
+# 任务配置
+tasks:
+  # 服务器启动完成时执行的任务
+  # key为cron表达式，value为命令列表
+  on-server-ready: {}
+  # 示例:
+  #   "* * * * * *":
+  #     - "broadcast <%msg.server_ready%>"
+  #     - "gamerule keepInventory true"
+
+  # 插件启用时执行的任务
+  # key为插件名称，value为命令列表
+  on-plugin-enable: {}
+  # 示例:
+  #   "Essentials":
+  #     - "say Essentials plugin is ready"
+
+  # 插件禁用时执行的任务
+  # key为插件名称，value为命令列表
+  on-plugin-disable: {}
+
+  # 定时任务
+  # key为cron表达式，value为命令列表
+  scheduled-tasks:
+    # 工作日早上8:30的问候 (支持中文表达)
+    "0 30 8 ? * 工作日":
+    - "broadcast <%msg.weekday_greeting%>"
+    # 周末早上8:30的问候 (支持中文表达)
+    "0 30 8 ? * 周末":
+    - "broadcast <%msg.weekend_greeting%>"
+    # 每周一早上9点的会议提醒 (支持中文星期)
+    "0 0 9 ? * 周一":
+    - "broadcast §e每周例会即将开始！"
+    # 每周五下午6点的周报提醒 (支持英文星期)
+    "0 0 18 ? * Friday":
+    - "broadcast §a请记得提交本周工作总结！"
+    # 新年祝福（每年一月1日0点，支持中文月份）
+    "0 0 0 1 一月 ?":
+    - "broadcast <%msg.new_year_greeting%>"
+    # 圣诞节祝福（每年December 25日，支持英文月份）
+    "0 0 0 25 December ?":
+    - "broadcast §c🎄 圣诞快乐！Merry Christmas! 🎄"
+    # 示例：每天晚上11:55提醒服务器即将重启
+    # "0 55 23 * * *":
+    #   - "broadcast §e服务器将在5分钟后重启！"
+
+    # 示例：每天午夜重启服务器
+    # "0 0 0 * * *":
+    #   - "stop"

@@ -1,0 +1,111 @@
+# CreateArea Plugin English Language File
+# Following the five-layer architecture i18n Key classification system
+
+# ==================== Core System Layer ====================
+core:
+  plugin:
+    enabled: "<green>CreateArea plugin enabled</green>"
+    disabled: "<red>CreateArea plugin disabled</red>"
+    reloading: "<yellow>CreateArea plugin reloading...</yellow>"
+    reloaded: "<green>CreateArea plugin reloaded</green>"
+    reload_failed: "<red>CreateArea plugin reload failed: {0}</red>"
+
+  error:
+    no_permission: "<red>You don't have permission to perform this action</red>"
+    player_only: "<red>This command can only be executed by players</red>"
+    operation_failed: "<red>Operation failed: {0}</red>"
+    invalid_args: "<red>Invalid arguments: {0}</red>"
+    player_not_found: "<red>Player not found: {0}</red>"
+    world_not_found: "<red>World not found: {0}</red>"
+
+  success:
+    operation_completed: "<green>Operation completed</green>"
+
+# ==================== Command System Layer ====================
+commands:
+  help:
+    description: "Show help information"
+    header: "<gold>===== {0} Help =====</gold>"
+    footer: "<gray>Use /createarea help for more help</gray>"
+
+  reload:
+    description: "Reload plugin configuration"
+    success: "<green>Configuration reloaded successfully</green>"
+    failed: "<red>Configuration reload failed: {0}</red>"
+    log_success: "Plugin configuration reloaded by {0}"
+    log_failed: "Plugin configuration reload failed, operator: {0}"
+
+  tp:
+    description: "Teleport to create area"
+    player_arg: "Target player name"
+    success_self: "<green>Teleported to your create area!</green>"
+    success_other: "<green>Teleported to {0}'s create area!</green>"
+    area_not_found_self: "<red>You don't have a create area!</red>"
+    area_not_found_other: "<red>Player {0}'s create area does not exist!</red>"
+
+  set:
+    description: "Set create area"
+    player_arg: "Target player name"
+    success_self: "<green>Create area set for you!</green>"
+    success_other: "<green>Create area set for player {0}!</green>"
+    no_selection: "<red>Please select an area with WorldEdit wand first! Height doesn't matter, only horizontal area!</red>"
+    worldedit_not_found: "<red>WorldEdit plugin not found, cannot use this feature!</red>"
+
+  delete:
+    description: "Delete create area"
+    player_arg: "Target player name"
+    success_self: "<green>Your create area has been deleted!</green>"
+    success_other: "<green>Player {0}'s create area has been deleted!</green>"
+    area_not_found_self: "<red>You don't have a create area to delete!</red>"
+    area_not_found_other: "<red>Player {0} doesn't have a create area to delete!</red>"
+
+  gui:
+    description: "Open create area management GUI"
+
+# ==================== GUI Layer ====================
+gui:
+  common:
+    back: "<white>Back</white>"
+    close: "<red>Close</red>"
+    confirm: "<green>Confirm</green>"
+    previous_page: "<yellow>Previous Page</yellow>"
+    next_page: "<yellow>Next Page</yellow>"
+
+  area_list:
+    title: "<gold>Create Area Management</gold>"
+    area_entry: "<yellow>{0}'s Create Area</yellow>"
+    no_areas: "<gray>No create areas</gray>"
+
+# ==================== Business Domain Layer ====================
+area:
+  created: "<green>Create area created</green>"
+  deleted: "<red>Create area deleted</red>"
+  teleported: "<green>Teleported to create area</green>"
+  permission_updated: "<yellow>Permission group updated</yellow>"
+  dynmap_synced: "<blue>Dynmap markers synced</blue>"
+
+permission:
+  group_added: "<green>Added to permission group: {0}</green>"
+  group_removed: "<red>Removed from permission group: {0}</red>"
+  check_failed: "<red>Permission check failed</red>"
+
+# ==================== Logging Layer ====================
+log:
+  info:
+    plugin_loaded: "CreateArea plugin loaded"
+    config_loaded: "Configuration file loaded"
+    area_created: "Create area created for player: {0}"
+    area_deleted: "Create area deleted for player: {0}"
+    dynmap_connected: "Dynmap connected successfully"
+
+  error:
+    initialization_failed: "Initialization failed: {0}"
+    service_error: "Service error: {0}"
+    worldedit_error: "WorldEdit error: {0}"
+    dynmap_error: "Dynmap error: {0}"
+    vault_error: "Vault error: {0}"
+
+  warning:
+    worldedit_not_found: "WorldEdit plugin not found"
+    dynmap_not_found: "Dynmap plugin not found"
+    vault_not_found: "Vault plugin not found"

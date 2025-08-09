@@ -1,0 +1,83 @@
+core:
+  plugin:
+    reload_failed: '<red>DynamicEconomy plugin reload failed: {0}</red>'
+  error:
+    operation_failed: '<red>Operation failed: {0}</red>'
+    insufficient_funds: <red>Insufficient funds</red>
+commands:
+  help:
+    description: Show help information
+    query: Help query keywords
+  main:
+    description: DynamicEconomy main command
+  reload:
+    description: Reload plugin configuration
+    success: <green>Configuration reloaded successfully</green>
+    failed: '<red>Configuration reload failed: {0}</red>'
+    log_success: Plugin configuration reloaded by {0}
+    log_failed: 'Plugin configuration reload failed, operator: {0}'
+  stats:
+    description: View economic statistics
+    wealth_header: <gold>=== Wealth Statistics ===</gold>
+    economy_header: <gold>=== Economy Statistics ===</gold>
+    commodity_header: <gold>=== Commodity Statistics ===</gold>
+  commodity:
+    list:
+      description: View commodity list
+    info:
+      description: View commodity information
+    buy:
+      description: Buy commodity
+    sell:
+      description: Sell commodity
+    name:
+      arg: Commodity name
+    amount:
+      arg: Amount
+  issue:
+    description: Issue currency
+    success: <green>Successfully issued {0} currency</green>
+    failed: '<red>Currency issuance failed: {0}</red>'
+    log_success: 'Currency issued by {0}: amount {1}'
+    log_failed: 'Currency issuance failed by {0}: {1}'
+    amount:
+      arg: Amount to issue
+  reload_issuance:
+    description: Reload issuance configuration
+    success: <green>Issuance configuration reloaded successfully</green>
+    failed: '<red>Issuance configuration reload failed: {0}</red>'
+    log_success: Issuance configuration reloaded by {0}
+    log_failed: 'Issuance configuration reload failed by {0}: {1}'
+  update_index:
+    description: Update economic index
+    success: <green>Economic index updated successfully</green>
+    failed: '<red>Economic index update failed: {0}</red>'
+    log_success: Economic index updated by {0}
+    log_failed: 'Economic index update failed by {0}: {1}'
+wealth:
+  total_wealth: '<green>Total wealth: {0}</green>'
+  resource_count: '<yellow>{0}: {1}</yellow>'
+economy:
+  currency_issuance: '<blue>Currency issuance: {0}</blue>'
+  national_treasury: '<blue>National treasury: {0}</blue>'
+  insufficient_treasury: <red>Insufficient treasury balance</red>
+  owner_account_set: '<green>Economy owner account set: {0}</green>'
+commodity:
+  buy_success: <green>Successfully bought {0} {1} for {2}</green>
+  sell_success: <green>Successfully sold {0} {1} for {2}</green>
+  not_found: <red>Commodity {0} not found</red>
+  insufficient_stock: <red>Insufficient stock</red>
+  buy_price: '<green>Buy price: {0}</green>'
+  sell_price: '<red>Sell price: {0}</red>'
+  stock: '<yellow>Stock: {0}</yellow>'
+log:
+  info:
+    wealth_calculated: 'Wealth calculation completed: {0}'
+    commodity_traded: 'Commodity trade: {0} {1} amount {2}'
+  warning:
+    vault_not_found: Vault plugin not found, economy features will be unavailable
+  error:
+    vault_error: 'Vault service error: {0}'
+    wealth_calculation_error: 'Wealth calculation error: {0}'
+    commodity_error: 'Commodity processing error: {0}'
+    economy_error: 'Economy processing error: {0}'

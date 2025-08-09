@@ -1,0 +1,280 @@
+core:
+  plugin:
+    reload_failed: <red>插件重载失败</red>
+gui:
+  common:
+    back: <gray>返回</gray>
+    previous_page: <yellow>上一页</yellow>
+    next_page: <yellow>下一页</yellow>
+    cycle_line: 环线
+    no_cycle_line: 往返线
+  rail_lines:
+    title_edit: <gray>[<dark_aqua><bold>牛腩轨道交通<reset><gray>]<reset> 所有线路</gray>
+    title_select: <gray>[<gold><bold>牛腩轨道交通<reset><gray>]<reset> 选择线路</gray>
+    add_line: 添加线路
+    line_name: <color:{0}>{1}</color:{0}>
+    line_lore: |-
+      <gray>线路ID: {0}
+      <gray>站点数: {1}
+      <gray>类型: {2}
+    line_operations_edit: |-
+      
+      <green>左键: 编辑线路站点
+      <green>右键: 切换环线/往返线模式
+      <green>Shift+左键: 编辑线路
+      <green>Shift+右键: 删除线路</green>
+    line_operations_select: |-
+      
+      <green>左键: 选择线路</green>
+    line_added: <green>线路 <color:{0}>{1}</color:{0}> 已添加!</green>
+    line_updated: <green>线路 <color:{0}>{1}</color:{0}> 已更新!</green>
+    line_deleted: <green>线路 <color:{0}>{1}</color:{0}> 已删除!</green>
+    delete_confirm: <red>确认删除线路 <color:{0}>{1}</color:{0}>? 将删除其包含的所有站点(站点自身不会被删除)! 回复Y确认, 回复其他取消</red>
+    free_area_management: <yellow>游离区域</yellow>
+    free_area_management_lore: |-
+      <gray>这些区域由于其所在的线路或站点被删除,</gray>
+      <gray>处于游离状态, 等待分配</gray>
+
+      <green>左键: 打开游离区域管理</green>
+  rail_line:
+    title_edit: <gray>[<dark_aqua><bold>牛腩轨道交通<reset><gray>]<reset> <gray>[<bold><color:{0}>{1}</color:{0}><reset><gray>]<reset>的所有站点</gray>
+    title_select: <gray>[<gold><bold>牛腩轨道交通<reset><gray>]<reset> 选择站点</gray>
+    add_station: 添加站点
+    add_station_lore: |-
+      点击添加新站点到此线路
+      新站点将添加到线路末尾
+    left_return_yes: '左侧折返: <green>是</green>'
+    left_return_no: '左侧折返: <red>否</red>'
+    right_return_yes: '右侧折返: <green>是</green>'
+    right_return_no: '右侧折返: <red>否</red>'
+    return_description: |-
+      指到实际线路达终点站后
+      是否能够折返到另一边的起点
+    station_name: <yellow>{0}</yellow>
+    station_lore: |
+      <gray>站点ID: {0}
+    station_operations_edit: |-
+      
+      <green>左键: 选择站点
+      <green>右键: 移除站点
+    station_operations_select: |-
+      
+      <green>左键: 选择站点</green>
+    station_operations_shift_left: |
+      
+      <green>Shift+左键: 向左移动站点</green>
+    station_operations_shift_right: |
+      
+      <green>Shift+右键: 向右移动站点</green>
+    station_added: <green>站点 {0} 已添加到线路!</green>
+    station_removed: <green>站点 {0} 已从线路移除!</green>
+    remove_station_confirm: <red>确认从线路移除站点 {0}? 回复Y确认, 回复其他取消</red>
+    left_return_updated: <green>左侧折返设置已更新!</green>
+    right_return_updated: <green>右侧折返设置已更新!</green>
+  station:
+    title: <gray>[<dark_aqua><bold>牛腩轨道交通<reset><gray>]<reset> 所有可用站点</gray>
+    create_station: 创建站点
+    create_station_lore: |-
+      点击创建新站点
+      新站点将添加到系统中
+    station_lore: |-
+      <gray>站点ID: {0}
+      <gray>使用线路数: {1}
+    station_operations: |-
+      
+      <green>左键: 选择站点
+      <green>Shift+左键: 编辑站点
+      {2}
+    station_created: <green>站点 {0} 已创建!</green>
+    station_updated: <green>站点 {0} 已更新!</green>
+    station_deleted: <green>站点 {0} 已删除!</green>
+    delete_confirm: <red>确认删除站点 {0}? 回复Y确认, 回复其他取消</red>
+    station_in_use: '<red>站点 {0} 正在被以下线路使用，无法删除: {1}</red>'
+    delete_operation: 删除站点
+    delete_operation_in_use: <red>无法删除正在使用的站点</red>
+  rail_area:
+    title: <gray>[<dark_aqua><bold>牛腩轨道交通<reset><gray>]<reset> <color:{0}>{1}-{2}</color:{0}> 铁路区域列表</gray>
+    add_area: 添加区域
+    add_area_lore: |-
+      <green>展示屏蔽的玩家</green>
+      <gray>点击展示屏蔽的玩家</gray>
+      <gray>将打开屏蔽玩家列表</gray>
+    area_name: <white>{0} <color:{1}>{2}</color:{1}> 开往<gold>{3}</gold>方向</white>
+    area_lore: |-
+      {0}
+      {1}
+      <gray>世界: {2}
+      <gray>范围: ({3}, {4}, {5}) - ({6}, {7}, {8})
+      <gray>停靠点: ({9}, {10}, {11})
+      <gray>发车方向: {12}
+
+      <green>左键: 显示区域
+      <green>右键: 传送到区域
+      <green>Shift+左键: 编辑区域
+      <green>Shift+右键: 删除区域</green>
+    area_added: <green>区域已添加!</green>
+    area_updated: <green>区域已更新!</green>
+    area_deleted: <green>区域已删除!</green>
+    area_update_failed: '<red>区域更新失败: {0}</red>'
+    area_delete_failed: '<red>区域删除失败: {0}</red>'
+    area_add_failed: '<red>区域添加失败: {0}</red>'
+    delete_confirm: <red>确认删除区域 ({0}, {1}, {2})? 回复Y确认, 回复其他取消</red>
+    teleported: <green>已传送到区域 ({0}, {1}, {2})</green>
+    teleport_failed: '<red>传送失败: {0}</red>'
+    start_station: <purple>本站为起点站</purple>
+    previous_station: '<gray>上一站: <purple>{0}</purple></gray>'
+    end_station: <purple>本站为终点站</purple>
+    next_station: '<gray>下一站: <purple>{0}</purple></gray>'
+  free_area:
+    title: <gray>[<dark_aqua><bold>牛腩轨道交通<reset><gray>]<reset> 游离区域</gray>
+    area_lore: |-
+      <gray>世界: {0}
+      <gray>范围: ({1}, {2}, {3}) - ({4}, {5}, {6})
+      <gray>停靠点: ({7}, {8}, {9})
+      <gray>发车方向: {10}
+      <red>未分配到具体站点和线路
+
+      <green>左键: 显示区域
+      <green>右键: 传送到区域
+      <green>Shift+左键: 编辑区域
+      <green>Shift+右键: 删除区域</green>
+    area_updated: <green>游离区域已更新!</green>
+    area_deleted: <green>游离区域 {0} 已删除!</green>
+    delete_confirm: <red>确认删除游离区域? 回复Y确认, 回复其他取消</red>
+    teleported: <green>已传送到游离区域</green>
+    teleport_failed: '<red>传送失败: {0}</red>'
+    update_failed: '<red>游离区域更新失败: {0}</red>'
+    delete_failed: '<red>游离区域删除失败: {0}</red>'
+  reverse:
+    title: <gray>[<dark_aqua><bold>牛腩轨道交通<reset><gray>]<reset> 选择方向</gray>
+    selection_name: 开往 <gold>{0}</gold> 方向
+input:
+  common:
+    cancelled: <gray>已取消</gray>
+    chat_input_busy: <red>你正在进行其他输入, 请先取消之!</red>
+    unknown_command: <red>未知指令! </red>
+  station:
+    prompt: <yellow>请设定站点名称</yellow>
+    help: |-
+      <gold>=== 站点配置帮助 ===</gold>
+      直接在聊天框输入指令即可, 无需 / 符号.
+      <yellow>name: 设定站点名称</yellow>
+      <yellow>cancel: 取消设置</yellow>
+      <yellow>ok: 确认设置</yellow>
+    edit_prompt: '开始设置站点 <green>{0}<reset>，接下来请设定站点的属性:'
+    name_set: '已设置名称: {0}'
+    name_exists: <red>站点 {0} 已存在!</red>
+    name_required: <red>请先设置名称!</red>
+    save_failed: '<red>保存站点失败: {0}</red>'
+  rail_line:
+    prompt: <yellow>请设定线路名称和颜色</yellow>
+    help: |-
+      <gold>=== 线路配置帮助 ===</gold>
+      直接在聊天框输入指令即可, 无需 / 符号.
+      <yellow>name: 设定线路名称</yellow>
+      <yellow>color: 设定线路颜色</yellow>
+      <yellow>cancel: 取消设置</yellow>
+      <yellow>ok: 确认设置</yellow>
+    name_set: '已设置名称: {0}'
+    name_exists: <red>线路 {0} 已存在!</red>
+    name_required: <red>请输入名称!</red>
+    color_set: '已设置颜色: <color:{0}>{1}</color:{0}>'
+    color_required: <red>请输入颜色
+    color_format_error: <red>颜色格式错误! 请使用
+    name_color_required: <red>请先设置名称和颜色!</red>
+    save_failed: '<red>保存线路失败: {0}</red>'
+  area:
+    prompt: '开始设置区域，接下来请设定区域的属性:'
+    edit_prompt: '开始设置区域 <green>{0}({1})<reset>，接下来请设定区域的属性:'
+    preview: |-
+      <gold>=== 区域配置预览 ===</gold>
+      <yellow>站点: {0}</yellow>
+      <yellow>线路: {1}</yellow>
+      <yellow>方向: {2}</yellow>
+      <yellow>世界: {3}</yellow>
+      <yellow>区域: {4}</yellow>
+      <yellow>停靠点: {5}</yellow>
+      <yellow>方向: {6}</yellow>
+    help: |-
+      <gold>=== 区域配置帮助 ===</gold>
+      直接在聊天框输入指令即可, 无需 / 符号.
+      <yellow>station: 设定站点</yellow>
+      <yellow>area: 设定区域范围</yellow>
+      <yellow>stop: 设定停靠点</yellow>
+      <yellow>dir: 设定方向</yellow>
+      <yellow>preview: 预览当前设置</yellow>
+      <yellow>cancel: 取消设置</yellow>
+      <yellow>ok: 确认设置</yellow>
+    preview_not_set: <red>未设置</red>
+    station_selected: '<green>已选择站点: {0}</green>'
+    worldedit_not_installed: <red>未安装WorldEdit插件!</red>
+    select_area_first: <red>请先用小木斧选择一个区域!</red>
+    wrong_world: <red>请先切换到选择区域所在的世界!</red>
+    single_point_error: <red>是不是不小心把area打成stop了? 选择区域大一点吧!</red>
+    area_set: '已设定区域范围为: {0} <green>({1}, {2}, {3}) - ({4}, {5}, {6})</green>'
+    area_format_error: <red>区域范围格式错误! 请使用 world x1 y1 z1 x2 y2 z2 的格式!</red>
+    world_not_exists: <red>世界 {0} 不存在!</red>
+    must_in_area_world: <red>你必须在范围所在世界!</red>
+    direction_set: '已设定方向为: <green>{0}</green>'
+    face_cardinal_direction: <red>请面向正东西南北!</red>
+    select_rail_first: <red>请先用小木斧选择一个铁轨, 注意是边长为1的范围!</red>
+    stop_point_set: '根据你小木斧选择的铁轨，已设定停靠点(铁轨)为: <green>({0}, {1}, {2})</green>'
+    stop_format_error: <red>方块格式错误! 请使用 x y z 的格式!</red>
+    must_be_rail: <red>请先用小木斧选择一个铁轨, 注意是边长为1的范围!</red>
+    stop_must_in_area: <red>停靠点必须在区域内!</red>
+    station_required: <red>请先设定站点!</red>
+    area_range_required: <red>请先设定区域范围!</red>
+    stop_point_required: <red>请先设定停靠点!</red>
+    direction_required: <red>请先设定方向!</red>
+    create_failed: '<red>创建区域失败: {0}</red>'
+    commands: |-
+      <gold>=== 区域配置命令 ===</gold>
+      直接在聊天框输入指令即可, 无需 / 符号.
+      <yellow>station: 设定站点</yellow>
+      <yellow>area: 设定区域范围</yellow>
+      <yellow>stop: 设定停靠点</yellow>
+      <yellow>dir: 设定方向</yellow>
+      <yellow>preview: 预览当前设置</yellow>
+      <yellow>cancel: 取消设置</yellow>
+      <yellow>ok: 确认设置</yellow>
+    direction_selected: '<green>已选择方向: {0}</green>'
+commands:
+  common:
+    player_only: <red>此命令只能由玩家执行</red>
+  help:
+    description: 显示帮助信息
+    query: 查询特定命令的帮助
+  main:
+    description: RailArea插件主命令
+  railarea:
+    gui_opened: <green>已打开管理界面</green>
+    gui_failed: <red>打开界面失败</red>
+    log_success: 玩家 {0} 成功打开了管理界面
+    log_failed: 玩家 {0} 打开管理界面失败
+  reload:
+    description: 重载插件配置
+    success: <green>配置重载成功</green>
+    failed: '<red>配置重载失败: {0}</red>'
+    log_success: 玩家 {0} 成功重载了插件配置
+    log_failed: 玩家 {0} 重载插件配置失败
+  new_area:
+    description: 创建新的铁路区域
+    area_added: <green>铁路区域已成功添加!</green>
+    area_add_failed: '<red>添加铁路区域失败: {0}</red>'
+
+events:
+  core:
+    arrived_title: '<gold><bold>{0}</bold></gold> 到了'
+    arrived_subtitle_solo: '感谢您乘坐牛腩地铁 <color:{1}>{0}</color:{1}>'
+    arrived_subtitle_switchable: '可换乘 {0}'
+    under_board_title: '牛腩地铁 <color:{1}>{0}</color:{1}> {2}'
+    under_board_subtitle_terminal: <orange><bold>本站是终点站，乘车请到对侧站台</bold></orange>
+    under_board_subtitle: '<gray><bold>开往 <purple>{0}</purple> 方向, 下一站: <purple>{1}</purple></bold></gray>'
+    start_title: '下一站 <gold><bold>{0}</bold></gold>'
+    start_subtitle_switchable: '可换乘 {0}'
+    start_subtitle_solo: ''
+    terminal_actionbar: '<red>本站为终点站，请到对侧站台乘车</red>'
+    non_terminal_actionbar: '<red>请右击铁轨, 自动搭乘</red> <bold><color:{0}>{1}</color:{0}></bold> <red>列车</red>'
+    arrived_terminal_message: <green>列车已到达终点站，感谢您的乘坐！</green>
+    start_message: <green>列车已启动，请扶好站稳，注意安全</green>
+    waiting_message: '列车将在 <yellow>{0}</yellow> 秒后发车，您可在车上等待或现在下车'

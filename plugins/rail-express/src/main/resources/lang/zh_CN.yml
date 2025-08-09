@@ -1,0 +1,18 @@
+commands:
+  main:
+    description: RailExpress主命令
+  help:
+    description: 显示帮助信息
+    query: 搜索特定命令帮助的查询
+  reload:
+    description: 重载插件配置
+    success: <green>配置文件已重载
+    failed: '<red>重载配置时发生错误: {0}'
+    log_success: 插件被 {0} 重载
+    log_failed: 为 {0} 重载插件失败
+railexpress:
+  plugin:
+    events_registered: 事件监听器已注册
+  config:
+    reload_failed: 配置重载失败
+    worlds_loaded: 已加载 {0} 个世界的配置

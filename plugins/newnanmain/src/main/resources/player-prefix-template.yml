@@ -1,0 +1,8 @@
+# 玩家前缀配置模板
+# 此文件用作新玩家前缀配置的模板
+
+# 可用前缀列表 (namespace -> key)
+available: {}
+
+# 当前激活的前缀 (namespace)
+current: null

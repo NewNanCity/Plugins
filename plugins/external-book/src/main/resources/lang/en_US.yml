@@ -1,0 +1,209 @@
+core:
+  plugin:
+    reloaded: ExternalBook plugin reloaded successfully
+    reload_failed: Failed to reload ExternalBook plugin
+  error:
+    player_only: <red>This command can only be executed by players
+    invalid_uuid: <red>Invalid UUID format
+  common:
+    invalid_book_id: <red>Invalid book ID format
+commands:
+  common:
+    librarian_not_available: <red>Library service not available, please contact administrator
+    log_librarian_not_available: Librarian not available for user {0}
+    invalid_book_id: <red>Invalid book ID format
+  help:
+    description: Show help information
+    query: Get command help
+  main:
+    description: ExternalBook main command
+  reload:
+    description: Reload plugin configuration
+    success: <green>Plugin configuration reloaded successfully!
+    failed: '<red>Failed to reload plugin configuration: {0}'
+    log_success: Configuration reloaded successfully
+    log_failed: Failed to reload configuration
+  import:
+    description: Import a book to the library
+    success_new: <green>Book registered and imported successfully, now you can publish it!
+    success_update: <green>Book content updated, all published copies will be updated!
+    invalid_item: <red>Please hold a [Book and Quill] or [Written Book] in your main hand!
+    no_permission: <red>Only the original author/OP/authorized users can import registered books!
+    failed: <red>Failed to import book
+    log_success: Book imported successfully for user {0}
+    log_failed: Failed to import book for user {0}
+  export:
+    description: Export a book from the library
+    success: <green>Original book exported successfully, you can edit it now!
+    not_found: <red>Book not found for export
+    not_author: <red>Only the original author can export this book
+    inventory_full: <red>Inventory is full, cannot export original book!
+    failed: <red>Failed to export book
+    invalid_item: <red>Please hold a [Written Book] in your main hand!
+    log_opened: Book export opened for user {0}
+    log_failed: Failed to export book for user {0}
+  publish:
+    description: Publish a book in the library
+    success: <green>Book published successfully, modifications will sync to published books!
+    not_found: <red>Book not found for publishing
+    not_author: <red>Only the original author can publish this book
+    inventory_full: <red>Inventory is full, cannot publish book!
+    failed: <red>Failed to publish book
+    invalid_item: <red>Please hold a [Written Book] in your main hand!
+    log_success: Book published successfully for user {0}
+    log_failed: Failed to publish book for user {0}
+  strip:
+    description: Strip a book from library management
+    success: <green>Book unbound successfully, it's now a normal book no longer managed by the library!
+    not_found: <red>Book not found for stripping
+    not_author: <red>Only the original author can strip this book
+    failed: <red>Failed to strip book
+    invalid_item: <red>Please hold a [Written Book] in your main hand!
+    log_success: Book stripped successfully for user {0}
+    log_failed: Failed to strip book for user {0}
+  open:
+    description: Open a book for a player
+    success: '<green>Opened book for player {0}: {1}'
+    book_not_found: <red>Specified book does not exist
+    failed: <red>Failed to open book
+    player: Target player
+    ulid: Book ULID
+    log_success: Book opened successfully for player {0}
+    log_failed: Failed to open book for player {0}
+  give:
+    description: Give a book to a player
+    success: <green>Gave book {1} to player {0}!
+    book_not_found: <red>Specified book does not exist!
+    inventory_full: <red>Player {0}'s inventory is full, book dropped on ground!
+    failed: <red>Failed to give book
+    player: Target player
+    book_id: Book ID
+    success_get: '<green>You received a book: {0}'
+    log_success: Book given successfully to player {0}
+    log_failed: Failed to give book to player {0}
+  admin:
+    description: Admin commands for library management
+    gui_opening: <green>Opening admin interface...
+    gui_failed: <red>Failed to open admin interface
+    log_failed: Failed to execute admin command for user {0}
+  gui:
+    description: Open book management interface
+    opening: <green>Opening book management interface...
+    failed: <red>Failed to open book management interface
+    log_opened: Book management interface opened for user {0}
+    log_failed: Failed to open interface for user {0}
+gui:
+  editbook:
+    upload_button:
+      untitled: 《Untitled》
+  common:
+    back: Back
+    previous_page: Previous Page
+    next_page: Next Page
+    unknown_player: <dark_gray>Unknown
+  edit_book:
+    title_edit: '<gray>[<dark_aqua><bold>NewNan Library<reset><gray>]<reset> Edit Book: <black><bold>{0}'
+    title_new: <gray>[<dark_aqua><bold>NewNan Library<reset><gray>]<reset> Add New Book
+    upload_hint: <dark_gray>Please place the edited [Book & Quill] in the slot above, then click the anvil to upload
+    inventory_full_export: <red>Inventory is full, cannot export original book!
+    inventory_full_original: <red>Inventory is full, cannot export original book!
+    download_editable:
+      name: Download Editable Book
+      lore: |
+        <yellow>Click to get an editable book (Book & Quill),
+        <yellow>You can edit this book's content, ownership remains yours
+        <yellow>After editing, place it in the slot on the right and click upload
+        <aqua>If you've downloaded this book before, you can use the old one
+        <red>Note: Previously downloaded books may not have the latest content, uploading will overwrite and cannot be recovered
+    export_original:
+      name: Export as Original Book
+      lore: |
+        <red>Note: Different from <white>[Download Editable Book]<red> above
+        <red>Clicking this button will generate a true original copy,
+        <red>i.e., a regular [Book & Quill] with text content
+        <red>The generated book will be unlinked from NewNan Library,
+        <red>This means others can freely modify this book's content and claim it as their own
+    new_book_hint:
+      lore: |
+        Since you are adding a new book
+        There is no old content to download
+        Simply place a [Book & Quill] or [Written Book] in the slot on the right
+    upload_button:
+      cannot_upload: <red>Cannot Upload
+      can_upload: <green>Upload
+      checking: <yellow>Checking...
+      checking_hint: <white>Checking book information, please wait...
+      no_book_hint: |
+        <white>Please place an edited [Book & Quill] or [Written Book]
+        <white>in the slot on the right, then click the anvil to upload!
+      no_librarian_hint: <red>Librarian not initialized, cannot upload book
+      wrong_type_hint: <white>Wrong type, please place a [Book & Quill] or [Written Book]!
+      existing_book_new_mode: |
+        <white>The book to upload is an editable version of another book
+        <white>already existing in NewNan Library:
+          Title: <dark_aqua>{0}
+          Author: <dark_aqua>{1}
+      existing_book_edit_mode: |
+        <white>The book to upload is an editable version of another book
+        <white>already existing in NewNan Library:
+          Title: <dark_aqua>{0}
+          Author: <dark_aqua>{1}
+      upload_hint_new: <white>Click the anvil to upload the book to NewNan Library!
+      upload_hint_edit: <white>Click the anvil to update the original content!
+      unknown_author: <dark_gray>Unknown
+  player_books:
+    title: <gray>[<dark_aqua><bold>NewNan Library<reset><gray>]<reset> {0}'s All Books
+    add_modify: <gold>Add/Modify
+    close: Close
+    delete_confirm_message: |
+      <red>You are deleting a registered book. Once deleted, it cannot be recovered and all published
+      copies in the game will be destroyed! <gold>However, after deletion, you will receive an editable original copy that
+      can be imported again. <white>Type <green>Y <white>to confirm deletion, type anything else to cancel
+    delete_inventory_full: <red>Inventory is full, cannot export original book!
+    delete_success: <green>Deleted!
+    delete_cancelled: <red>Deletion cancelled!
+    chat_input_busy: <red>You are currently in another input mode, please cancel it first!
+    book_display:
+      created_time: '<reset><gold>Created: <reset><gray>{0}<reset>'
+      modified_time: '<reset><gold>Modified: <reset><gray>{0}<reset>'
+      last_modifier: '<reset><gold>Last Editor: <reset><gray>{0}<reset>'
+      anonymous: Anonymous
+      left_click: '<light_purple>Left Click: Print Book'
+      right_click: '<light_purple>Right Click: Edit'
+      shift_right_click: '<red>Shift+Right Click: Delete'
+      preview: '<dark_gray>Preview: <reset>'
+      preview_content: <reset><gray>{0}...<reset>
+      no_content: <reset><dark_gray>No Content<reset>
+      ulid: '<dark_gray>ULID: {0}<reset>'
+  online_players:
+    title: <gray>[<dark_aqua><bold>NewNan Library<reset><gray>]<reset> Library Members
+  player_not_found: <red>This player has never joined the server!
+  book_not_found: <red>Book not found!
+  save_failed: <red>Save failed
+  inventory_full: <red>Inventory is full, cannot publish book!
+  operation_failed: <red>Operation failed
+  delete_failed: <red>Delete failed
+events:
+  book_not_found: <red>Book no longer exists, destroyed!
+  book_open_failed: <red>Failed to open book
+  book_query_failed: <red>Failed to query book
+book:
+  unknown_author: Unknown
+  written_book_lore: |
+    <gold>Author:  <gray>{0}
+    <gold>Created: <gray>{1}
+    <dark_gray><bold>[NewNan Library]
+  written_book_with_modify_info: |
+    <gold>Author:        <gray>{0}
+    <gold>Created:       <gray>{1}
+    <gold>Last Modified: <gray>{2}
+    <gold>Modified By:   <gray>{3}
+    <dark_gray><bold>[NewNan Library]
+  writable_book_lore: |
+    <gray>{0} (Draft)
+    <dark_gray><bold>[NewNan Library]
+  writable_book_with_modify_info: |
+    <gray>{0} (Draft)
+    <gold>Last Modified: <gray>{1}
+    <gold>Modified By:   <gray>{2}
+    <dark_gray><bold>[NewNan Library]

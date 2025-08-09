@@ -1,0 +1,49 @@
+logger:
+  module:
+    initialized: DeathCostModule initialized
+    reloaded: DeathCostModule reloaded
+    config_load_failed: Error occurred while loading DeathCostModule configuration
+  config:
+    target_account_set: 'Set cost transfer account to: {0}'
+death:
+  cost_deducted: <red>You respawned, cost {0} ₦, use /back to quickly return to death location.
+  broadcast_message: <gray>Player {0} died, deducted {1} ₦.
+  console_message: Player {0} died, deducted {1} ₦.
+  no_cost: <green>You have death bypass permission, no cost for this death.
+common:
+  enabled: Enabled
+  disabled: Disabled
+commands:
+  help:
+    description: Show command help
+    query: Query specific command usage
+  main:
+    description: DeathCost main command
+  reload:
+    description: Reload plugin configuration
+    success: <green>Plugin configuration reloaded!
+  status:
+    description: Show plugin status
+    error: <red>Error occurred while retrieving status information
+    log_error: Failed to log status error
+    header: <gold>=== DeathCost Plugin Status ===
+    version: '<gray>Plugin Version: <white>{0}'
+    enabled: '<gray>Plugin Status: <white>{0}'
+    cost_mode: '<gray>Cost Mode: <white>{0}'
+    mode_simple: Simple Mode
+    mode_complex: Complex Mode
+    simple_cost: '<gray>Simple Cost: <white>{0}'
+    cost_fixed: '<gray>Fixed Cost: <white>{0}'
+    cost_percent: '<gray>Percentage Cost: <white>{0}%'
+    complex_tiers: '<gray>Complex Tiers: <white>{0}'
+    target_account: '<gray>Target Account: <white>{0}'
+    no_target: None
+    player_message: '<gray>Player Message: <white>{0}'
+    broadcast_message: '<gray>Broadcast Message: <white>{0}'
+    console_message: '<gray>Console Message: <white>{0}'
+warning:
+  simple_mode_no_config: Simple cost mode enabled, but no cost configuration set, no cost will be deducted.
+  complex_mode_no_config: Complex cost mode enabled, but no cost configuration set, no cost will be deducted.
+plugin:
+  config:
+    reload_failed: Failed to reload plugin configuration

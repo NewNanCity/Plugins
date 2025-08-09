@@ -1,0 +1,56 @@
+# DeathCost 死亡扣费插件配置文件
+# 版本: 2.0.0
+
+# 玩家消息前缀
+player-message-prefix: "&7[&6牛腩小镇&7] &f"
+# 控制台消息前缀
+console-message-prefix: "[DeathCost] "
+
+# 死亡扣费配置
+death-cost:
+  # 目标转账账户
+  # 如果设置，扣除的费用将转入此账户
+  # 如果为空或null，费用将直接消失
+  target-account: null
+
+  # 是否使用简单模式
+  # true: 使用简单模式（固定扣费）
+  # false: 使用复杂模式（阶梯扣费）
+  use-simple-mode: false
+
+  # 简单模式配置
+  simple-mode:
+    # 扣费金额
+    cost: 50.0
+    # 是否按百分比扣费
+    # true: cost为百分比（0.01 = 1%）
+    # false: cost为固定金额
+    if-percent: false
+
+  # 复杂模式配置（阶梯扣费）
+  complex-mode:
+  # 第一阶梯：余额 0-5000，不扣费
+  - max: 5000.0
+    cost: 0.0
+    if-percent: false
+  # 第二阶梯：余额 5000-10000，固定扣费 20
+  - max: 10000.0
+    cost: 20.0
+    if-percent: false
+  # 第三阶梯：余额 10000-50000，按 0.1% 扣费
+  - max: 50000.0
+    cost: 0.001
+    if-percent: true
+  # 第四阶梯：余额 50000+，按 0.24% 扣费
+  - max: -1
+    cost: 0.0024
+    if-percent: true
+
+# 死亡消息配置
+death-message:
+  # 是否向玩家发送死亡消息
+  player-enable: true
+  # 是否广播死亡消息
+  broadcast-enable: false
+  # 是否向控制台发送死亡消息
+  console-enable: false

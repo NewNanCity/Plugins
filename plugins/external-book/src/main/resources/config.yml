@@ -1,0 +1,24 @@
+# 外部书籍插件配置文件
+# ExternalBook Plugin Configuration File
+
+# 显示设置
+player-message-prefix: "§7[§6牛腩书局§7] §f"
+console-message-prefix: "[ExternalBook] "
+
+# 存储配置
+storage:
+  # 存储模式: "file" 或 "database"
+  mode: "file"
+  # 文件存储配置
+  file-storage: {}
+  # 数据库存储配置，支持 MySQL PostgresSQL SQLite
+  database-storage:
+    url: "jdbc:mysql://localhost:3306/externalbook"
+    username: "root"
+    password: "123456"
+    # 表名配置
+    table-name: "books"
+    table-prefix: ""
+    # 更多配置请参考 HikariCP 文档
+    pool-name: "ExternalBook-HikariCP"
+    # max-lifetime: 1800000

@@ -1,0 +1,46 @@
+# 插件基本信息
+name: ${name}
+version: ${version}
+main: ${main}
+api-version: ${apiVersion}
+load: ${load}
+authors: ${authors}
+description: ${description}
+website: ${website}
+prefix: ${prefix}
+
+# 插件依赖关系
+depend: ${depend}
+softdepend: ${softdepend}
+loadbefore: ${loadbefore}
+
+# 默认权限
+default-permission: op
+
+# 权限节点
+permissions:
+  mc-patch.admin:
+    description: 管理员权限
+    default: op
+    children:
+      mc-patch.reload: true
+      mc-patch.bypass.all: true
+  mc-patch.reload:
+    description: 重载插件配置
+    default: op
+  mc-patch.bypass.all:
+    description: 绕过所有安全检查
+    default: false
+    children:
+      mc-patch.bypass.contraband: true
+      mc-patch.bypass.anti-crash: true
+      mc-patch.bypass.performance: true
+  mc-patch.bypass.contraband:
+    description: 绕过违禁物品检查
+    default: false
+  mc-patch.bypass.anti-crash:
+    description: 绕过崩服防护
+    default: false
+  mc-patch.bypass.performance:
+    description: 绕过性能限制
+    default: false

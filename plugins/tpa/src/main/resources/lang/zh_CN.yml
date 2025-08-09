@@ -1,0 +1,112 @@
+core:
+  plugin:
+    reload_failed: '<red>TPA插件重载失败: {0}</red>'
+  error:
+    operation_failed: '<red>操作失败: {0}</red>'
+commands:
+  common:
+    player_only: <red>此命令只能由玩家执行</red>
+  main:
+    description: TPA主命令
+  help:
+    description: 显示帮助信息
+    query: 搜索特定命令帮助的查询
+  reload:
+    description: 重载插件配置
+    success: <green>配置重载成功</green>
+    failed: '<red>配置重载失败: {0}</red>'
+    log_success: 插件被 {0} 重载
+    log_failed: 为 {0} 重载插件失败
+  tpa_there:
+    description: 向某玩家发送传送请求，使自己传送至对方所在位置
+    player_arg: 目标玩家名称
+    self_request: <red>你不能向自己发送传送请求</red>
+  tpa_here:
+    description: 向某玩家发送传送请求，使对方传送至自己所在位置
+    player_arg: 目标玩家名称
+    self_request: <red>你不能向自己发送传送请求</red>
+  accept:
+    description: 接受某玩家的传送请求
+    id_arg: 请求ID
+    request_expired: <red>请求已过期</red>
+  reject:
+    description: 拒绝某玩家的传送请求
+    id_arg: 请求ID
+    request_expired: <red>请求已过期</red>
+  block:
+    description: 屏蔽某玩家的传送请求
+    player_arg: 要屏蔽的玩家名称
+    self_block: <red>你不能屏蔽自己</red>
+    success: <green>已屏蔽玩家 <white>{0}</white> 的TPA请求</green>
+    hint: 你可以使用 <green>/tpa blocklist</green> 查看屏蔽列表，或者使用 <green>/tpa unblock {0}</green> 解除屏蔽
+    usage_hint: 你可以使用 <green>/tpa blocklist</green> 查看屏蔽列表，或者使用 <green>/tpa unblock {0}</green> 解除屏蔽
+    already_blocked: <yellow>你已经屏蔽了这个玩家</yellow>
+  unblock:
+    description: 取消屏蔽某玩家的传送请求
+    player_arg: 要取消屏蔽的玩家名称
+    self_unblock: <red>你不能取消屏蔽自己</red>
+    success: <green>已取消屏蔽玩家 <white>{0}</white> 的TPA请求</green>
+    not_blocked: <yellow>你没有屏蔽这个玩家</yellow>
+  tpa:
+    cooldown_active: <red>请等待 {0} 秒后再发送另一个请求</red>
+    target_blocked_you: <red>无法向该玩家发送请求，因为对方已屏蔽了你</red>
+    requester_world_blocked: <red>你当前所在的世界不允许使用TPA</red>
+    target_world_blocked: <red>目标玩家所在的世界不允许使用TPA</red>
+  response:
+    not_your_request: <red>这不是你的请求</red>
+    request_expired: <red>请求已过期</red>
+    accepted: <green>你已接受传送请求</green>
+    rejected: <red>你已拒绝传送请求</red>
+gui:
+  common:
+    back: <white>返回</white>
+    previous_page: <yellow>上一页</yellow>
+    next_page: <yellow>下一页</yellow>
+  player_list:
+    title: §7[§6TPA§7] 选择在线玩家
+    player_entry_name: <gold>{0}</gold>
+    player_entry_lore: |
+      <gray>玩家: <white>{0}</white>
+      <gray>世界: <white>{1}</white>
+
+      <green>左键点击传送到对方那边</green>
+      <green>右键点击让对方传送到你这边</green>
+      <red>Shift+右键点击屏蔽该玩家</red>
+    no_players_hint_name: <red>没有可用的玩家</red>
+    no_players_hint_lore: |
+      <gray>当前没有其他在线玩家</gray>
+      <gray>或者所有玩家都已被屏蔽</gray>
+    show_blocked_players_name: <green>展示屏蔽的玩家</green>
+    show_blocked_players_lore: |
+      <gray>点击展示屏蔽的玩家</gray>
+      <gray>将打开屏蔽玩家列表</gray>
+  block_list:
+    title: §7[§6TPA§7] 已屏蔽的玩家
+    unblock_lore: <yellow>点击解除屏蔽</yellow>
+    empty_list_name: <gray>没有屏蔽任何玩家</gray>
+tpa:
+  separator: <gray><strikethrough><bold>--------------------------------------------------------------------</bold></strikethrough></gray>
+  request:
+    incoming_tpa: |
+      <gold>{0}</gold> <white>想来你这里瞧瞧~</white> <bold><green><hover:show_text:'<green>接受请求，你将传送到对方身边</green>'><click:run_command:'/tpa-accept {1}'>[接受]</click></hover></green> <red><hover:show_text:'<red>拒绝对方的请求</red>'><click:run_command:'/tpa-reject {1}'>[拒绝]</click></hover></red> <dark_gray><hover:show_text:'<yellow>该玩家以后的传送请求都将不会提示</yellow>'><click:run_command:'/tpa-block {2}'>[拉黑]</click></hover></dark_gray></bold>
+    incoming_tpahere: |
+      <gold>{0}</gold> <white>邀请你去他那边做客~</white>
+       <bold><green><hover:show_text:'<green>接受请求，对方将传送到你身边</green>'><click:run_command:'/tpa-accept {1}'>[接受]</click></hover></green>
+       <red><hover:show_text:'<red>拒绝对方的请求</red>'><click:run_command:'/tpa-reject {1}'>[拒绝]</click></hover></red>
+       <dark_gray><hover:show_text:'<yellow>该玩家以后的传送请求都将不会提示</yellow>'><click:run_command:'/tpa-block {2}'>[拉黑]</click></hover></dark_gray></bold>
+  teleport:
+    countdown_from: 你将在 <red>{0}</red> 秒后传送到对方身边
+    countdown_to: 对方将在 <red>{0}</red> 秒后传送到你身边
+    success_from: <green>你已传送到对方身边</green>
+    success_to: <green>对方已传送到你身边</green>
+    cancelled_offline: <red>对方已离线</red>
+    cancelled_world: <red>对方所在世界不能使用TPA</red>
+  session:
+    accepted: <green>对方已接受你的请求</green>
+    rejected: <red>对方拒绝了你的请求</red>
+log:
+  info:
+    module_initialized: 模块 {0} 已初始化
+  error:
+    config_error: '配置错误: {0}'
+    teleport_error: '传送错误: {0}'

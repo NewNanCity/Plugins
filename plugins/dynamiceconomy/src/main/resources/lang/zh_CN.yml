@@ -1,0 +1,83 @@
+core:
+  plugin:
+    reload_failed: '<red>DynamicEconomy 插件重载失败: {0}</red>'
+  error:
+    operation_failed: '<red>操作失败: {0}</red>'
+    insufficient_funds: <red>余额不足</red>
+commands:
+  help:
+    description: 显示帮助信息
+    query: 帮助查询关键词
+  main:
+    description: DynamicEconomy主命令
+  reload:
+    description: 重载插件配置
+    success: <green>配置重载成功</green>
+    failed: '<red>配置重载失败: {0}</red>'
+    log_success: 插件配置已被 {0} 重载
+    log_failed: '插件配置重载失败，操作者: {0}'
+  stats:
+    description: 查看经济统计信息
+    wealth_header: <gold>=== 财富统计 ===</gold>
+    economy_header: <gold>=== 经济统计 ===</gold>
+    commodity_header: <gold>=== 商品统计 ===</gold>
+  commodity:
+    list:
+      description: 查看商品列表
+    info:
+      description: 查看商品信息
+    buy:
+      description: 购买商品
+    sell:
+      description: 出售商品
+    name:
+      arg: 商品名称
+    amount:
+      arg: 数量
+  issue:
+    description: 发行货币
+    success: <green>成功发行 {0} 货币</green>
+    failed: '<red>货币发行失败: {0}</red>'
+    log_success: '货币已由 {0} 发行: 数量 {1}'
+    log_failed: '货币发行失败，操作者 {0}: {1}'
+    amount:
+      arg: 发行数量
+  reload_issuance:
+    description: 重载发行配置
+    success: <green>发行配置重载成功</green>
+    failed: '<red>发行配置重载失败: {0}</red>'
+    log_success: 发行配置已由 {0} 重载
+    log_failed: '发行配置重载失败，操作者 {0}: {1}'
+  update_index:
+    description: 更新经济指数
+    success: <green>经济指数更新成功</green>
+    failed: '<red>经济指数更新失败: {0}</red>'
+    log_success: 经济指数已由 {0} 更新
+    log_failed: '经济指数更新失败，操作者 {0}: {1}'
+wealth:
+  total_wealth: '<green>总财富: {0}</green>'
+  resource_count: '<yellow>{0}: {1}</yellow>'
+economy:
+  currency_issuance: '<blue>货币发行量: {0}</blue>'
+  national_treasury: '<blue>国库余额: {0}</blue>'
+  insufficient_treasury: <red>国库余额不足</red>
+  owner_account_set: '<green>经济系统拥有者账户已设置: {0}</green>'
+commodity:
+  buy_success: <green>成功购买 {0} 个 {1}，花费 {2}</green>
+  sell_success: <green>成功出售 {0} 个 {1}，获得 {2}</green>
+  not_found: <red>商品 {0} 不存在</red>
+  insufficient_stock: <red>库存不足</red>
+  buy_price: '<green>买入价: {0}</green>'
+  sell_price: '<red>卖出价: {0}</red>'
+  stock: '<yellow>库存: {0}</yellow>'
+log:
+  info:
+    wealth_calculated: '财富计算完成: {0}'
+    commodity_traded: '商品交易: {0} {1} 数量 {2}'
+  warning:
+    vault_not_found: 未找到 Vault 插件，经济功能将不可用
+  error:
+    vault_error: 'Vault 服务错误: {0}'
+    wealth_calculation_error: '财富计算错误: {0}'
+    commodity_error: '商品处理错误: {0}'
+    economy_error: '经济处理错误: {0}'

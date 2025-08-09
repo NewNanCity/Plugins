@@ -1,0 +1,80 @@
+core:
+  plugin:
+    reload_failed: '<red>BetterCommandBlock 插件重载失败: {0}</red>'
+  error:
+    command_block_only: <red>此命令只能在命令方块中执行</red>
+    operation_failed: '<red>操作失败: {0}</red>'
+commands:
+  help:
+    description: 显示帮助信息
+    query: 帮助查询关键词
+  reload:
+    success: <green>配置重载成功</green>
+    failed: '<red>配置重载失败: {0}</red>'
+    description: 重载插件配置
+  pick:
+    success: <green>成功从 {0} 容器随机选择了 {1}</green>
+    no_container_down: <red>命令方块下方没有容器</red>
+    no_container_up: <red>命令方块上方没有容器</red>
+    source_empty: <red>源容器为空</red>
+    target_full: <red>目标容器已满</red>
+    invalid_type: <red>无效的选择类型，请使用 random-slot 或 random-item</red>
+    invalid_direction: <red>无效的方向，请使用 up 或 down</red>
+    description: 从容器中随机选择物品
+  scoreboard:
+    success: <green>已随机设置计分板 {0} 的值为 {1} ~ {2}</green>
+    objective_not_found: '<red>找不到计分板目标: {0}</red>'
+    target_not_found: '<red>找不到目标: {0}</red>'
+    invalid_mode: <red>无效的模式，请使用 set、add 或 sub</red>
+    description: 随机设置计分板分数
+  execute:
+    success: <green>命令执行完成</green>
+    blocked_command: <red>命令 {0} 被安全策略阻止</red>
+    entity_not_found: '<red>找不到实体: {0}</red>'
+    recursive_execute: <red>不允许递归执行 execute 命令</red>
+    description: 执行增强的 execute 命令
+view:
+  command_content: '<yellow>命令方块的命令为: <white>{0}</white></yellow>'
+firewall:
+  commands:
+    status:
+      success: |
+        <gold>===== 防火墙状态 =====</gold>
+        <yellow>状态:</yellow> {0}
+        <yellow>命令树大小:</yellow> {1} 节点
+        <yellow>白名单命令:</yellow> {2} 个
+        <yellow>验证器:</yellow> {3} 个
+        <yellow>配置版本:</yellow> {4}
+      description: 显示防火墙状态信息
+    stats:
+      success: |
+        <gold>===== 防火墙统计 =====</gold>
+        <yellow>总命令数:</yellow> {0}
+        <yellow>被阻止:</yellow> {1} ({2}%)
+        <yellow>允许通过:</yellow> {3} ({4}%)
+        <yellow>验证错误:</yellow> {5}
+        <yellow>平均验证时间:</yellow> {6}ns
+        <yellow>命令树大小:</yellow> {7} 节点
+        <yellow>热门命令:</yellow>
+        {8}
+      reset_success: <green>防火墙统计信息已重置</green>
+      description: 显示或重置防火墙统计信息
+    test:
+      command_safe: '<green>命令安全: {0}</green>'
+      command_blocked: '<red>命令被阻止: {0}</red>'
+      description: 测试命令是否会被防火墙阻止
+    reload:
+      success: <green>防火墙配置重载成功</green>
+      failed: '<red>防火墙配置重载失败: {0}</red>'
+      description: 重载防火墙配置
+log:
+  info:
+    command_registered: 命令 {0} 已注册
+  error:
+    initialization_failed: '初始化失败: {0}'
+    command_execution_failed: '命令执行失败: {0}'
+    event_handling_failed: '事件处理失败: {0}'
+  warning:
+    unsafe_operation: '不安全的操作: {0}'
+  debug:
+    player_interaction: 玩家 {0} 与命令方块交互

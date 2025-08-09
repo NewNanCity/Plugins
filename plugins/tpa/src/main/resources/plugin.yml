@@ -1,0 +1,48 @@
+############ 插件基础信息 ############
+# 插件主类
+main: ${main}
+# 插件名称
+name: ${name}
+# 插件版本
+version: ${version}
+# 插件描述
+description: ${description}
+# 加载时机
+load: ${load}
+# 作者
+authors: ${authors}
+# 网站
+website: ${website}
+# 日志前缀
+prefix: ${prefix}
+# 最低Minecraft版本
+api-version: ${apiVersion}
+# 依赖插件
+depend: ${depend}
+# 软依赖(loadafter)
+softdepend: ${softdepend}
+loadbefore: ${loadbefore}
+
+############ 插件权限信息 ############
+# 权限的默认赋予对象，默认是op
+default-permission: false
+# 权限节点, 可选
+permissions:
+  # 模板
+  # 'Example':
+  #  description: '权限的解释'
+  #  default: 玩家权限节点的默认值，true、false、op和not op  不写就是 default-permission   控制台算op,false则控制台无权限
+  #  children: #子节点(仅名字)
+  #    'Example2': true会继承父节点的权限，false会与父节点相反
+  tpa.use:
+    description: "允许使用基本TPA功能"
+    default: true
+  tpa.reload:
+    description: "允许重载TPA插件配置"
+    default: op
+  tpa.no-cool-down:
+    description: "绕过冷却时间限制"
+    default: false
+  tpa.bypass.worlds:
+    description: "绕过世界限制"
+    default: false

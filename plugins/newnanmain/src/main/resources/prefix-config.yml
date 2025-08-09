@@ -1,0 +1,3 @@
+# 全局前缀配置文件
+# 格式: namespace -> key -> prefix_value
+{}

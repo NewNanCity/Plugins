@@ -1,0 +1,161 @@
+# ============================================================================
+# Universal i18n Template - English (en_US)
+# ============================================================================
+# This file is a universal i18n template for all plugin development
+# Usage: Copy to your plugin project and modify/extend as needed
+# Format: MiniMessage (supports <color> tags and modern styling)
+# ============================================================================
+
+# ============================================================================
+# 1. Core System Layer
+# ============================================================================
+core:
+  plugin:
+    enabled: "<green>Plugin enabled</green>"
+    disabled: "<red>Plugin disabled</red>"
+    reload_completed: "<green>Plugin reload completed</green>"
+    reload_failed: "<red>Plugin reload failed: {0}</red>"
+    
+  config:
+    reloaded: "<green>Configuration reloaded</green>"
+    reload_failed: "<red>Configuration reload failed: {0}</red>"
+    file_not_found: "<red>Configuration file not found: {0}</red>"
+    
+  error:
+    no_permission: "<red>You don't have permission to perform this operation</red>"
+    operation_failed: "<red>Operation failed: {0}</red>"
+    player_not_found: "<red>Player not found: {0}</red>"
+    player_offline: "<red>Player {0} is offline</red>"
+    
+  success:
+    operation_completed: "<green>Operation completed successfully</green>"
+    data_saved: "<green>Data saved</green>"
+    
+  validation:
+    amount_invalid: "<red>Invalid amount, must be greater than 0</red>"
+    amount_too_large: "<red>Amount too large, maximum is {0}</red>"
+    parameter_missing: "<red>Missing required parameter: {0}</red>"
+    format_invalid: "<red>Invalid format, correct format: {0}</red>"
+
+# ============================================================================
+# 2. Command System Layer
+# ============================================================================
+commands:
+  help:
+    header: "<gold>===== {0} Help =====</gold>"
+    usage: "<yellow>Usage: {0}</yellow>"
+    description: "<gray>Description: {0}</gray>"
+    permission: "<gray>Permission: {0}</gray>"
+    
+  validation:
+    command_not_found: "<red>Command not found: {0}</red>"
+    invalid_usage: "<red>Invalid usage, please use {0}</red>"
+    player_only: "<red>This command can only be executed by players</red>"
+    console_only: "<red>This command can only be executed from console</red>"
+    
+  # Universal command response template
+  # Specific commands should follow this format:
+  # [command_name]:
+  #   success: "<green>{command_name} executed successfully</green>"
+  #   error: "<red>{command_name} failed: {0}</red>"
+  #   info: "<gray>{command_name} info: {0}</gray>"
+  
+  reload:
+    success: "<green>Reload successful</green>"
+    error: "<red>Reload failed: {0}</red>"
+    info: "<gray>Reloading...</gray>"
+
+# ============================================================================
+# 3. GUI Layer
+# ============================================================================
+gui:
+  common:
+    # Common buttons
+    back: "<white>Back</white>"
+    close: "<red>Close</red>"
+    next: "<green>Next Page</green>"
+    previous: "<green>Previous Page</green>"
+    confirm: "<green>Confirm</green>"
+    cancel: "<red>Cancel</red>"
+    
+    # Common titles
+    main_menu: "<gold>Main Menu</gold>"
+    settings: "<gold>Settings</gold>"
+    
+    # Common hints
+    click_to_select: "<gray>Click to select</gray>"
+    shift_click_hint: "<gray>Shift+Click: {0}</gray>"
+    
+    # Common status
+    enabled: "<green>Enabled</green>"
+    disabled: "<red>Disabled</red>"
+    online: "<green>Online</green>"
+    offline: "<red>Offline</red>"
+    loading: "<yellow>Loading...</yellow>"
+    
+    # Common descriptions
+    no_items: "<gray>No items</gray>"
+    no_data: "<gray>No data</gray>"
+    page_indicator: "<gray>Page {0}/{1}</gray>"
+
+# ============================================================================
+# 4. Business Domain Layer
+# ============================================================================
+# This section should be defined based on specific plugin business logic
+# Below are examples of common business domains:
+
+# Example: Death cost plugin
+death:
+  cost_deducted: "<red>Death cost deducted {0} coins</red>"
+  insufficient_balance: "<red>Insufficient balance, cannot deduct death cost</red>"
+  broadcast_message: "<gray>Player {0} died, deducted {1} coins</gray>"
+  
+# Example: Flight plugin
+fly:
+  started: "<green>Flight started, consuming {0} coins per minute</green>"
+  ended: "<red>Flight ended</red>"
+  insufficient_balance: "<red>Insufficient balance, cannot continue flying</red>"
+  time_remaining: "<gray>Flight time remaining: {0} minutes</gray>"
+  
+# Example: Teleport plugin
+tpa:
+  request_sent: "<green>Teleport request sent to {0}</green>"
+  request_received: "<yellow>{0} requests to teleport to you</yellow>"
+  request_accepted: "<green>Teleport request accepted</green>"
+  request_denied: "<red>Teleport request denied</red>"
+
+# ============================================================================
+# 5. Logging Layer
+# ============================================================================
+# Note: Log messages usually don't need color formatting, use plain text
+log:
+  info:
+    plugin_loaded: "Plugin loaded"
+    config_loaded: "Configuration loaded"
+    service_started: "Service started: {0}"
+    
+  warn:
+    config_outdated: "Configuration file is outdated, consider updating"
+    performance_warning: "Performance warning: {0}"
+    
+  error:
+    plugin_load_failed: "Plugin load failed: {0}"
+    config_load_failed: "Configuration load failed: {0}"
+    service_error: "Service error: {0}"
+
+# ============================================================================
+# 6. Plugin-specific Configuration
+# ============================================================================
+# Add your plugin-specific i18n key-value pairs here
+# Follow the classification rules and naming conventions above
+
+plugin:
+  # Plugin name and description
+  name: "My Plugin"
+  description: "This is an example plugin"
+  version: "Version {0}"
+  
+  # Plugin-specific success/error messages
+  feature:
+    enabled: "<green>Feature enabled</green>"
+    disabled: "<red>Feature disabled</red>"

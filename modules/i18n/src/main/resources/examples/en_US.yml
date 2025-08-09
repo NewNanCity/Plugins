@@ -1,0 +1,72 @@
+# English language file example
+# Demonstrates the usage of i18n module
+
+plugin:
+  enabled: "&aPlugin enabled"
+  disabled: "&cPlugin disabled"
+  loading: "&eLoading plugin..."
+  reloading: "&eReloading plugin..."
+
+welcome:
+  message: "&aWelcome &e{0} &ato the server!"
+  first_join: "&6This is &e{0}&6's first time joining, let's welcome them!"
+  returning: "&bWelcome back, &e{0}&b!"
+
+goodbye:
+  message: "&7Player &e{0} &7left the server"
+  kick: "&cPlayer &e{0} &cwas kicked from the server"
+  ban: "&4Player &e{0} &4was banned"
+
+server:
+  info: "&bServer info: &e{0}&b/&e{1} &bplayers online"
+  status: "&aServer is running normally"
+  maintenance: "&cServer is under maintenance"
+  restart: "&eServer will restart in &c{0} &eseconds"
+
+commands:
+  help:
+    title: "&6=== Help Menu ==="
+    usage: "&eUsage: &f{0}"
+    description: "&7{0}"
+  
+  reload:
+    success: "&aConfiguration reloaded successfully!"
+    failed: "&cConfiguration reload failed: {0}"
+  
+  save:
+    success: "&aData saved successfully!"
+    failed: "&cData save failed: {0}"
+
+errors:
+  permission: "&cYou don't have permission to execute this command!"
+  command: "&cUnknown command, use /help for help"
+  player_not_found: "&cPlayer not found: {0}"
+  invalid_argument: "&cInvalid argument: {0}"
+  internal_error: "&cInternal error, please contact administrator"
+
+messages:
+  loading: "&eLoading..."
+  saving: "&eSaving..."
+  processing: "&eProcessing..."
+  completed: "&aCompleted!"
+  cancelled: "&cCancelled"
+  timeout: "&cOperation timed out"
+
+ui:
+  buttons:
+    confirm: "&aConfirm"
+    cancel: "&cCancel"
+    back: "&7Back"
+    next: "&eNext Page"
+    previous: "&ePrevious Page"
+  
+  titles:
+    main_menu: "Main Menu"
+    settings: "Settings"
+    player_info: "Player Information"
+
+notifications:
+  info: "&b[INFO] &f{0}"
+  warning: "&e[WARNING] &f{0}"
+  error: "&c[ERROR] &f{0}"
+  success: "&a[SUCCESS] &f{0}"

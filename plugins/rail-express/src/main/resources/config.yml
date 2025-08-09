@@ -1,0 +1,25 @@
+# RailExpress 配置文件
+# 版本: ${version}
+
+version: ${version}
+
+# 玩家前缀
+player-message-prefix: "§7[§6RailExpress§7] §r"
+# 控制台前缀
+console-message-prefix: "[RailExpress] "
+
+# 世界组配置
+groups:
+  - worlds: ['world', 'world_nether', 'world_the_end']
+    allow-non-player: false
+    power-rail-only: true
+    block-type:
+      # 默认速度是 0.4，最大是 1.5
+      SOUL_SAND: 0.2        # 魂沙 - 减速
+      STONE_BRICKS: 0.6     # 石砖 - 稍快
+      EMERALD_BLOCK: 1.2    # 绿宝石块 - 很快
+      BARRIER: 1.5          # 屏障方块 - 最快
+      DIAMOND_BLOCK: 1.0    # 钻石块 - 快速
+      GOLD_BLOCK: 0.8       # 金块 - 中等
+      IRON_BLOCK: 0.7       # 铁块 - 中等偏慢
+      COAL_BLOCK: 0.5       # 煤炭块 - 慢

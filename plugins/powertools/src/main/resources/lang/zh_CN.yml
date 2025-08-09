@@ -1,0 +1,34 @@
+core:
+  plugin:
+    reload_failed: '<red>PowerTools 插件重载失败: {0}</red>'
+  error:
+    player_only: <red>此命令只能由玩家执行</red>
+commands:
+  help:
+    description: 显示帮助信息
+    header: <gold>===== {0} 帮助 =====</gold>
+    footer: <gray>使用 /powertools help 查看更多帮助</gray>
+    query: 帮助查询关键词
+  main:
+    description: PowerTools主命令
+  reload:
+    description: 重载插件配置
+    success: <green>配置重载成功</green>
+    failed: '<red>配置重载失败: {0}</red>'
+    log_success: 插件配置已被 {0} 重载
+    log_failed: '插件配置重载失败，操作者: {0}'
+  skull:
+    description: 头颅相关命令
+    url:
+      description: 通过材质URL获取头颅
+      arg: 材质URL或材质ID
+    player:
+      description: 通过玩家名获取头颅
+      arg: 玩家名称
+    url_or_player:
+      arg: 材质URL或玩家名
+    success: <green>成功获取头颅！</green>
+    inventory_full: <red>您的背包已满！</red>
+    player_not_found: <red>玩家 {0} 不存在或从未加入过服务器！</red>
+    invalid_url: <red>无效的材质URL！</red>
+    feature_disabled: <red>此功能已被管理员禁用！</red>

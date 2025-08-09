@@ -1,0 +1,50 @@
+# MCPatch 插件配置文件
+
+# 模块启用配置
+modules:
+  # 反世界下载器模块
+  anti-world-download:
+    enabled: true
+    log-violations: true
+  
+  # 违禁物品检测模块
+  contraband:
+    enabled: true
+    blocked-materials:
+      - BEDROCK
+      - BARRIER
+      - END_CRYSTAL
+      - END_PORTAL
+      - END_PORTAL_FRAME
+      - END_GATEWAY
+      - COMMAND_BLOCK
+      - CHAIN_COMMAND_BLOCK
+      - REPEATING_COMMAND_BLOCK
+      - STRUCTURE_BLOCK
+      - JIGSAW
+      - AIR
+      - WATER
+      - LAVA
+    auto-remove: true
+  
+  # 反崩服模块
+  anti-crash:
+    dispenser-protection: true
+
+# 日志配置
+logging:
+  # 是否启用文件日志
+  file-logging-enabled: true
+  # 日志文件前缀
+  log-file-prefix: "MCPatch_Security_"
+  # 日志级别 (DEBUG, INFO, WARN, ERROR)
+  log-level: INFO
+  # 是否启用实时监控
+  real-time-monitoring: true
+
+# 消息配置
+message:
+  # 玩家消息前缀
+  player-prefix: "§7[§cMCPatch§7] §f"
+  # 控制台消息前缀
+  console-prefix: "[MCPatch] "

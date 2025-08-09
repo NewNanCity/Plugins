@@ -1,0 +1,42 @@
+# 铁路配置文件
+# 包含站点、线路和区域的配置信息
+
+# 站点配置
+stations: {}
+  # 示例:
+  # 1:
+  #   name: "中央车站"
+  # 2:
+  #   name: "商业区站"
+
+# 线路配置
+rail-lines: {}
+  # 示例:
+  # 1:
+  #   name: "1号线"
+  #   stations: [1, 2]
+  #   color: "#FF0000"
+  #   is-cycle: false
+  #   color-material: RED_CONCRETE
+  #   left-return: false
+  #   right-return: false
+
+# 区域配置（按世界分组）
+areas: {}
+  # 示例:
+  # world:
+  #   - range3D:
+  #       minX: 100
+  #       minY: 60
+  #       minZ: 100
+  #       maxX: 110
+  #       maxY: 70
+  #       maxZ: 110
+  #     direction: NORTH
+  #     stop-point:
+  #       x: 105
+  #       y: 64
+  #       z: 105
+  #     station: 1
+  #     line: 1
+  #     reverse: false

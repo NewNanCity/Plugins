@@ -1,0 +1,58 @@
+core:
+  error:
+    no_permission: <red>你没有权限执行此操作
+    operation_failed: <red>操作失败：{0}
+commands:
+  help:
+    description: 显示命令帮助信息
+    query: 要查询的命令
+  fly:
+    description: 切换飞行状态
+    player_only: 此命令只能由玩家使用
+    player_or_selector: 请指定玩家名称或选择器
+    log_toggled_self: 玩家 {0} 切换了自己的飞行状态
+    log_toggled_by_admin: 管理员 {0} 切换了玩家 {1} 的飞行状态
+  list:
+    description: 显示当前飞行的玩家列表
+  reload:
+    description: 重载插件配置
+    failed: <red>配置重载失败：{0}
+    log_success: 管理员 {0} 重载了配置
+    log_failed: 管理员 {0} 重载配置失败
+feefly:
+  config:
+    reload_failed: FeeFly 配置重载失败
+  economy:
+    target_account_set: '设置扣费转账账户为: {0}'
+  error:
+    creative_mode: <red>在创造或观察者模式下无法使用付费飞行！
+    already_flying: <red>你已经在飞行中，无需使用付费飞行！
+    already_in_fee_flying: <red>你已经在付费飞行中！
+    insufficient_balance: <red>余额不足，无法开启飞行！
+    command_cooldown: <red>命令使用过于频繁，请等待 {0} 秒后再试！
+  fly:
+    started: <green>已开启付费飞行！双击空格键开始飞行。
+    normal_started: <green>已开启飞行！
+    normal_ended: <yellow>已关闭飞行！
+    ended: <yellow>飞行已结束！
+    free_flight: <gold><bold>#免费飞行# <gray>祝 {0} 白嫖快乐！
+    status: '<gold><bold>#飞行中# <gray>剩余时间: {0} (余额 {1} ₦)'
+    low_balance_title: <red>余额即将耗尽！
+    low_balance_subtitle: <yellow>请尽快结束飞行
+    state_restored: 成功恢复 {0} 个玩家的飞行状态
+    state_restore_failed: 恢复飞行状态失败
+  time:
+    seconds: '{0}秒'
+    minutes_seconds: '{0}分{1}秒'
+    hours_minutes_seconds: '{0}小时{1}分{2}秒'
+    days_hours_minutes_seconds: '{0}天{1}小时{2}分{3}秒'
+  command:
+    flying_count: '<gold>当前飞行人数: <yellow>{0}'
+    reload_success: <green>配置重载成功！
+    toggled_for_player: <green>已为玩家 <yellow>{0} <green>切换飞行状态。
+    detailed_info_header: <gold>=== 详细飞行信息 ===
+    no_flying_players: <gray>当前没有玩家在飞行
+    player_detail: '<gray>{0}: 飞行时间 {1}，余额: {2}'
+log:
+  error:
+    service_error: '服务错误: {0}'

@@ -1,0 +1,108 @@
+error:
+  no_permission: <red>您没有权限执行此命令！
+  operation_failed: '<red>操作失败: {0}'
+commands:
+  help:
+    description: 显示帮助信息
+    query: 查询参数
+  main:
+    description: Foundation插件主命令
+  reload:
+    description: 重载插件配置
+    success: <green>插件重载成功！
+  donate:
+    description: 向基金会捐赠金钱
+    amount: 捐赠金额
+    success: <green>成功捐赠 {0} 给基金会！
+    player_only: <red>此命令只能由玩家执行
+    player_or_selector: 玩家或选择器
+    deposit_failed: <red>向基金账户存款失败
+    insufficient_balance: <red>余额不足，无法捐赠 {0}
+    invalid_amount: '<red>无效的捐赠金额: {0}'
+    no_target_account: <red>未指定捐赠目标账户
+    withdraw_failed: <red>从基金账户提取资金失败
+  query:
+    description: 查询玩家转账记录
+    player: 目标玩家
+    header: <yellow>=== {0} 的转账记录 ===
+    no_record: <gray>玩家 {0} 没有转账记录
+    active_donations: '<gray>主动捐赠: <white>{0}'
+    passive_donations: '<gray>被动拨款: <white>{0}'
+    total_donations: '<gray>总计: <white>{0}'
+    log_failed: 查询玩家记录失败
+  balance:
+    description: 查看基金余额
+    header: <yellow>=== 基金余额信息 ===
+    account: '<gray>基金账户: <white>{0}'
+    amount: '<gray>当前余额: <white>{0}'
+    active_donations: '<gray>主动捐赠: <white>{0}'
+    passive_donations: '<gray>被动拨款: <white>{0}'
+    log_failed: 查询余额失败
+    foundation_account_not_set: <red>基金账户未设置，请联系管理员
+  allocate:
+    description: 分配资金给玩家
+    player: 目标玩家
+    amount: 分配金额
+    reason: 分配原因
+    success: '<green>成功分配 {0} 给 {1}，原因: {2}'
+    failed: '<red>分配失败: {0}'
+    insufficient_foundation_balance: <red>基金余额不足
+    invalid_amount: <red>请输入有效的金额
+    invalid_reason: <red>请输入拨款原因
+    no_target_account: <red>基金账户未设置，请联系管理员
+    log_success: 拨款成功
+  top:
+    description: 显示捐赠排行榜
+    header: <yellow>=== 捐赠排行榜 ===
+    entry: <gray>{0}. <white>{1} <yellow>{2}
+    page: 页码
+    console: <red>此命令只能由玩家执行
+    invalid_page: <red>无效的页码
+    out_of_range: <red>页码超出范围
+    log_failed: 显示排行榜失败
+  error:
+    operation_failed: '<red>操作失败: {0}'
+foundation:
+  plugin:
+    target_account_set: '设置基金账户为: {0}'
+    target_account_not_set: 基金账户未设置，插件不会工作！
+  config:
+    reload_failed: Foundation 配置重载失败
+gui:
+  common:
+    back: <gray>返回
+    back_desc: <gray>点击返回
+    next_page: <gray>下一页
+    previous_page: <gray>上一页
+    back_lore: <gray>点击返回
+  top:
+    title: <gold>基金会捐赠排行榜
+    rank: '<gray>排名 #{0} - <white>{1}'
+    rank_self: '<green>排名 #{0} - <gold>你'
+    detailed_stats_header: <gold>=== 详细统计 ===
+    operation_failed: 操作失败
+    player_active: '<green>主动: <white>{0}'
+    player_details_header: '<gold>=== 玩家详情: {0} ==='
+    player_passive: '<yellow>被动: <white>{0}'
+    player_total: '<gold>总计: <white>{0}'
+    stats: <gold>统计信息
+    stats_average: '<gray>平均每人: <white>{0}'
+    stats_grand_total: '<gray>总计: <white>{0}'
+    stats_total_active: '<gray>总主动捐赠: <white>{0}'
+    stats_total_passive: '<gray>总被动拨款: <white>{0}'
+    stats_total_players: '<gray>总玩家数: <white>{0}'
+    rank_lore: |-
+      <green>主动捐赠: <white>{1}
+      <yellow>被动拨款: <white>{2}
+      <gold>总捐赠: <white>{3}
+
+      <gray>点击查看详细统计
+    page_lore: |-
+      <gray>第 {0} 页，共 {1} 页
+    stats_lore: |-
+      <gray>总玩家数: <white>{0}
+      <gray>总主动捐赠: <white>{1}
+      <gray>总被动拨款: <white>{2}
+      <gray>总计: <white>{3}
+
+      <gray>点击查看详细统计

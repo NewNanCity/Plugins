@@ -1,0 +1,61 @@
+# Foundation 牛腩基金插件配置文件
+# 版本: 2.0.0
+
+# 基金目标账户
+# 如果设置，转账将进入此账户
+# 如果为空或注释掉，插件将不会工作
+target-account: ""
+
+# 玩家消息前缀
+player-message-prefix: "&7[&6牛腩基金&7] &f"
+
+# 控制台消息前缀
+console-message-prefix: "[Foundation] "
+
+# 转账检测配置
+transfer-detection:
+  # 是否启用转账检测
+  enabled: true
+
+  # 转账匹配过期时间（毫秒）
+  # 默认：5000ms (5秒)
+  expire-milliseconds: 5000
+
+# 数据存储配置
+data-storage:
+  # 存储模式 (file/database)
+  mode: "file"
+
+  # 文件存储配置
+  file-storage:
+    # 数据文件名
+    data-file: "data.csv"
+
+    # 拨款日志文件名
+    allocate-log-file: "allocate.csv"
+
+    # 自动保存间隔（tick）
+    # 默认：1200 tick (60秒)
+    auto-save-interval-ticks: 1200
+
+    # 排行榜缓存过期时间（毫秒）
+    # 默认：1800000ms (30分钟)
+    ranking-cache-expire-milliseconds: 1800000
+
+  # 数据库存储配置
+  database-storage:
+    # 转账记录表名
+    transfer-table-name: "transfer_records"
+
+    # 拨款日志表名
+    allocation-table-name: "allocation_logs"
+
+    # 表前缀（可选，用于区分不同服务器的表）
+    table-prefix: ""
+
+    # 批量保存间隔（tick）
+    # 默认：200 tick (10秒) - 比文件模式更频繁
+    batch-save-interval-ticks: 200
+
+    # JDBC URL - 根据数据库类型配置
+    jdbcUrl: "jdbc:mysql://localhost:3306/foundation?useSSL=false&serverTimezone=UTC&characterEncoding=utf8"

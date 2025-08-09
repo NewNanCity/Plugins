@@ -1,0 +1,130 @@
+core:
+  plugin:
+    reloading: <yellow>Guardian 插件重载中...</yellow>
+    reloaded: <green>Guardian 插件重载完成</green>
+  error:
+    player_only: <red>此命令只能由玩家执行</red>
+    operation_failed: '<red>操作失败: {0}</red>'
+    player_not_found: '<red>找不到玩家: {0}</red>'
+commands:
+  common:
+    no_permission: <red>您没有权限执行此操作</red>
+  main:
+    description: Guardian 主命令
+  help:
+    description: 显示帮助信息
+    query: 搜索特定命令帮助的查询
+  reload:
+    description: 重载插件配置
+    success: <green>配置重载成功</green>
+    failed: '<red>配置重载失败: {0}</red>'
+    log_success: 插件被 {0} 重载
+    log_failed: 为 {0} 重载插件失败
+  judgemental:
+    description: 风纪委员模式功能
+    enabled: <green>风纪委员已启用</green>
+    disabled: <red>风纪委员已禁用</red>
+    not_authorized: <red>你没有权限使用此功能</red>
+    log_enabled: 风纪委员已启用
+    log_disabled: 风纪委员已禁用
+    log_failed: 风纪委员操作失败
+  judgement_list:
+    description: 查看风纪委员列表
+    header: <gold>===== 风纪委员列表 =====</gold>
+    empty: <gray>当前没有风纪委员</gray>
+    log_success: 审判列表查询成功
+  judgement_add:
+    description: 添加风纪委员
+    player: 要添加的玩家名称
+    success: '<green>已成功添加风纪委员: {0}</green>'
+    already_exists: <yellow>玩家 {0} 已在审判列表中</yellow>
+    player_not_found: '<red>找不到玩家: {0}</red>'
+    log_success: '添加风纪委员: {0}'
+    log_failed: '添加风纪委员失败: {0}'
+  judgement_remove:
+    description: 移除风纪委员
+    player: 要移除的玩家名称
+    success: '<green>已成功移除风纪委员: {0}</green>'
+    not_exists: <yellow>玩家 {0} 不在审判列表中</yellow>
+    player_not_found: '<red>找不到玩家: {0}</red>'
+    log_success: '移除风纪委员: {0}'
+    log_failed: '移除风纪委员失败: {0}'
+  town:
+    description: 查看小镇信息
+    town_name: 小镇名称
+    not_found: <red>小镇 {0} 不存在</red>
+    no_town: <red>你还没有加入任何小镇</red>
+    gui_opening: <green>正在打开小镇GUI...</green>
+    gui_failed: <red>打开小镇GUI失败</red>
+    log_success: '小镇信息查询成功: {0}'
+    log_failed: '小镇信息查询失败: {0}'
+  lookup:
+    description: 查询玩家详细信息
+    player: 要查询的玩家名称
+    header: '<gold>===== 玩家信息: {0} =====</gold>'
+    footer: <gray>查询完成</gray>
+    player_not_found: '<red>找不到玩家: {0}</red>'
+    not_bound: <red>玩家未绑定</red>
+    name_label: '<gray>玩家名: </gray><white>{0}</white>'
+    uuid_label: '<gray>UUID: </gray><white>{0}</white>'
+    cash_label: '<gray>金币: </gray><white>{0}</white>'
+    bed_spawn_label: '<gray>重生点: </gray><white>{0}</white>'
+    bed_spawn_none: <gray>未设置</gray>
+    first_played_label: '<gray>首次游戏: </gray><white>{0}</white>'
+    last_played_label: '<gray>最后游戏: </gray><white>{0}</white>'
+    play_time_label: '<gray>游戏时长: </gray><white>{0}</white>'
+    never_played: <gray>从未游戏</gray>
+    qq_label: '<gray>QQ: </gray><white>{0}</white>'
+    guild_label: '<gray>频道: </gray><white>{0}</white>'
+    discord_label: '<gray>Discord: </gray><white>{0}</white>'
+    ban_status_none: <green>未封禁</green>
+    ban_status_temp: <yellow>临时封禁</yellow>
+    ban_status_perm: <red>永久封禁</red>
+    town_label: '<gray>小镇: </gray><white>{0}</white>'
+    town_none: <gray>无小镇</gray>
+    ip_list_label: '<gray>历史IP: </gray><white>{0}</white>'
+    status_joined: <green>[已加入]</green>
+    status_not_joined: <red>[未加入]</red>
+    info_none: <gray>无信息</gray>
+    log_success: '玩家信息查询成功: {0}'
+    log_failed: '玩家信息查询失败: {0}'
+gui:
+  town:
+    title: <gray>[<aqua><bold>牛腩小镇</bold></aqua>]</gray> <bold>{0}</bold> {1}
+    level_cancelled: <red>已注销</red>
+    leader_label: '<gold><bold>镇长</bold></gold><gray>: </gray><white>{0}</white>'
+    qq_group_label: '<gold><bold>QQ群</bold></gold><gray>: </gray><white>{0}</white>'
+    qq_label: '<gray>QQ: </gray><white>{0}</white>'
+    ban_label: '<gray>封禁: </gray><white>{0}</white>'
+    ban_yes: <red>是</red>
+    ban_no: <green>否</green>
+    unknown: 未知
+    right_click_remove: '<gold>右键: 删除成员</gold>'
+    previous_page: 上一页
+    next_page: 下一页
+    close: 关闭
+    add_member_button: <green><bold>添加成员</bold></green>
+    input_player_name: <green>请直接在聊天框输入要添加的玩家名字, 或者输入 </green><red>cancel</red><green> 取消操作</green>
+    operation_cancelled: <red>已取消操作</red>
+    player_not_found: '<red>找不到玩家: {0}, 请重新输入, 或者输入 </red><red>cancel</red><green> 取消操作</green>'
+    player_already_in_town: '<red>玩家: {0} 已经加入了其他镇, 请重新输入, 或者输入 </red><red>cancel</red><green> 取消操作</green>'
+    player_added_success: '<green>已成功添加玩家: {0}</green>'
+    player_removed_success: '<green>已成功删除玩家: {0}</green>'
+    input_in_progress: <red>你正在进行其他输入, 请先取消之!</red>
+    member_lore_editable: |
+      <gray>QQ: </gray><white>{0}</white>
+      <gray>封禁: </gray><white>{1}</white>
+
+      <gold>右键: 删除成员</gold>
+    member_lore_readonly: |
+      <gray>QQ: </gray><white>{0}</white>
+      <gray>封禁: </gray><white>{1}</white>
+player:
+  judgemental:
+    fake_logout_broadcast_message: <yellow>{0} 离开了游戏</yellow>
+    fake_login_broadcast_message: <yellow>{0} 加入了游戏</yellow>
+log:
+  info:
+    plugin_loaded: Guardian 插件已加载
+  error:
+    initialization_failed: '初始化失败: {0}'

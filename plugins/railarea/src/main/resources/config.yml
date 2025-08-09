@@ -1,0 +1,59 @@
+# RailArea 配置文件
+
+# 世界大小配置
+world-size:
+  world:
+    x1: -10000
+    z1: -10000
+    x2: 10000
+    z2: 10000
+
+# 等待时间（秒）
+waiting-second: 5
+
+# 发车警告音效
+start-warning-sound: BLOCK_NOTE_BLOCK_BIT
+
+# 发车警告时间（秒）
+start-warning-second: 3
+
+# 发车速度
+start-speed: 1.0
+
+# 到站音乐
+arrive-music:
+  - tick: 0
+    note: "F3"
+    sound: BLOCK_NOTE_BLOCK_PLING
+    volume: 5
+  - tick: 6
+    note: "C♯3"
+    sound: BLOCK_NOTE_BLOCK_PLING
+    volume: 5
+  - tick: 12
+    note: "D♯3"
+    sound: BLOCK_NOTE_BLOCK_PLING
+    volume: 5
+  - tick: 18
+    note: "G♯2"
+    sound: BLOCK_NOTE_BLOCK_PLING
+    volume: 5
+
+# 发车音乐
+start-music:
+  - tick: 0
+    note: "C♯3"
+    sound: BLOCK_NOTE_BLOCK_PLING
+    volume: 5
+  - tick: 6
+    note: "F3"
+    sound: BLOCK_NOTE_BLOCK_PLING
+    volume: 5
+  - tick: 12
+    note: "G♯3"
+    sound: BLOCK_NOTE_BLOCK_PLING
+    volume: 5
+  - tick: 18
+    note: "C♯4"
+    sound: BLOCK_NOTE_BLOCK_PLING
+    volume: 5

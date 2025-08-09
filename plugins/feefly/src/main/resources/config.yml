@@ -1,0 +1,38 @@
+# FeeFly 付费飞行插件配置文件
+# 版本: 2.0.0
+
+# 玩家消息前缀
+player-message-prefix: "&7[&6牛腩飞行&7] &f"
+
+# 控制台消息前缀
+console-message-prefix: "[FeeFly] "
+
+# 目标转账账户
+# 如果设置，扣除的费用将转入此账户
+# 如果为空或注释掉，费用将直接消失
+target-account: ""
+
+# 飞行相关配置
+flying:
+  # 每次扣费的间隔（tick）
+  # 20 tick = 1秒
+  tick-per-count: 20
+
+  # 每次扣费的金额
+  cost-per-count: 0.3
+
+  # 飞行速度（0.0-1.0）
+  # 默认飞行速度是0.1，这里设置为一半
+  fly-speed: 0.05
+
+  # 低余额警告阈值（秒）
+  # 当剩余飞行时间少于此值时显示警告
+  low-balance-warning-seconds: 60
+
+  # 命令使用冷却时间（秒）
+  # 防止玩家恶意频繁使用命令
+  command-cooldown-seconds: 3
+
+  # 状态验证间隔（秒）
+  # 定期验证飞行玩家状态完整性的间隔
+  state-validation-interval-seconds: 30
