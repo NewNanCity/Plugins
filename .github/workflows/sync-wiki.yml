@@ -1,14 +1,23 @@
-name: 同步文档到 Wiki
+name: 同步文档到 Wiki (.wiki.git)
 
 on:
   push:
     branches: [main, master]
     paths:
       - "docs/**"
+      - "scripts/prepare-wiki-multi.py"
+      - ".github/workflows/sync-wiki.yml"
   workflow_dispatch:
 
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-wiki
+  cancel-in-progress: true
+
 jobs:
-  sync-wiki:
+  publish-wiki:
     runs-on: ubuntu-latest
 
     steps:
@@ -16,80 +25,25 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 设置 Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: 准备 Wiki 文档
+      - name: 生成 Wiki 文档
         run: |
           python scripts/prepare-wiki-multi.py
 
-      - name: 检出 Wiki 分支
-        run: |
-          # 检查 wiki 分支是否存在
-          if git ls-remote --heads origin wiki | grep -q wiki; then
-            echo "Wiki 分支已存在，切换到 wiki 分支"
-            git fetch origin wiki
-            git checkout wiki
-          else
-            echo "创建新的 wiki 分支"
-            git checkout --orphan wiki
-            git rm -rf .
-          fi
-
-      - name: 复制 Wiki 文档
-        run: |
-          # 清空当前目录（保留 .git）
-          find . -maxdepth 1 -not -name '.git' -not -name '.' -exec rm -rf {} +
-
-          # 复制 wiki 文档
-          cp -r wiki/* .
-
-          # _Sidebar.md 已由脚本生成，无需手动创建
-
-          # 创建 _Footer.md 文件
-          cat > _Footer.md << 'EOF'
-          ---
-          📝 **文档版本**: $(date '+%Y-%m-%d %H:%M:%S')
-          🔄 **自动同步**: 此文档由 GitHub Actions 自动同步
-          📖 **源码**: [查看源码](https://github.com/${{ github.repository }})
-          EOF
-
-      - name: 配置 Git
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-
-      - name: 提交更改
-        run: |
-          git add .
-
-          # 检查是否有更改
-          if git diff --staged --quiet; then
-            echo "没有检测到文档更改"
-            exit 0
-          fi
-
-          # 获取最新提交信息
-          COMMIT_MSG=$(git log -1 --pretty=format:"%s" origin/${{ github.ref_name }})
-
-          git commit -m "📚 同步文档更新: $COMMIT_MSG" \
-                     -m "自动同步来自 ${{ github.ref_name }} 分支的文档更改" \
-                     -m "提交哈希: ${{ github.sha }}"
-
-      - name: 推送到 Wiki 分支
-        run: |
-          git push origin wiki
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: 发布到 GitHub Wiki
+        uses: Andrew-Chen-Wang/github-wiki-action@v5
+        with:
+          # 明确指定目标仓库（即 https://github.com/NewNanCity/Plugins.wiki.git 对应的主仓库）
+          repository: NewNanCity/Plugins
+          path: wiki
+          # 其余保持默认：使用 ${{ github.token }} 推送到 .wiki.git
 
       - name: 输出同步结果
         run: |
           echo "✅ Wiki 文档同步完成!"
-          echo "📁 同步的文件:"
-          ls -la *.md
-          echo ""
           echo "🔗 访问 Wiki: https://github.com/${{ github.repository }}/wiki"

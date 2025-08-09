@@ -29,12 +29,21 @@ MODULE_ICONS = {
     "troubleshooting": "🔧",
 }
 
-# 文件名映射 (英文 -> 中文描述)
+# 文件名映射 (英文/大写 -> 中文描述)
 FILE_NAME_MAPPING = {
+    # 通用
     "README.md": "",  # 将作为模块主页
     "intro.md": "介绍",
+    "INTRO.md": "介绍",
     "quick-start.md": "快速开始",
+    "GETTING_STARTED.md": "快速开始",
     "concepts.md": "基础概念",
+    "CONCEPTS.md": "基础概念",
+    "NAVIGATION.md": "文档导航",
+    "CHANGELOG.md": "更新日志",
+    "IMPROVEMENTS.md": "改进",
+    "REORGANIZATION_SUMMARY.md": "重组总结",
+    # GUI 专用历史映射
     "basic-gui.md": "基础GUI",
     "paginated-gui.md": "分页GUI",
     "scrolling-gui.md": "滚动GUI",
@@ -44,6 +53,7 @@ FILE_NAME_MAPPING = {
     "layout-schemes.md": "布局方案",
     "event-handling.md": "事件处理",
     "chat-input.md": "聊天输入",
+    # 高级/参考
     "lifecycle.md": "生命周期管理",
     "architecture.md": "架构设计",
     "configuration.md": "配置和扩展",
@@ -54,6 +64,45 @@ FILE_NAME_MAPPING = {
     "version-compatibility.md": "版本兼容性",
     "i18n-lifecycle-best-practices.md": "国际化生命周期最佳实践",
     "scheduler-lifecycle-best-practices.md": "调度器生命周期最佳实践",
+}
+
+# 子目录文件名映射（按目录分类）
+SUBDIR_FILE_NAME_MAPPING = {
+    "api": {
+        "README.md": "API总览",
+        "pages.md": "页面API",
+        "components.md": "组件API",
+        "sessions.md": "会话API",
+        "events.md": "事件API",
+        "items.md": "物品API",
+    },
+    "guides": {
+        "README.md": "开发指南",
+        "best-practices.md": "最佳实践",
+        "performance.md": "性能优化",
+        "error-handling.md": "错误处理",
+        "troubleshooting.md": "故障排除",
+    },
+    "tutorials": {
+        "README.md": "教程索引",
+        "01-first-gui.md": "教程-第一个GUI",
+        "02-components.md": "教程-组件使用",
+        "03-events.md": "教程-事件处理",
+        "04-sessions.md": "教程-会话管理",
+        "05-i18n-integration.md": "教程-国际化集成",
+        "06-advanced-features.md": "教程-高级功能",
+        "07-infinite-scrolling.md": "教程-无限滚动",
+    },
+    "examples": {
+        "README.md": "示例索引",
+        "basic/enhanced-items-demo.md": "示例-基础-增强物品展示",
+        "basic/border-components.md": "示例-基础-边框组件",
+        "basic/skull-items.md": "示例-基础-头颅物品",
+        "advanced/event-handling-examples.md": "示例-高级-事件处理示例",
+        "advanced/feature-based-events.md": "示例-高级-特性化事件",
+        "advanced/component-specific-events.md": "示例-高级-组件特定事件",
+        "real-world/tpa-plugin-example.md": "示例-实战-TPA插件",
+    },
 }
 
 
@@ -95,7 +144,7 @@ def discover_modules():
 
 
 def generate_module_config(module_id, md_files):
-    """为模块生成配置"""
+    """为模块生成配置（包含已知子目录）"""
     # 模块名称
     module_name = f"{module_id.upper()}模块"
 
@@ -106,9 +155,10 @@ def generate_module_config(module_id, md_files):
     description = get_module_description(module_id, md_files)
 
     # 生成文件映射
-    files = {}
-    links = {}
+    files: dict[str, str] = {}
+    links: dict[str, str] = {}
 
+    # 顶层 .md 文件
     for md_file in md_files:
         file_name = md_file.name
 
@@ -126,6 +176,24 @@ def generate_module_config(module_id, md_files):
 
         files[file_name] = wiki_name
         links[file_name] = link_name
+
+    # 已知子目录（如 api）
+    module_dir = Path("docs") / module_id
+    for subdir, sub_mapping in SUBDIR_FILE_NAME_MAPPING.items():
+        sd = module_dir / subdir
+        if not sd.exists() or not sd.is_dir():
+            continue
+        for md_path in sd.glob("*.md"):
+            rel_key = f"{subdir}/{md_path.name}"  # 用于链接替换
+            title_key = md_path.name
+            chinese_name = sub_mapping.get(
+                title_key, title_key.replace(".md", "").replace("-", " ").title()
+            )
+            wiki_name = f"{module_name}-{chinese_name}.md"
+            link_name = wiki_name.replace(".md", "")
+
+            files[rel_key] = wiki_name
+            links[rel_key] = link_name
 
     return {
         "name": module_name,

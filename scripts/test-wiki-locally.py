@@ -71,9 +71,9 @@ def test_wiki_generation():
         "Home.md",
         "_Sidebar.md",
         "GUI模块.md",
-        "GUI模块-介绍.md",
         "GUI模块-快速开始.md",
-        "GUI模块-API参考.md",
+        "GUI模块-基础概念.md",
+        "GUI模块-API总览.md",
     ]
 
     print("\n📋 检查生成的文件...")

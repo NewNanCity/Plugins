@@ -974,4 +974,12 @@ python .\scripts\language-analyzer.py --check-best-practices
 - **会话管理**：旧系统的PlayerGuiSession → 新系统的自动会话栈管理
 - **物品渲染**：旧系统的ItemBuilder → 新系统的item {} DSL
 
+
+## 📚 Wiki 自动同步（简要）
+- 工具链：scripts/prepare-wiki-multi.py 生成 wiki/；.github/workflows/sync-wiki.yml 使用 github-wiki-action 推送到 https://github.com/NewNanCity/Plugins.wiki.git
+- 触发：对 docs/** 的变更或手动 workflow_dispatch
+- 注意：首次使用需要在仓库 Wiki 中手动创建任意占位页以初始化 .wiki.git
+- 本地测试：`python scripts/test-wiki-locally.py` 或 `./wiki-tools.ps1 test-wiki`
+- 详情见 docs/WIKI-SETUP.md（以该文档为准）
+
 This architecture provides enterprise-grade plugin development with modern Kotlin practices, comprehensive resource management, modular design, and modern GUI systems for maintainable, high-performance Minecraft plugins.
