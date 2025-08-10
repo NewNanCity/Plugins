@@ -13,6 +13,7 @@
 [![Stars](https://img.shields.io/github/stars/NewNanCity/Plugins?style=social)](https://github.com/NewNanCity/Plugins)
 [![Forks](https://img.shields.io/github/forks/NewNanCity/Plugins?style=social)](https://github.com/NewNanCity/Plugins)
 [![Issues](https://img.shields.io/github/issues/NewNanCity/Plugins)](https://github.com/NewNanCity/Plugins/issues)
+[![Wiki](https://img.shields.io/badge/Plugin-Wiki-blue.svg)](https://github.com/NewNanCity/Plugins/wiki)
 
 **🚀 让你的 Minecraft 服务器拥抱现代化与工程化！**
 
@@ -351,7 +352,7 @@ graph LR
 > 感谢 NSrank 提供认真细致的测试工作，为项目质量保障做出了重要贡献
 
 > 🤖 **AI 编码助手团队**
-> 感谢 Claude、GPT、Kimi 和 Deepseek 团队所提供的 AI 编码与智能体工具
+> 感谢 Claude、GPT、Kimi、Deepseek 和 Qwen 团队所提供的 AI 编码与智能体工具
 > 为本项目的开发节省了大量的时间和精力
 
 ---

@@ -229,33 +229,168 @@ def get_module_description(module_id, md_files):
     return f"{module_id.title()} 模块文档"
 
 
-def update_links_in_content(content, module_config):
-    """更新文档内容中的链接"""
+def update_links_in_content(
+    content,
+    module_config,
+    module_id: str,
+    current_source_rel: str,
+    global_links: dict[str, str],
+):
+    """更新文档内容中的链接（支持跨模块/子目录，保留锚点）
+
+    Parameters
+    ----------
+    content : str
+        源 Markdown 文本
+    module_config : dict
+        当前模块配置，包含本模块 files/links
+    module_id : str
+        当前模块 id（如 gui/core）
+    current_source_rel : str
+        当前处理文件相对模块目录的路径（如 'README.md' 或 'api/pages.md'）
+    global_links : dict[str, str]
+        全局链接映射：'module_id/relative/path.md' → 'Wiki页面名(无.md)'
+    """
     link_mapping = module_config.get("links", {})
+
+    def normalize_rel_path(rel: str) -> str:
+        # 目录链接转 README.md
+        if rel.endswith("/"):
+            rel = rel + "README.md"
+        # 去掉当前目录前缀
+        if rel.startswith("./"):
+            rel = rel[2:]
+        return rel
 
     # 更新 Markdown 链接 [text](link)
     def replace_link(match):
         text = match.group(1)
-        link = match.group(2)
+        link = match.group(2).strip()
 
-        # 跳过外部链接
-        if link.startswith("http"):
+        # 外部链接或锚点链接
+        if link.startswith("http") or "://" in link:
             return match.group(0)
 
-        # 如果是相对链接且在映射表中，则替换
-        if link in link_mapping:
-            return f"[{text}]({link_mapping[link]})"
+        # 分离锚点
+        anchor = None
+        if "#" in link:
+            base, anchor = link.split("#", 1)
+        else:
+            base = link
 
-        return match.group(0)
+        base = normalize_rel_path(base)
+
+        # 如果源是空，保持原样；若为非.md，尝试回退到对应模块的README
+        if not base:
+            return match.group(0)
+        if not base.endswith(".md"):
+            from pathlib import PurePosixPath
+            import posixpath as _pp
+
+            base_dir = PurePosixPath(current_source_rel).parent
+            abs_rel = _pp.normpath(str(PurePosixPath(base_dir).joinpath(base)))
+
+            target = None
+            # 跨模块：回退到目标模块README
+            if abs_rel.startswith("../"):
+                parts = abs_rel.split("/")
+                if len(parts) >= 2 and parts[0] == "..":
+                    target_mod = parts[1]
+                    readme_key = f"{target_mod}/README.md"
+                    for k, v in global_links.items():
+                        if k == readme_key:
+                            target = v
+                            break
+            # 同模块：回退到本模块README
+            if not target:
+                readme_key = f"{module_id}/README.md"
+                target = global_links.get(readme_key)
+
+            if not target:
+                return match.group(0)
+            return f"[{text}]({target}{('#' + anchor) if anchor else ''})"
+
+        # 基于当前文件目录解析相对路径到 docs 下绝对模块路径（规范化 .. 和重复分隔符）
+        from pathlib import PurePosixPath
+        import posixpath as _pp
+
+        base_dir = PurePosixPath(current_source_rel).parent
+        abs_rel = _pp.normpath(str(PurePosixPath(base_dir).joinpath(base)))
+
+        # 组装全局查找 key
+        global_key = f"{module_id}/{abs_rel}"
+
+        target = None
+        if global_key in global_links:
+            target = global_links[global_key]
+        elif abs_rel in link_mapping:
+            # 同模块的直接映射（不带模块前缀）
+            target = link_mapping[abs_rel]
+        elif base in link_mapping:
+            # 退回原始相对键
+            target = link_mapping[base]
+        else:
+            # 跨模块相对路径，如 ../core/README.md
+            norm = _pp.normpath(abs_rel)
+            cross_key = f"{module_id}/{norm}"
+            target = global_links.get(cross_key)
+
+            # 额外别名修正：core/schedule.md → core/scheduler.md
+            if not target and (
+                norm.endswith("core/schedule.md") or norm == "core/schedule.md"
+            ):
+                alias_norm = norm.replace("core/schedule.md", "core/scheduler.md")
+                alias_key = f"{module_id}/{alias_norm}"
+                target = global_links.get(alias_key)
+
+            # 退化：若仍找不到且是跨模块引用，回退到目标模块README
+            if not target and norm.startswith("../"):
+                # 提取 '../<mod>/' 的模块名
+                parts = norm.split("/")
+                if len(parts) >= 2 and parts[0] == "..":
+                    target_mod = parts[1]
+                    readme_key = f"{target_mod}/README.md"
+                    # 在全局映射中查找该模块的主页
+                    for k, v in global_links.items():
+                        if k == readme_key:
+                            target = v
+                            break
+
+            # 退化：同模块内未知页面回退到本模块README
+            if not target:
+                readme_key = f"{module_id}/README.md"
+                if readme_key in global_links:
+                    target = global_links[readme_key]
+
+        if not target:
+            return match.group(0)
+
+        if anchor:
+            return f"[{text}]({target}#{anchor})"
+        return f"[{text}]({target})"
 
     # 替换链接
     content = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", replace_link, content)
 
-    # 移除 "下一步" 链接中的箭头和格式
+    # 标准化 “下一步” 链接格式
+    def repl_next(m):
+        raw_link = m.group(2)
+        # 复用上面的替换器逻辑（构造一个假的匹配对象不方便，这里尝试直接走全局映射）
+        link_only = raw_link.split("#", 1)[0]
+        link_only = normalize_rel_path(link_only)
+        from pathlib import PurePosixPath
+
+        abs_rel = str(
+            PurePosixPath(PurePosixPath(current_source_rel).parent)
+            .joinpath(link_only)
+            .as_posix()
+        )
+        global_key = f"{module_id}/{abs_rel}"
+        target = global_links.get(global_key, link_mapping.get(link_only, raw_link))
+        return f"---\n\n**下一步** → [{m.group(1)}]({target})"
+
     content = re.sub(
-        r"---\n\n\*\*下一步\*\* → \[([^\]]+)\]\(([^)]+)\)",
-        lambda m: f"---\n\n**下一步** → [{m.group(1)}]({link_mapping.get(m.group(2), m.group(2))})",
-        content,
+        r"---\n\n\*\*下一步\*\* → \[([^\]]+)\]\(([^)]+)\)", repl_next, content
     )
 
     # 移除 "返回目录" 链接
@@ -281,13 +416,23 @@ def create_home_page(modules):
         name = module_config.get("name", module_id)
         description = module_config.get("description", "")
 
-        # 获取模块主页链接
-        files = module_config.get("files", {})
-        main_page = files.get("README.md", f"{name}.md")
-        main_page_name = main_page.replace(".md", "")
+        # 获取模块主页链接（仅当 README.md 存在时，否则链接到第一个页面或不链接）
+        files: dict[str, str] = module_config.get("files", {})
+        main_link_label = name
+        main_link_target = None
+        if "README.md" in files:
+            main_link_target = files["README.md"].replace(".md", "")
+        elif files:
+            any_page = next(iter(files.values()))
+            main_link_target = any_page.replace(".md", "")
 
-        content += f"### {icon} [{name}]({main_page_name})\n\n"
-        content += f"{description}\n\n"
+        if main_link_target:
+            content += f"### {icon} [{main_link_label}]({main_link_target})\n\n"
+        else:
+            content += f"### {icon} {main_link_label}\n\n"
+
+        if description:
+            content += f"{description}\n\n"
 
         # 添加快速链接
         if "quick-start.md" in files:
@@ -331,7 +476,7 @@ def create_home_page(modules):
 
 
 def create_sidebar(modules):
-    """创建侧边栏"""
+    """创建侧边栏（按 docs 目录语义分组）"""
 
     content = """## 📚 项目文档
 
@@ -340,10 +485,12 @@ def create_sidebar(modules):
 
 """
 
+    known_groups = ["tutorials", "guides", "api", "examples"]
+
     for module_id, module_config in modules.items():
         icon = module_config.get("icon", "📦")
         name = module_config.get("name", module_id)
-        files = module_config.get("files", {})
+        files: dict[str, str] = module_config.get("files", {})
 
         content += f"### {icon} {name}\n"
 
@@ -356,41 +503,101 @@ def create_sidebar(modules):
             quick_start = files["quick-start.md"].replace(".md", "")
             content += f"- [🚀 快速开始]({quick_start})\n"
 
-        # 功能指南 - 动态检测文件
-        guide_patterns = [
-            ("basic-", "基础"),
-            ("paginated-", "分页"),
-            ("storage-", "存储"),
-            ("task-", "任务"),
-            ("event-", "事件"),
-            ("architecture", "架构"),
-            ("configuration", "配置"),
-            ("api-reference", "API参考"),
-            ("best-practices", "最佳实践"),
-            ("troubleshooting", "故障排除"),
-            ("examples", "示例代码"),
+        # 收集已分组的键，避免重复
+        grouped_keys: set[str] = set()
+
+        # 目录分组：tutorials/guides/api/examples
+        for group in known_groups:
+            present = [k for k in files.keys() if k.startswith(f"{group}/")]
+            if not present:
+                continue
+
+            # 组标题与索引（如果存在 README）
+            group_title = {
+                "tutorials": "📖 教程",
+                "guides": "🛠️ 指南",
+                "api": "📚 API",
+                "examples": "📝 示例",
+            }.get(group, group)
+            index_key = f"{group}/README.md"
+            if index_key in files:
+                index_page = files[index_key].replace(".md", "")
+                content += f"- [{group_title}]({index_page})\n"
+            else:
+                content += f"- {group_title}\n"
+
+            # 分组排序规则
+            def sort_key(x: str) -> tuple:
+                import re as _re
+
+                # tutorials: 编号优先
+                if group == "tutorials":
+                    m = _re.match(r"^tutorials/(\d+)-", x)
+                    if m:
+                        return (0, int(m.group(1)), x)
+                    return (1, x)
+                # api: 固定顺序
+                if group == "api":
+                    order = [
+                        "api/README.md",
+                        "api/pages.md",
+                        "api/components.md",
+                        "api/sessions.md",
+                        "api/events.md",
+                        "api/items.md",
+                    ]
+                    idx = order.index(x) if x in order else 999
+                    return (idx, x)
+                # guides: 固定顺序
+                if group == "guides":
+                    order = [
+                        "guides/README.md",
+                        "guides/best-practices.md",
+                        "guides/performance.md",
+                        "guides/error-handling.md",
+                        "guides/troubleshooting.md",
+                    ]
+                    idx = order.index(x) if x in order else 999
+                    return (idx, x)
+                # examples: README → basic → advanced → real-world
+                if group == "examples":
+                    if x == "examples/README.md":
+                        return (0, x)
+                    if x.startswith("examples/basic/"):
+                        return (1, x)
+                    if x.startswith("examples/advanced/"):
+                        return (2, x)
+                    if x.startswith("examples/real-world/"):
+                        return (3, x)
+                    return (9, x)
+                # 其他默认字典序
+                return (5, x)
+
+            for k in sorted(set(present), key=sort_key):
+                grouped_keys.add(k)
+                page = files[k].replace(".md", "")
+                # 友好显示名：去掉“模块名前缀-”；教程再去掉“教程-”前缀
+                display = files[k].replace(".md", "").replace(f"{name}-", "")
+                if group == "tutorials":
+                    display = display.replace("教程-", "")
+                # 子目录 README 作为分组索引项
+                if k.endswith("/README.md"):
+                    content += f"  - [索引]({page})\n"
+                else:
+                    content += f"  - [{display}]({page})\n"
+
+        # 其他未分组文件（排除 README 和 quick-start）
+        others = [
+            k
+            for k in files.keys()
+            if k not in grouped_keys and k not in ("README.md", "quick-start.md")
         ]
-
-        for pattern, display_prefix in guide_patterns:
-            matching_files = [
-                f for f in files.keys() if pattern in f and f != "README.md"
-            ]
-            for file_name in matching_files:
-                page_name = files[file_name].replace(".md", "")
-                # 提取更好的显示名称
-                display_name = FILE_NAME_MAPPING.get(
-                    file_name, file_name.replace(".md", "").replace("-", " ").title()
-                )
-                content += f"- [🛠️ {display_name}]({page_name})\n"
-
-        # 参考资料
-        if "api-reference.md" in files:
-            api_ref = files["api-reference.md"].replace(".md", "")
-            content += f"- [📋 API参考]({api_ref})\n"
-
-        if "examples.md" in files:
-            examples = files["examples.md"].replace(".md", "")
-            content += f"- [📝 示例代码]({examples})\n"
+        if others:
+            content += f"- 其他\n"
+            for k in sorted(others):
+                page = files[k].replace(".md", "")
+                display = files[k].replace(".md", "").replace(f"{name}-", "")
+                content += f"  - [{display}]({page})\n"
 
         content += "\n"
 
@@ -431,6 +638,13 @@ def prepare_wiki_docs():
     with open(target_dir / "_Sidebar.md", "w", encoding="utf-8") as f:
         f.write(sidebar_content)
 
+    # 构建全局链接映射：module_id/relative/path.md → Wiki页面名(无.md)
+    global_links: dict[str, str] = {}
+    for mid, mconf in modules.items():
+        for src_rel, tgt in mconf.get("files", {}).items():
+            key = f"{mid}/{src_rel}"
+            global_links[key] = tgt.replace(".md", "")
+
     # 处理每个模块
     for module_id, module_config in modules.items():
         print(f"\n处理模块: {module_config['name']}")
@@ -457,8 +671,14 @@ def prepare_wiki_docs():
             with open(source_path, "r", encoding="utf-8") as f:
                 content = f.read()
 
-            # 更新链接
-            content = update_links_in_content(content, module_config)
+            # 更新链接（带全局映射与当前上下文）
+            content = update_links_in_content(
+                content,
+                module_config,
+                module_id=module_id,
+                current_source_rel=source_file,
+                global_links=global_links,
+            )
 
             # 写入目标文件
             with open(target_path, "w", encoding="utf-8") as f:
@@ -501,11 +721,18 @@ def validate_links():
 
         for text, link in links:
             # 跳过外部链接
-            if link.startswith("http"):
+            if link.startswith("http") or "://" in link:
                 continue
 
-            # 检查内部链接
-            if link not in wiki_pages:
+            # 忽略锚点，取页面名部分
+            link_base = link.split("#", 1)[0]
+
+            # 忽略明显的非Wiki页面资源链接（含扩展名，如 .yml/.png/.kt 等）
+            if "." in link_base and link_base not in wiki_pages:
+                continue
+
+            # 检查内部Wiki页面链接
+            if link_base not in wiki_pages:
                 broken_links.append((file.name, text, link))
 
     if broken_links:
@@ -517,5 +744,11 @@ def validate_links():
 
 
 if __name__ == "__main__":
-    prepare_wiki_docs()
-    validate_links()
+    try:
+        prepare_wiki_docs()
+        validate_links()
+    except Exception as e:
+        print(f"❌ 脚本执行失败: {e}")
+        import traceback
+
+        traceback.print_exc()

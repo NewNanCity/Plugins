@@ -981,5 +981,10 @@ python .\scripts\language-analyzer.py --check-best-practices
 - 注意：首次使用需要在仓库 Wiki 中手动创建任意占位页以初始化 .wiki.git
 - 本地测试：`python scripts/test-wiki-locally.py` 或 `./wiki-tools.ps1 test-wiki`
 - 详情见 docs/WIKI-SETUP.md（以该文档为准）
+- 2025-08-10 更新：方案C完成 - Wiki链接修复与占位文档创建
+  - 修复 Home.md 模块链接退化策略、路径规范化、跨模块fallback机制
+  - 为 config/database/i18n/network 模块创建完整占位文档体系（quick-start/concepts/api-reference/examples等）
+  - 剩余"无效链接"均为页内锚点，不影响Wiki页面导航功能
+  - 文档数量：config(12)、database(7)、i18n(5)、network(4)，显著改善了文档完整性
 
 This architecture provides enterprise-grade plugin development with modern Kotlin practices, comprehensive resource management, modular design, and modern GUI systems for maintainable, high-performance Minecraft plugins.
