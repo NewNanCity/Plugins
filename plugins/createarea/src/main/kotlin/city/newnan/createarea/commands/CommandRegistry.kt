@@ -65,6 +65,6 @@ class CommandRegistry(val plugin: CreateAreaPlugin) {
         }
 
         // 生成帮助指令
-        help = MinecraftHelp.createNative("/createarea", commandManager)
+        help = MinecraftHelp.createNative("/createarea help", commandManager)
     }
 }

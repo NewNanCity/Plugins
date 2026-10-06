@@ -1,0 +1,17 @@
+############ 插件基础信息 ############
+# 插件主类
+main: ${main}
+# 插件名称
+name: ${name}
+# 插件版本
+version: ${version}
+# 插件描述
+description: ${description}
+# 加载时机
+load: ${load}
+# 作者
+authors: ${authors}
+# 日志前缀
+prefix: ${prefix}
+# 最低Minecraft版本
+api-version: ${apiVersion}

@@ -485,19 +485,32 @@ interface DataProvider<T> {
 
     // 检查是否还有更多数据
     fun canFetchMore(offset: Int, callback: DataProviderCallback<Boolean>)
-
-    // 获取缓存策略
-    fun getCacheStrategy(): CacheStrategy
 }
 ```
 
-#### 缓存策略
+#### 无缓存设计
+
+组件采用无缓存设计，所有缓存逻辑由DataProvider负责：
 
 ```kotlin
-enum class CacheStrategy {
-    CURRENT_PAGE_ONLY,  // 只缓存当前页（有限分页默认）
-    MULTI_PAGE,         // 多页缓存（无限分页默认）
-    AGGRESSIVE          // 激进缓存（小数据集）
+class CachedDataProvider<T>(
+    private val delegate: IDataProvider<T>
+) : IDataProvider<T> {
+    private val cache = mutableMapOf<String, List<T>>()
+
+    override fun fetchItems(offset: Int, limit: Int, callback: DataProviderCallback<List<T>>) {
+        val key = "${offset}_${limit}"
+        val cached = cache[key]
+        if (cached != null) {
+            callback(Result.success(cached))
+        } else {
+            delegate.fetchItems(offset, limit) { result ->
+                result.onSuccess { data -> cache[key] = data }
+                callback(result)
+            }
+        }
+    }
+    // ... 其他方法
 }
 ```
 

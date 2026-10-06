@@ -4,6 +4,7 @@ import city.newnan.core.scheduler.runAsync
 import city.newnan.core.scheduler.runSync
 import city.newnan.guardian.GuardianPlugin
 import city.newnan.guardian.i18n.LanguageKeys
+import city.newnan.guardian.sdk.models.BanMode
 import org.bukkit.OfflinePlayer
 import org.bukkit.command.CommandSender
 import org.incendo.cloud.annotations.Argument
@@ -70,13 +71,13 @@ class LookupCommand(private val plugin: GuardianPlugin) {
                     val firstPlayed = if (playerInfo.firstPlayed > 0) {
                         millisecondToTime(playerInfo.firstPlayed)
                     } else {
-                        plugin.messager.sprintf(LanguageKeys.Commands.Lookup.NEVER_PLAYED) // "§7未登录过"
+                        plugin.messager.sprintfPlain(LanguageKeys.Commands.Lookup.NEVER_PLAYED) // "§7未登录过"
                     }
 
                     val lastPlayed = if (playerInfo.lastPlayed > 0) {
                         millisecondToTime(playerInfo.lastPlayed)
                     } else {
-                        plugin.messager.sprintf(LanguageKeys.Commands.Lookup.NEVER_PLAYED) // "§7未登录过"
+                        plugin.messager.sprintfPlain(LanguageKeys.Commands.Lookup.NEVER_PLAYED) // "§7未登录过"
                     }
 
                     plugin.messager.printf(sender, LanguageKeys.Commands.Lookup.FIRST_PLAYED_LABEL, firstPlayed) // "§7第一次登录时间:   §f$firstPlayed"
@@ -88,51 +89,48 @@ class LookupCommand(private val plugin: GuardianPlugin) {
 
                     // 数据库信息
                     if (playerInfo.record != null) {
-                        val record = playerInfo.record!!
+                        val record = playerInfo.record
 
                         // QQ信息
-                        val qqStatus = if (record.inqqgroup) {
-                            plugin.messager.sprintf(LanguageKeys.Commands.Lookup.STATUS_JOINED) // "§a[已加入]"
+                        val qqStatus = if (record.inQqGroup) {
+                            plugin.messager.sprintfPlain(LanguageKeys.Commands.Lookup.STATUS_JOINED) // "§a[已加入]"
                         } else {
-                            plugin.messager.sprintf(LanguageKeys.Commands.Lookup.STATUS_NOT_JOINED) // "§c[未加入]"
+                            plugin.messager.sprintfPlain(LanguageKeys.Commands.Lookup.STATUS_NOT_JOINED) // "§c[未加入]"
                         }
                         val qqInfo = record.qq?.let { "$it $qqStatus" } ?: plugin.messager.sprintf(LanguageKeys.Commands.Lookup.INFO_NONE) // "无"
                         plugin.messager.printf(sender, LanguageKeys.Commands.Lookup.QQ_LABEL, qqInfo) // "§7QQ:      §f$qqInfo"
 
                         // 频道信息
-                        val guildStatus = if (record.inqqguild) {
-                            plugin.messager.sprintf(LanguageKeys.Commands.Lookup.STATUS_JOINED) // "§a[已加入]"
+                        val guildStatus = if (record.inQqGuild) {
+                            plugin.messager.sprintfPlain(LanguageKeys.Commands.Lookup.STATUS_JOINED) // "§a[已加入]"
                         } else {
-                            plugin.messager.sprintf(LanguageKeys.Commands.Lookup.STATUS_NOT_JOINED) // "§c[未加入]"
+                            plugin.messager.sprintfPlain(LanguageKeys.Commands.Lookup.STATUS_NOT_JOINED) // "§c[未加入]"
                         }
-                        val guildInfo = record.qqguild?.let { "$it $guildStatus" } ?: plugin.messager.sprintf(LanguageKeys.Commands.Lookup.INFO_NONE) // "无"
+                        val guildInfo = record.qqguild?.let { "$it $guildStatus" } ?: plugin.messager.sprintfPlain(LanguageKeys.Commands.Lookup.INFO_NONE) // "无"
                         plugin.messager.printf(sender, LanguageKeys.Commands.Lookup.GUILD_LABEL, guildInfo) // "§7频道:    §f$guildInfo"
 
                         // Discord信息
-                        val discordStatus = if (record.indiscord) {
-                            plugin.messager.sprintf(LanguageKeys.Commands.Lookup.STATUS_JOINED) // "§a[已加入]"
+                        val discordStatus = if (record.inDiscord) {
+                            plugin.messager.sprintfPlain(LanguageKeys.Commands.Lookup.STATUS_JOINED) // "§a[已加入]"
                         } else {
-                            plugin.messager.sprintf(LanguageKeys.Commands.Lookup.STATUS_NOT_JOINED) // "§c[未加入]"
+                            plugin.messager.sprintfPlain(LanguageKeys.Commands.Lookup.STATUS_NOT_JOINED) // "§c[未加入]"
                         }
-                        val discordInfo = record.discord?.let { "$it $discordStatus" } ?: plugin.messager.sprintf(LanguageKeys.Commands.Lookup.INFO_NONE) // "无"
+                        val discordInfo = record.discord?.let { "$it $discordStatus" } ?: plugin.messager.sprintfPlain(LanguageKeys.Commands.Lookup.INFO_NONE) // "无"
                         plugin.messager.printf(sender, LanguageKeys.Commands.Lookup.DISCORD_LABEL, discordInfo) // "§7Discord: §f$discordInfo"
 
                         // 封禁状态
-                        when {
-                            record.banMode == 0 -> plugin.messager.printf(sender, LanguageKeys.Commands.Lookup.BAN_STATUS_NONE) // "§7封禁状态: §a未封禁"
-                            record.banMode == 1 -> {
-                                val expireTime = record.banExpire?.toString() ?: "?"
+                        when (record.banMode) {
+                            BanMode.NORMAL -> plugin.messager.printf(sender, LanguageKeys.Commands.Lookup.BAN_STATUS_NONE) // "§7封禁状态: §a未封禁"
+                            BanMode.TEMPORARY -> {
+                                val expireTime = record.banExpire ?: "?"
                                 plugin.messager.printf(sender, LanguageKeys.Commands.Lookup.BAN_STATUS_TEMP, expireTime) // "§7封禁状态: §e临时封禁 §7至 §f$expireTime"
                             }
-                            record.banMode == 2 -> plugin.messager.printf(sender, LanguageKeys.Commands.Lookup.BAN_STATUS_PERM) // "§7封禁状态: §c永久封禁"
+                            BanMode.PERMANENT -> plugin.messager.printf(sender, LanguageKeys.Commands.Lookup.BAN_STATUS_PERM) // "§7封禁状态: §c永久封禁"
                         }
 
                         // 小镇信息
-                        val townName = playerInfo.town?.name ?: plugin.messager.sprintf(LanguageKeys.Commands.Lookup.TOWN_NONE) // "§7未加入小镇"
+                        val townName = playerInfo.town?.name ?: plugin.messager.sprintfPlain(LanguageKeys.Commands.Lookup.TOWN_NONE) // "§7未加入小镇"
                         plugin.messager.printf(sender, LanguageKeys.Commands.Lookup.TOWN_LABEL, townName) // "§7小镇: §f$townName"
-
-                        // IP列表
-                        plugin.messager.printf(sender, LanguageKeys.Commands.Lookup.IP_LIST_LABEL, playerInfo.ips.joinToString(", ")) // "§7历史IP: §f${playerInfo.ips.joinToString(", ")}"
                     } else {
                         plugin.messager.printf(sender, LanguageKeys.Commands.Lookup.NOT_BOUND) // "§c该玩家未绑定过!"
                     }

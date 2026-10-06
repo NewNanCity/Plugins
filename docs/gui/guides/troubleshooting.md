@@ -395,13 +395,13 @@ fun monitorGUIPerformance() {
 ## 🆘 获取帮助
 
 ### 1. 检查文档
-- [快速入门](quick-start.md)
-- [核心概念](concepts.md)
+- [快速入门](../quick-start.md)
+- [核心概念](../CONCEPTS.md)
 - [最佳实践](best-practices.md)
 
 ### 2. 查看示例
-- [基础示例](examples/basic.md)
-- [高级示例](examples/advanced.md)
+- [基础示例](../examples/basic/)
+- [高级示例](../examples/advanced/)
 
 ### 3. 检查日志
 ```bash

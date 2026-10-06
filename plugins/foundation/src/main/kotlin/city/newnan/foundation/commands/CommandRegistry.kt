@@ -76,7 +76,7 @@ class CommandRegistry(val plugin: FoundationPlugin) {
         ).forEach { commandAnnotationParser.parse(it) }
 
         // 生成帮助指令
-        help = MinecraftHelp.createNative("/foundation", commandManager)
+        help = MinecraftHelp.createNative("/foundation help", commandManager)
     }
 
     // 为help的查询提供补全
@@ -92,7 +92,7 @@ class CommandRegistry(val plugin: FoundationPlugin) {
     // 帮助指令
     @Command("foundation|fund help [help-query]")
     @CommandDescription(LanguageKeys.Commands.Help.DESCRIPTION)
-    fun helpCommand(sender: CommandSender, @Greedy @Default("") @Argument(value = "help-query", description = LanguageKeys.Commands.Help.QUERY) query: String) {
+    fun helpCommand(sender: CommandSender, @Greedy @Default("1") @Argument(value = "help-query", description = LanguageKeys.Commands.Help.QUERY) query: String) {
         help.queryCommands(query, sender) // 所有插件的帮助命令都这样写
     }
 

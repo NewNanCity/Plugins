@@ -3,7 +3,7 @@ plugins {
 }
 
 val pluginName = "Guardian"
-version = "1.0.4"
+version = "1.0.6"
 group = "city.newnan.guardian"
 description = "Guardian for NewNanCity."
 
@@ -16,7 +16,6 @@ tasks.processResources {
         it.prefix = pluginName
         it.load = PluginLoadMode.STARTUP
         it.dependencies = listOf("Vault")
-        it.database = true
     }
 
     inputs.properties(pluginProperties)
@@ -28,6 +27,9 @@ tasks.processResources {
 }
 
 dependencies {
+    testImplementation(Dependencies.Test.junitJupiter)
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.13.2")
+    testImplementation(Dependencies.Optional.Network.okHttpMock)
     // 项目模块
     implementation(project(":core"))
     implementation(project(":modules:config"))
@@ -44,12 +46,8 @@ dependencies {
     // Vault API for permission
     compileOnly(Dependencies.Optional.ThirdParty.vault)
 
-    // 数据库
-    implementation(Dependencies.Optional.Database.hikariCP)
-    implementation(Dependencies.Optional.Database.mysql)
-    implementation(Dependencies.Optional.Database.exposedCore)
-    implementation(Dependencies.Optional.Database.exposedJdbc)
-    implementation(Dependencies.Optional.Database.exposedKotlinDatetime)
+    // 网络请求
+    implementation(Dependencies.Optional.Network.okHttp)
 }
 
 // Shadow配置 - 自定义插件名称
@@ -64,5 +62,6 @@ tasks.runServer {
 
 // 测试配置
 tasks.test {
+    enabled = true
     useJUnitPlatform()
 }

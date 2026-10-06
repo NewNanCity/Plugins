@@ -66,7 +66,7 @@ class CommandRegistry(val plugin: DeathCostPlugin) {
         ).forEach { commandAnnotationParser.parse(it) }
 
         // 生成帮助指令
-        help = MinecraftHelp.createNative("/deathcost", commandManager)
+        help = MinecraftHelp.createNative("/deathcost help", commandManager)
     }
 
     // ====== 帮助和主命令实现 ======
@@ -86,7 +86,7 @@ class CommandRegistry(val plugin: DeathCostPlugin) {
     @CommandDescription(LanguageKeys.Commands.Help.DESCRIPTION)
     fun helpCommand(
         sender: CommandSender,
-        @Greedy @Default("") @Argument(value = "help-query", description = LanguageKeys.Commands.Help.QUERY)
+        @Greedy @Default("1") @Argument(value = "help-query", description = LanguageKeys.Commands.Help.QUERY)
         query: String
     ) {
         help.queryCommands(query, sender)

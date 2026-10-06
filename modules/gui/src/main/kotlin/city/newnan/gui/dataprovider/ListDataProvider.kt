@@ -6,8 +6,7 @@ package city.newnan.gui.dataprovider
  * 将现有的List包装为异步DataProvider
  */
 class ListDataProvider<T>(
-    private val items: List<T>,
-    private val cacheStrategy: CacheStrategy = CacheStrategy.CURRENT_PAGE_ONLY
+    private val items: List<T>
 ) : IDataProvider<T> {
     override fun getSize(callback: DataProviderCallback<Int>) {
         callback(Result.success(items.size))
@@ -34,6 +33,4 @@ class ListDataProvider<T>(
     ) {
         callback(Result.success(offset < items.size))
     }
-
-    override fun getCacheStrategy(): CacheStrategy = cacheStrategy
 }

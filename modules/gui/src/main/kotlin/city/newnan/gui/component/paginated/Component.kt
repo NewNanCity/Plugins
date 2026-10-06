@@ -1,10 +1,8 @@
 package city.newnan.gui.component.paginated
 
-import city.newnan.core.cache.LRUCache
 import city.newnan.core.utils.text.toMiniMessage
 import city.newnan.gui.component.base.BaseComponent
 import city.newnan.gui.component.base.BaseRenderContext
-import city.newnan.gui.dataprovider.CacheStrategy
 import city.newnan.gui.dataprovider.IDataProvider
 import city.newnan.gui.dataprovider.ListDataProvider
 import city.newnan.gui.dataprovider.SyncDataProvider
@@ -18,35 +16,6 @@ import kotlin.concurrent.withLock
 import kotlin.math.ceil
 
 typealias PageChangeHandler = (context: PageChangeContext) -> Unit
-
-/**
- * 页面缓存条目
- * 包含页面数据和状态，作为统一的缓存单元
- * 
- * @param T 数据项类型
- * @param data 页面数据列表
- * @param state 页面状态
- */
-data class PageCacheEntry<T>(
-    val data: List<T>,
-    val state: PageState
-) {
-    companion object {
-        fun <T> loading(): PageCacheEntry<T> = PageCacheEntry(emptyList(), PageState.LOADING)
-        fun <T> error(): PageCacheEntry<T> = PageCacheEntry(emptyList(), PageState.ERROR)
-        fun <T> loaded(data: List<T>): PageCacheEntry<T> = PageCacheEntry(data, PageState.LOADED)
-    }
-}
-
-/**
- * 页面状态枚举
- */
-enum class PageState {
-    NOT_LOADED,  // 未加载
-    LOADING,     // 正在加载
-    LOADED,      // 已加载
-    ERROR        // 加载失败
-}
 
 /**
  * 分页组件
@@ -112,7 +81,7 @@ class PaginatedComponent<T>(
 
     // 固定的逻辑页面大小（用于数据请求和分页计算）
     private val logicalItemsPerPage: Int = width * height
-    
+
     // 实际可显示的项目数量（考虑槽位覆盖）
     val pageSize: Int get() = availableSlots.size
 
@@ -123,34 +92,18 @@ class PaginatedComponent<T>(
     @Volatile
     private var totalDataSize: Int = -1
 
-    // 页面缓存（使用 LRUCache 统一管理数据和状态）
-    private var pageCache: LRUCache<Int, PageCacheEntry<T>>
+    // 当前页的数据
+    @Volatile
+    private var currentPageData: List<T> = emptyList()
 
     // 是否为无限分页模式
     private val isInfiniteMode: Boolean get() = totalDataSize < 0
-    
+
     // 操作锁，确保异步操作的原子性
     private val operationLock = ReentrantLock()
 
     // 总页数（基于逻辑页面大小）
     val totalPages: Int get() = if (isInfiniteMode) Int.MAX_VALUE else ceil(totalDataSize.toDouble() / logicalItemsPerPage).toInt()
-
-    // 当前页的数据
-    private val currentPageData: List<T> get() {
-        val strategy = dataProvider.getCacheStrategy()
-        return if (strategy == CacheStrategy.NO_CACHE) {
-            // NO_CACHE策略：从临时数据获取
-            val tempData = noCacheTemporaryData
-            if (tempData != null && tempData.first == currentPage) {
-                tempData.second
-            } else {
-                emptyList()
-            }
-        } else {
-            // 其他策略：从缓存获取
-            pageCache[currentPage]?.data ?: emptyList()
-        }
-    }
 
     var pageChangeHandler: PageChangeHandler? = null
 
@@ -200,54 +153,11 @@ class PaginatedComponent<T>(
             )
         }
 
-        // 根据缓存策略初始化缓存
-        pageCache = createPageCache()
-        bind(pageCache) // 绑定到组件生命周期
-
         // 初始化数据
         refreshData()
     }
 
-    /**
-     * 根据缓存策略创建页面缓存
-     */
-    private fun createPageCache(): LRUCache<Int, PageCacheEntry<T>> {
-        val strategy = dataProvider.getCacheStrategy()
-        val capacity = when (strategy) {
-            CacheStrategy.NO_CACHE -> 0
-            CacheStrategy.CURRENT_PAGE_ONLY -> 1
-            CacheStrategy.MULTI_PAGE -> 5
-            CacheStrategy.AGGRESSIVE -> 20
-        }
-        return LRUCache(capacity)
-    }
 
-    /**
-     * 根据缓存策略应用清理逻辑
-     * 只在必要时调用，避免重复清理
-     */
-    private fun applyCacheStrategy() {
-        val strategy = dataProvider.getCacheStrategy()
-        
-        when (strategy) {
-            CacheStrategy.NO_CACHE -> {
-                // 不缓存，立即清空所有缓存
-                pageCache.clear()
-            }
-            CacheStrategy.CURRENT_PAGE_ONLY -> {
-                // 只保留当前页
-                val currentEntry = pageCache[currentPage]
-                pageCache.clear()
-                if (currentEntry != null) {
-                    pageCache[currentPage] = currentEntry
-                }
-            }
-            // MULTI_PAGE 和 AGGRESSIVE 由 LRUCache 自动管理
-            else -> {
-                // LRUCache 会自动管理缓存大小，无需手动处理
-            }
-        }
-    }
 
 
     /**
@@ -262,8 +172,6 @@ class PaginatedComponent<T>(
             sizeResult.fold(
                 onSuccess = { size ->
                     totalDataSize = size
-                    // 根据缓存策略清理缓存（只在数据源变更时）
-                    applyCacheStrategy()
                     // 设置组件状态为就绪
                     componentState.set(ComponentState.READY)
                     // 加载当前页数据
@@ -272,7 +180,7 @@ class PaginatedComponent<T>(
                 onFailure = { error ->
                     // 处理数据加载错误
                     totalDataSize = 0
-                    pageCache.clear()
+                    currentPageData = emptyList()
                     componentState.set(ComponentState.ERROR)
                     update()
                 }
@@ -284,74 +192,20 @@ class PaginatedComponent<T>(
      * 加载指定页面数据
      */
     private fun loadPageData(page: Int) {
-        val strategy = dataProvider.getCacheStrategy()
-
-        // NO_CACHE策略：每次都重新加载
-        if (strategy == CacheStrategy.NO_CACHE) {
-            loadPageDataInternal(page, forceReload = true)
-            return
-        }
-
-        val currentEntry = pageCache[page]
-        if (currentEntry != null && (currentEntry.state == PageState.LOADING || currentEntry.state == PageState.LOADED)) {
-            // 缓存命中，直接返回
-            return
-        }
-
-        loadPageDataInternal(page, forceReload = false)
-    }
-
-    // NO_CACHE策略的临时数据存储
-    @Volatile
-    private var noCacheTemporaryData: Pair<Int, List<T>>? = null
-
-    /**
-     * 内部页面数据加载方法
-     */
-    private fun loadPageDataInternal(page: Int, forceReload: Boolean) {
-        val strategy = dataProvider.getCacheStrategy()
-
-        // 如果强制重新加载或者是NO_CACHE策略，清除现有缓存
-        if (forceReload || strategy == CacheStrategy.NO_CACHE) {
-            pageCache.remove(page)
-        }
-
-        // 非NO_CACHE策略才设置loading状态到缓存
-        if (strategy != CacheStrategy.NO_CACHE) {
-            pageCache[page] = PageCacheEntry.loading()
-        }
-
         val offset = page * logicalItemsPerPage
         dataProvider.fetchItems(offset, logicalItemsPerPage) { dataResult ->
             dataResult.fold(
                 onSuccess = { data ->
-                    // 根据缓存策略决定是否缓存
-                    if (strategy != CacheStrategy.NO_CACHE) {
-                        pageCache[page] = PageCacheEntry.loaded(data)
-                        // LRU缓存会自动管理大小，无需手动调用
-                    } else {
-                        // NO_CACHE策略：真正不缓存，只用临时变量存储当前页数据
-                        if (page == currentPage) {
-                            noCacheTemporaryData = Pair(page, data)
-                        }
-                    }
-
-                    // 如果是当前页，立即更新显示
+                    // 如果是当前页，更新数据并刷新显示
                     if (page == currentPage) {
+                        currentPageData = data
                         update()
                     }
                 },
                 onFailure = { error ->
-                    if (strategy != CacheStrategy.NO_CACHE) {
-                        pageCache[page] = PageCacheEntry.error()
-                    } else {
-                        // NO_CACHE策略：不缓存错误状态，清空临时数据
-                        if (page == currentPage) {
-                            noCacheTemporaryData = null
-                        }
-                    }
-
+                    // 如果是当前页，清空数据并刷新显示
                     if (page == currentPage) {
+                        currentPageData = emptyList()
                         update()
                     }
                 }
@@ -367,21 +221,14 @@ class PaginatedComponent<T>(
             // 暂停组件状态更新
             componentState.set(ComponentState.LOADING)
 
-            // 保存旧缓存的引用
-            val oldCache = this.pageCache
-
-            // 创建新缓存
-            val newCache = createPageCache()
-            bind(newCache)
-
             // 原子性地更新所有状态
             this.dataProvider = newDataProvider
             this.currentPage = 0
             this.totalDataSize = -1
-            this.pageCache = newCache
+            this.currentPageData = emptyList()
 
-            // 关闭旧缓存
-            oldCache.close()
+            // 立即更新显示加载状态
+            update()
 
             // 刷新数据
             refreshData()
@@ -396,89 +243,14 @@ class PaginatedComponent<T>(
     }
 
     /**
-     * 清空缓存
-     */
-    fun clearCache() {
-        pageCache.clear()
-    }
-
-    /**
      * 刷新当前页
      */
     fun refresh() {
-        val strategy = dataProvider.getCacheStrategy()
-        if (strategy == CacheStrategy.NO_CACHE) {
-            // NO_CACHE策略：强制重新加载
-            loadPageDataInternal(currentPage, forceReload = true)
-        } else {
-            // 其他策略：清除当前页缓存后重新加载
-            pageCache.remove(currentPage)
-            loadPageData(currentPage)
-        }
-    }
-
-    /**
-     * 刷新指定页面
-     */
-    fun refreshPage(page: Int) {
-        val strategy = dataProvider.getCacheStrategy()
-        if (strategy == CacheStrategy.NO_CACHE) {
-            // NO_CACHE策略：强制重新加载
-            loadPageDataInternal(page, forceReload = true)
-        } else {
-            // 其他策略：清除指定页缓存后重新加载
-            pageCache.remove(page)
-            loadPageData(page)
-        }
-    }
-
-    /**
-     * 预加载指定页面
-     */
-    fun preloadPage(page: Int) {
-        if (page >= 0) {
-            val strategy = dataProvider.getCacheStrategy()
-
-            // NO_CACHE策略：不进行预加载
-            if (strategy == CacheStrategy.NO_CACHE) {
-                return
-            }
-
-            val entry = pageCache[page]
-            if (entry == null || (entry.state != PageState.LOADING && entry.state != PageState.LOADED)) {
-                loadPageData(page)
-            }
-        }
-    }
-
-    /**
-     * 根据缓存策略预加载邻近页面
-     */
-    private fun preloadAdjacentPages() {
-        val strategy = dataProvider.getCacheStrategy()
-
-        when (strategy) {
-            CacheStrategy.NO_CACHE, CacheStrategy.CURRENT_PAGE_ONLY -> {
-                // 不预加载
-                return
-            }
-            CacheStrategy.MULTI_PAGE -> {
-                // 预加载前后各1页
-                preloadPage(currentPage + 1)
-                if (currentPage > 0) {
-                    preloadPage(currentPage - 1)
-                }
-            }
-            CacheStrategy.AGGRESSIVE -> {
-                // 预加载前后各2页
-                for (i in -2..2) {
-                    val targetPage = currentPage + i
-                    if (targetPage >= 0 && targetPage != currentPage) {
-                        preloadPage(targetPage)
-                    }
-                }
-            }
-        }
+        // 清空当前数据并立即更新显示
+        currentPageData = emptyList()
+        update()
+        // 重新加载数据
+        loadPageData(currentPage)
     }
 
     /**
@@ -544,14 +316,12 @@ class PaginatedComponent<T>(
             val previousPage = currentPage
             currentPage = newPage
 
+            // 清空当前页数据并立即更新显示
+            currentPageData = emptyList()
+            update()
+
             // 加载新页面数据
             loadPageData(currentPage)
-
-            // 根据缓存策略预加载邻近页面
-            preloadAdjacentPages()
-
-            // 立即更新显示
-            update()
 
             // 触发页面变更事件
             pageChangeHandler?.invoke(
@@ -581,7 +351,7 @@ class PaginatedComponent<T>(
                 val nextPageOffset = (currentPage + 1) * logicalItemsPerPage
                 val semaphore = Semaphore(0)
                 var canTurnPage = false
-                
+
                 dataProvider.canFetchMore(nextPageOffset) { canFetchResult ->
                     canFetchResult.fold(
                         onSuccess = { canFetch ->
@@ -593,7 +363,7 @@ class PaginatedComponent<T>(
                     )
                     semaphore.release()
                 }
-                
+
                 // 等待异步操作完成
                 semaphore.acquire()
                 canTurnPage
@@ -677,74 +447,9 @@ class PaginatedComponent<T>(
     fun hasPreviousPage(): Boolean = currentPage > 0
 
     /**
-     * 检查页面是否正在加载
-     */
-    fun isPageLoading(page: Int): Boolean = pageCache[page]?.state == PageState.LOADING
-
-    /**
-     * 检查页面是否已缓存
-     */
-    fun isPageCached(page: Int): Boolean = pageCache[page]?.state == PageState.LOADED
-
-    /**
-     * 获取页面状态
-     */
-    fun getPageState(page: Int): PageState = pageCache[page]?.state ?: PageState.NOT_LOADED
-
-    /**
      * 获取组件状态
      */
     fun getComponentState(): ComponentState = componentState.get()
-
-    /**
-     * 获取当前缓存策略
-     */
-    fun getCacheStrategy(): CacheStrategy = dataProvider.getCacheStrategy()
-
-    /**
-     * 获取分页缓存统计信息
-     */
-    fun getPaginatedCacheStats(): String {
-        val stats = getCacheStatsDetailed()
-        return "PaginatedComponent Cache - Strategy: ${stats.strategy}, Pages: ${stats.cachedPages}/${stats.maxCacheSize}, Hit Rate: ${"%.2f".format(stats.cacheHitRate * 100)}%, Cached Pages: ${stats.cachedPageNumbers}"
-    }
-
-    /**
-     * 获取详细的缓存统计信息
-     */
-    fun getCacheStatsDetailed(): CacheStats {
-        return CacheStats(
-            strategy = getCacheStrategy(),
-            cachedPages = pageCache.size,
-            maxCacheSize = pageCache.capacity,
-            cacheHitRate = calculateCacheHitRate(),
-            cachedPageNumbers = pageCache.keys.toList()
-        )
-    }
-
-    /**
-     * 计算缓存命中率（简化实现）
-     */
-    private fun calculateCacheHitRate(): Double {
-        // 简化实现：基于当前缓存页数和缓存容量的比例
-        return if (pageCache.capacity == 0) 0.0
-               else pageCache.size.toDouble() / pageCache.capacity.coerceAtLeast(1)
-    }
-
-    /**
-     * 强制清理缓存（除了当前页）
-     */
-    fun forceClearCache(keepCurrentPage: Boolean = true) {
-        if (keepCurrentPage) {
-            val currentEntry = pageCache[currentPage]
-            pageCache.clear()
-            if (currentEntry != null) {
-                pageCache[currentPage] = currentEntry
-            }
-        } else {
-            clearCache()
-        }
-    }
 
     override fun getSlots(): List<Int> {
         return potentialSlots // 返回所有可能的槽位，由 BasePage 处理覆盖逻辑
@@ -757,7 +462,7 @@ class PaginatedComponent<T>(
     override fun getRenderContext(slot: Int, oldItem: ItemStack?): PaginatedRenderContext<T>? {
         // 检查槽位是否属于这个组件
         if (!potentialSlots.contains(slot)) return null
-        
+
         // 检查槽位是否被其他组件覆盖
         val ownerComponent = page.getComponentBySlot(slot)
         if (ownerComponent != null && ownerComponent != this) return null
@@ -771,15 +476,11 @@ class PaginatedComponent<T>(
         val y = slot / inventoryWidth
         val relativeX = x - startX
         val relativeY = y - startY
-        
+
         // 统一使用可用槽位索引进行数据访问和计算
         val renderIndex = availableSlotIndex
         val globalIndex = currentPage * availableSlots.size + renderIndex
         val item = if (renderIndex < currentPageData.size) currentPageData[renderIndex] else null
-        
-        val pageState = pageCache[currentPage]?.state ?: PageState.NOT_LOADED
-        val isLoading = pageState == PageState.LOADING
-        val isPageCached = pageState == PageState.LOADED
 
         return PaginatedRenderContext(
             x = x,
@@ -792,10 +493,7 @@ class PaginatedComponent<T>(
             pageIndex = currentPage,
             item = item,
             globalIndex = globalIndex, // 全局索引（基于可用槽位大小）
-            isLoading = isLoading,
-            isPageCached = isPageCached,
             isInfiniteMode = isInfiniteMode,
-            pageState = pageState,
             componentState = componentState.get()
         )
     }
@@ -807,13 +505,9 @@ class PaginatedComponent<T>(
                 // 可以显示错误图标或空槽位
                 emptySlotRenderFunction?.invoke(context)
             }
-            // 页面正在加载且没有数据时显示加载中
-            context.pageState == PageState.LOADING && context.item == null -> {
+            // 组件正在加载且没有数据时显示加载中
+            context.componentState == ComponentState.LOADING && context.item == null -> {
                 loadingSlotRenderFunction?.invoke(context)
-            }
-            // 页面加载失败
-            context.pageState == PageState.ERROR -> {
-                emptySlotRenderFunction?.invoke(context)
             }
             // 有数据时正常渲染
             context.item != null -> {
@@ -829,7 +523,7 @@ class PaginatedComponent<T>(
     override fun toString(): String {
         return "PaginatedComponent(startX=$startX, startY=$startY, width=$width, height=$height, currentPage=$currentPage, mode=${
             if(isInfiniteMode) "infinite" else "finite"}, totalPages=${if(isInfiniteMode) "∞" else totalPages
-            }, dataSize=$totalDataSize, logicalPageSize=$logicalItemsPerPage, availableSlots=${availableSlots.size}, currentPageDataSize=${currentPageData.size}, cachedPages=${pageCache.size}, page=${page.title.toMiniMessage()})"
+            }, dataSize=$totalDataSize, logicalPageSize=$logicalItemsPerPage, availableSlots=${availableSlots.size}, currentPageDataSize=${currentPageData.size}, page=${page.title.toMiniMessage()})"
     }
 
     override fun close() {
@@ -851,10 +545,7 @@ data class PaginatedRenderContext<T>(
     val pageIndex: Int,
     val item: T?,
     val globalIndex: Int,
-    val isLoading: Boolean = false,
-    val isPageCached: Boolean = false,
     val isInfiniteMode: Boolean = false,
-    val pageState: PageState = PageState.NOT_LOADED,
     val componentState: PaginatedComponent.ComponentState = PaginatedComponent.ComponentState.INIT
 ) : BaseRenderContext()
 
@@ -885,14 +576,3 @@ data class PageChangeContext(
  * 渲染函数类型别名
  */
 typealias RenderFunction<T> = (T) -> ItemStack?
-
-/**
- * 缓存统计信息
- */
-data class CacheStats(
-    val strategy: CacheStrategy,
-    val cachedPages: Int,
-    val maxCacheSize: Int,
-    val cacheHitRate: Double,
-    val cachedPageNumbers: List<Int>
-)

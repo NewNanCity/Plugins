@@ -29,10 +29,9 @@ fun <T> BasePage.syncPaginated(
     hasMoreProvider: (offset: Int) -> Boolean = { offset ->
         val size = sizeProvider()
         if (size < 0) true else offset < size
-    },
-    cacheStrategy: CacheStrategy = CacheStrategy.CURRENT_PAGE_ONLY
+    }
 ): PaginatedComponent<T> {
-    val dataProvider = SyncDataProvider(sizeProvider, itemProvider, hasMoreProvider, cacheStrategy)
+    val dataProvider = SyncDataProvider(sizeProvider, itemProvider, hasMoreProvider)
     return PaginatedComponent(this, startX, startY, width, height, dataProvider)
 }
 
@@ -62,10 +61,9 @@ fun <T> BasePage.asyncPaginated(
                 onFailure = { callback(Result.success(false)) }
             )
         }
-    },
-    cacheStrategy: CacheStrategy = CacheStrategy.CURRENT_PAGE_ONLY
+    }
 ): PaginatedComponent<T> {
-    val dataProvider = AsyncDataProvider(sizeProvider, itemProvider, hasMoreProvider, cacheStrategy)
+    val dataProvider = AsyncDataProvider(sizeProvider, itemProvider, hasMoreProvider)
     return PaginatedComponent(this, startX, startY, width, height, dataProvider)
 }
 
@@ -77,10 +75,9 @@ fun <T> BasePage.paginatedFromList(
     startY: Int,
     width: Int,
     height: Int,
-    items: List<T>,
-    cacheStrategy: CacheStrategy = CacheStrategy.CURRENT_PAGE_ONLY
+    items: List<T>
 ): PaginatedComponent<T> {
-    val dataProvider = ListDataProvider(items, cacheStrategy)
+    val dataProvider = ListDataProvider(items)
     return PaginatedComponent(this, startX, startY, width, height, dataProvider)
 }
 
@@ -92,8 +89,7 @@ fun <T> BasePage.paginatedFromFunction(
     startY: Int,
     width: Int,
     height: Int,
-    itemsProvider: () -> List<T>,
-    cacheStrategy: CacheStrategy = CacheStrategy.CURRENT_PAGE_ONLY
+    itemsProvider: () -> List<T>
 ): PaginatedComponent<T> {
     val dataProvider = SyncDataProvider(itemsProvider)
     return PaginatedComponent(this, startX, startY, width, height, dataProvider)
@@ -150,7 +146,6 @@ class PaginatedBuilder<T>(private val page: BasePage) {
     var startY: Int = 0
     var width: Int = 9
     var height: Int = 4
-    var cacheStrategy: CacheStrategy = CacheStrategy.CURRENT_PAGE_ONLY
 
     private var dataProvider: IDataProvider<T>? = null
 
@@ -158,7 +153,7 @@ class PaginatedBuilder<T>(private val page: BasePage) {
      * 使用List数据
      */
     fun data(items: List<T>) {
-        dataProvider = ListDataProvider(items, cacheStrategy)
+        dataProvider = ListDataProvider(items)
     }
 
     /**
@@ -179,7 +174,7 @@ class PaginatedBuilder<T>(private val page: BasePage) {
             if (size < 0) true else offset < size
         }
     ) {
-        dataProvider = SyncDataProvider(sizeProvider, itemProvider, hasMoreProvider, cacheStrategy)
+        dataProvider = SyncDataProvider(sizeProvider, itemProvider, hasMoreProvider)
     }
 
     /**
@@ -200,7 +195,7 @@ class PaginatedBuilder<T>(private val page: BasePage) {
             }
         }
     ) {
-        dataProvider = AsyncDataProvider(sizeProvider, itemProvider, hasMoreProvider, cacheStrategy)
+        dataProvider = AsyncDataProvider(sizeProvider, itemProvider, hasMoreProvider)
     }
 
     /**
@@ -244,28 +239,4 @@ fun <T> PaginatedComponent<T>.isLoading(): Boolean {
  */
 fun <T> PaginatedComponent<T>.hasError(): Boolean {
     return getComponentState() == PaginatedComponent.ComponentState.ERROR
-}
-
-/**
- * 检查当前页是否准备就绪
- */
-fun <T> PaginatedComponent<T>.isCurrentPageReady(): Boolean {
-    return getPageState(getCurrentPage()) == PageState.LOADED
-}
-
-// ==================== 缓存管理扩展 ====================
-
-/**
- * 检查是否启用了缓存
- */
-fun <T> PaginatedComponent<T>.isCacheEnabled(): Boolean {
-    return getCacheStrategy() != CacheStrategy.NO_CACHE
-}
-
-/**
- * 检查是否使用多页缓存
- */
-fun <T> PaginatedComponent<T>.isMultiPageCache(): Boolean {
-    val strategy = getCacheStrategy()
-    return strategy == CacheStrategy.MULTI_PAGE || strategy == CacheStrategy.AGGRESSIVE
 }

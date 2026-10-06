@@ -9,8 +9,8 @@ gui:
     cycle_line: 环线
     no_cycle_line: 往返线
   rail_lines:
-    title_edit: <gray>[<dark_aqua><bold>牛腩轨道交通<reset><gray>]<reset> 所有线路</gray>
-    title_select: <gray>[<gold><bold>牛腩轨道交通<reset><gray>]<reset> 选择线路</gray>
+    title_edit: <gray>[<dark_aqua><bold>牛腩轨道交通<reset><gray>]<reset> 所有线路
+    title_select: <gray>[<gold><bold>牛腩轨道交通<reset><gray>]<reset> 选择线路
     add_line: 添加线路
     line_name: <color:{0}>{1}</color:{0}>
     line_lore: |-
@@ -37,8 +37,8 @@ gui:
 
       <green>左键: 打开游离区域管理</green>
   rail_line:
-    title_edit: <gray>[<dark_aqua><bold>牛腩轨道交通<reset><gray>]<reset> <gray>[<bold><color:{0}>{1}</color:{0}><reset><gray>]<reset>的所有站点</gray>
-    title_select: <gray>[<gold><bold>牛腩轨道交通<reset><gray>]<reset> 选择站点</gray>
+    title_edit: <gray>[<dark_aqua><bold>牛腩轨道交通<reset><gray>]<reset> <gray>[<bold><color:{0}>{1}</color:{0}><reset><gray>]<reset>的所有站点
+    title_select: <gray>[<gold><bold>牛腩轨道交通<reset><gray>]<reset> 选择站点
     add_station: 添加站点
     add_station_lore: |-
       点击添加新站点到此线路
@@ -72,7 +72,7 @@ gui:
     left_return_updated: <green>左侧折返设置已更新!</green>
     right_return_updated: <green>右侧折返设置已更新!</green>
   station:
-    title: <gray>[<dark_aqua><bold>牛腩轨道交通<reset><gray>]<reset> 所有可用站点</gray>
+    title: <gray>[<dark_aqua><bold>牛腩轨道交通<reset><gray>]<reset> 所有可用站点
     create_station: 创建站点
     create_station_lore: |-
       点击创建新站点
@@ -93,7 +93,7 @@ gui:
     delete_operation: 删除站点
     delete_operation_in_use: <red>无法删除正在使用的站点</red>
   rail_area:
-    title: <gray>[<dark_aqua><bold>牛腩轨道交通<reset><gray>]<reset> <color:{0}>{1}-{2}</color:{0}> 铁路区域列表</gray>
+    title: <gray>[<dark_aqua><bold>牛腩轨道交通<reset><gray>]<reset> <color:{0}>{1}-{2}</color:{0}> 铁路区域列表
     add_area: 添加区域
     add_area_lore: |-
       <green>展示屏蔽的玩家</green>
@@ -126,7 +126,7 @@ gui:
     end_station: <purple>本站为终点站</purple>
     next_station: '<gray>下一站: <purple>{0}</purple></gray>'
   free_area:
-    title: <gray>[<dark_aqua><bold>牛腩轨道交通<reset><gray>]<reset> 游离区域</gray>
+    title: <gray>[<dark_aqua><bold>牛腩轨道交通<reset><gray>]<reset> 游离区域
     area_lore: |-
       <gray>世界: {0}
       <gray>范围: ({1}, {2}, {3}) - ({4}, {5}, {6})
@@ -146,7 +146,7 @@ gui:
     update_failed: '<red>游离区域更新失败: {0}</red>'
     delete_failed: '<red>游离区域删除失败: {0}</red>'
   reverse:
-    title: <gray>[<dark_aqua><bold>牛腩轨道交通<reset><gray>]<reset> 选择方向</gray>
+    title: <gray>[<dark_aqua><bold>牛腩轨道交通<reset><gray>]<reset> 选择方向
     selection_name: 开往 <gold>{0}</gold> 方向
 input:
   common:
@@ -231,7 +231,7 @@ input:
       <gold>=== 区域配置命令 ===</gold>
       直接在聊天框输入指令即可, 无需 / 符号.
       <yellow>station: 设定站点</yellow>
-      <yellow>area: 设定区域范围</yellow>
+      <yellow>box: 设定空间范围</yellow>
       <yellow>stop: 设定停靠点</yellow>
       <yellow>dir: 设定方向</yellow>
       <yellow>preview: 预览当前设置</yellow>

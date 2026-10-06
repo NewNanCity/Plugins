@@ -28,7 +28,7 @@ class JudgementalManager(val plugin: GuardianPlugin) : BaseModule("JudgementalMa
 
     override fun onReload() {
         judgementalGroup = plugin.getPluginConfig().judgementalGroup
-        plugin.configManager.touchWithMerge("judgemental-players.yml", createBackup = true)
+        plugin.configManager.touch("judgemental-players.yml", { JudgementalPlayers() })
         plugin.configManager.parse<JudgementalPlayers>("judgemental-players.yml").players.also {
             judgementalPlayers.clear()
             judgementalPlayers.addAll(plugin.configManager.parse<JudgementalPlayers>("judgemental-players.yml").players)

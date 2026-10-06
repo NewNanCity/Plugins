@@ -222,33 +222,44 @@ val component = syncPaginated(
 )
 ```
 
-#### 2. CURRENT_PAGE_ONLY - 单页缓存
-- **适用场景**: 大数据集、内存受限环境
-- **行为**: 只缓存当前页，切换页面时清除旧缓存
-- **优点**: 内存占用最小，避免重复加载当前页
+#### 2. 无缓存策略
+- **行为**: 组件不进行数据缓存，每次都从DataProvider获取数据
+- **优点**: 内存占用最小，数据始终是最新的
 - **缺点**: 页面切换时需要重新加载
-- **最大缓存大小**: 1
+- **适用场景**: 数据变化频繁、内存受限环境
 
 ```kotlin
 val component = asyncPaginated(
     // ... 其他参数
-    cacheStrategy = CacheStrategy.CURRENT_PAGE_ONLY
 )
 ```
 
-#### 3. MULTI_PAGE - 多页缓存
-- **适用场景**: 中等数据集、用户经常在邻近页面间切换
-- **行为**: 缓存多个页面，使用LRU算法管理缓存
-- **预加载**: 自动预加载前后各1页
-- **优点**: 页面切换流畅，预加载提升体验
-- **缺点**: 内存占用适中
-- **最大缓存大小**: 5
+#### 3. DataProvider层缓存
+- **建议**: 如果需要缓存，在DataProvider层面实现
+- **优点**: 更灵活的缓存控制，可以跨组件共享缓存
+- **实现**: 在DataProvider的fetchItems方法中实现缓存逻辑
 
 ```kotlin
-val component = paginatedFromList(
-    // ... 其他参数
-    cacheStrategy = CacheStrategy.MULTI_PAGE
-)
+class CachedDataProvider<T>(
+    private val delegate: IDataProvider<T>,
+    private val cache: MutableMap<String, List<T>> = mutableMapOf()
+) : IDataProvider<T> {
+    override fun fetchItems(offset: Int, limit: Int, callback: DataProviderCallback<List<T>>) {
+        val key = "${offset}_${limit}"
+        val cached = cache[key]
+        if (cached != null) {
+            callback(Result.success(cached))
+        } else {
+            delegate.fetchItems(offset, limit) { result ->
+                result.onSuccess { data ->
+                    cache[key] = data
+                }
+                callback(result)
+            }
+        }
+    }
+    // ... 其他方法
+}
 ```
 
 #### 4. AGGRESSIVE - 激进缓存
@@ -266,43 +277,40 @@ val component = paginatedFromFunction(
 )
 ```
 
-### 缓存管理机制
+### 数据管理机制
 
-#### LRU缓存算法
-组件使用LRU（Least Recently Used）算法管理缓存：
-- 访问页面时更新访问顺序
-- 缓存满时移除最久未访问的页面
-- 当前页面永远不会被移除
+#### 无缓存设计
+组件采用无缓存设计：
+- 不在组件层面缓存数据
+- 每次页面切换都从DataProvider获取数据
+- 缓存责任完全交给DataProvider层
 
-#### 自动预加载
-根据缓存策略自动预加载邻近页面：
-- `MULTI_PAGE`: 预加载前后各1页
-- `AGGRESSIVE`: 预加载前后各2页
-- 其他策略: 不预加载
+#### 数据刷新
+- 页面切换时自动加载新页面数据
+- 数据源变更时清空当前数据
+- 支持手动刷新当前页面
 
-#### 缓存清理
-- 页面切换时自动清理过期缓存
-- 数据源变更时清空所有缓存
-- 支持手动强制清理缓存
+## 数据管理方法
 
-## 缓存监控和管理
-
-### 缓存统计信息
+### 数据刷新
 
 ```kotlin
-val stats = component.getCacheStats()
-println("缓存策略: ${stats.strategy}")
-println("已缓存页数: ${stats.cachedPages}/${stats.maxCacheSize}")
-println("缓存命中率: ${"%.2f".format(stats.cacheHitRate * 100)}%")
+// 刷新当前页
+component.refresh()
+
+// 刷新指定页面
+component.refreshPage(2)
 ```
 
-### 缓存管理方法
+### 数据更新
 
 ```kotlin
-// 检查缓存状态
-if (component.isCacheEnabled()) {
-    println("缓存已启用")
-}
+// 更新数据源
+component.setDataProvider(newDataProvider)
+
+// 更新数据列表
+component.setData(newDataList)
+```
 
 // 获取缓存效率描述
 val efficiency = component.getCacheEfficiencyDescription()

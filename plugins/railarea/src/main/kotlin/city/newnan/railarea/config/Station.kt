@@ -36,15 +36,6 @@ data class Station(
     val name: String,
     internal val storage: StationStorage
 ) {
-    override fun hashCode(): Int = id
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-        other as Station
-        return id == other.id
-    }
-
     override fun toString(): String = "Station(id=$id, name='$name')"
 
     val lines: Set<RailLine> get() = storage.getStationLines(id)
@@ -64,15 +55,6 @@ data class RailLine(
     val rightReturn: Boolean,
     internal val storage: StationStorage
 ) {
-    override fun hashCode(): Int = id
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-        other as RailLine
-        return id == other.id
-    }
-
     override fun toString(): String = "RailLine(id=$id, name='$name')"
 
     val stations = stationIds.map { storage.getStationById(it)!! }

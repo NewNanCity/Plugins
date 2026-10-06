@@ -117,6 +117,7 @@ object ComponentParseModeDetector {
 
                     // 2. 检查标签名和参数部分
                     if (hasValidTagChar) {
+                        var numberOnly = true
                         while (pos < input.length) {
                             val currentChar = input[pos]
 
@@ -140,16 +141,18 @@ object ComponentParseModeDetector {
                                     inQuotes = currentChar
                                     pos++
                                 }
-                                // 有效标签名字符
-                                in 'a'..'z', in 'A'..'Z', in '0'..'9', '_', '-' -> pos++
-                                // 参数分隔符
-                                ':' -> pos++
+                                // 换行符 - 不允许
+                                '\n' -> break
                                 // 标签结束符
-                                '>' -> return true
-                                // 空格 - 严格模式下不允许
-                                ' ' -> break  // 遇到空格，终止标签检测
-                                // 无效字符
-                                else -> break
+                                '>' -> return !numberOnly
+                                // 数字 - 允许，但不能只有数字
+                                in '0'..'9' -> pos++
+                                // 其余字符
+                                // in 'a'..'z', in 'A'..'Z', '_', '-', ':', ' '
+                                else -> {
+                                    pos++
+                                    numberOnly = false
+                                }
                             }
                         }
                     }

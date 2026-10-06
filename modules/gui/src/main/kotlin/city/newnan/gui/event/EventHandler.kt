@@ -1,6 +1,7 @@
 package city.newnan.gui.event
 
 import org.bukkit.Bukkit
+import org.bukkit.event.inventory.ClickType
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -169,35 +170,34 @@ class EventHandlers {
             onClickHandler?.invoke(context)
             if (!context.isPropagationStopped()) {
                 // 根据点击类型调用特定处理器
-                when {
-                    context.isLeftClick && !context.isShiftClick -> {
+                when (context.clickType) {
+                    ClickType.LEFT -> {
+                        onClickHandler?.invoke(context)
                         onLeftClickHandler?.invoke(context)
                     }
-                    context.isRightClick && !context.isShiftClick -> {
+                    ClickType.RIGHT -> {
+                        onClickHandler?.invoke(context)
                         onRightClickHandler?.invoke(context)
                     }
-                    context.isShiftClick -> {
-                        onShiftClickHandler?.invoke(context)
-                        if (!context.isPropagationStopped()) {
-                            when {
-                                context.isLeftClick -> {
-                                    onShiftLeftClickHandler?.invoke(context)
-                                }
-                                context.isRightClick -> {
-                                    onShiftRightClickHandler?.invoke(context)
-                                }
-                                context.isMiddleClick -> {
-                                    onMiddleClickHandler?.invoke(context)
-                                }
-                            }
-                        }
-                    }
-                    context.isMiddleClick -> {
+                    ClickType.MIDDLE -> {
+                        onClickHandler?.invoke(context)
                         onMiddleClickHandler?.invoke(context)
                     }
-                    context.isDoubleClick -> {
+                    ClickType.DOUBLE_CLICK -> {
+                        onClickHandler?.invoke(context)
                         onDoubleClickHandler?.invoke(context)
                     }
+                    ClickType.SHIFT_LEFT -> {
+                        onClickHandler?.invoke(context)
+                        onShiftClickHandler?.invoke(context)
+                        onShiftLeftClickHandler?.invoke(context)
+                    }
+                    ClickType.SHIFT_RIGHT -> {
+                        onClickHandler?.invoke(context)
+                        onShiftClickHandler?.invoke(context)
+                        onShiftRightClickHandler?.invoke(context)
+                    }
+                    else -> {}
                 }
             }
         }

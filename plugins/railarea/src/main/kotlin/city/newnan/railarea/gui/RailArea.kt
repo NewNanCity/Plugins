@@ -133,8 +133,8 @@ fun openRailAreasGui(
                             try {
                                 plugin.stationStorage.updateArea(newArea)
                                 plugin.messager.printf(player, LanguageKeys.Gui.RailArea.AREA_UPDATED)
-                                // 清除缓存
-                                this@paginatedComponent.clearCache()
+                                // 刷新组件
+                                this@paginatedComponent.refresh()
                             } catch (e: Exception) {
                                 plugin.logger.error("Failed to update area", e)
                                 plugin.messager.printf(player, LanguageKeys.Gui.RailArea.AREA_UPDATE_FAILED, e.message ?: "Unknown error")
@@ -157,8 +157,8 @@ fun openRailAreasGui(
                             try {
                                 plugin.stationStorage.removeArea(area.id)
                                 plugin.messager.printf(player, LanguageKeys.Gui.RailArea.AREA_DELETED)
-                                // 清除缓存
-                                this@paginatedComponent.clearCache()
+                                // 刷新组件
+                                this@paginatedComponent.refresh()
                             } catch (e: Exception) {
                                 plugin.logger.error("Failed to delete area", e)
                                 plugin.messager.printf(player, LanguageKeys.Gui.RailArea.AREA_DELETE_FAILED, e.message ?: "Unknown error")
@@ -201,8 +201,8 @@ fun openRailAreasGui(
                                     reverse = area.reverse
                                 )
                                 plugin.messager.printf(player, LanguageKeys.Gui.RailArea.AREA_ADDED)
-                                // 清除缓存
-                                paginatedComp.clearCache()
+                                // 刷新组件
+                                paginatedComp.refresh()
                             } catch (e: Exception) {
                                 plugin.logger.error("Failed to add area", e)
                                 plugin.messager.printf(player, LanguageKeys.Gui.RailArea.AREA_ADD_FAILED, e.message ?: "Unknown error")

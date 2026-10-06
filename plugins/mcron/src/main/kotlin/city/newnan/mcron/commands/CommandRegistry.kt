@@ -60,7 +60,7 @@ class CommandRegistry(val plugin: MCronPlugin) {
         ).forEach { commandAnnotationParser.parse(it) }
 
         // 生成帮助指令 - /mcron 是插件的指令前缀
-        help = MinecraftHelp.createNative("/mcron", commandManager)
+        help = MinecraftHelp.createNative("/mcron help", commandManager)
     }
 
     // 为help的查询提供补全 - 固定模板，不允许修改
@@ -76,7 +76,7 @@ class CommandRegistry(val plugin: MCronPlugin) {
     // 帮助指令 - 固定模板，不允许修改
     @Command("mcron help [help-query]")
     @CommandDescription(LanguageKeys.Commands.Help.DESCRIPTION)
-    fun helpCommand(sender: CommandSender, @Greedy @Default("") @Argument(value = "help-query", description = LanguageKeys.Commands.Help.QUERY) query: String) {
+    fun helpCommand(sender: CommandSender, @Greedy @Default("1") @Argument(value = "help-query", description = LanguageKeys.Commands.Help.QUERY) query: String) {
         help.queryCommands(query, sender) // 所有插件的帮助命令都这样写
     }
 

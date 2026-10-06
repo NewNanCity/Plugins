@@ -55,7 +55,13 @@ fun openTeleportGui(plugin: NewNanMainPlugin, player: Player, editable: Boolean 
                 // 添加配置的传送点
                 configuredPoints.forEach { point ->
                     val material = try {
-                        Material.valueOf(point.icon)
+                        // 支持两种格式：STONE 或 minecraft:stone
+                        val iconName = if (point.icon.contains(":")) {
+                            point.icon.substringAfterLast(":").uppercase()
+                        } else {
+                            point.icon.uppercase()
+                        }
+                        Material.valueOf(iconName)
                     } catch (e: IllegalArgumentException) {
                         Material.GRASS_BLOCK
                     }

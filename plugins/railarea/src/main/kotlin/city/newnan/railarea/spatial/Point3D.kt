@@ -1,6 +1,7 @@
 package city.newnan.railarea.spatial
 
 import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.bukkit.Location
 import org.bukkit.World
@@ -16,6 +17,7 @@ import org.bukkit.World
  * @author NewNanCity
  * @since 2.0.0
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 data class Point3D @JsonCreator constructor(
     @JsonProperty("x") val x: Int,
     @JsonProperty("y") val y: Int,

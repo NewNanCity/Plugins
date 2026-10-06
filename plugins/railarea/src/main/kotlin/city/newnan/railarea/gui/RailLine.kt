@@ -32,9 +32,11 @@ fun openRailLineGui(
     plugin: RailAreaPlugin,
     player: Player,
     editable: Boolean,
-    line: RailLine,
+    lineId: Int,
     onStationSelect: (stationId: Int) -> Unit = {}
 ) {
+    var line = plugin.stationStorage.getLineById(lineId) ?: return
+
     val title = if (editable) {
         plugin.messager.sprintfPlain(
             LanguageKeys.Gui.RailLine.TITLE_EDIT,
@@ -116,33 +118,33 @@ fun openRailLineGui(
             }
 
             // 点击处理
-            onLeftClick { context, index, item ->
+            onLeftClick { _, _, item ->
                 when (item) {
                     "leftReturn" -> {
                         if (!editable) return@onLeftClick
                         try {
                             plugin.stationStorage.updateLine(line.copy(leftReturn = !line.leftReturn))
                             plugin.messager.printf(player, LanguageKeys.Gui.RailLine.LEFT_RETURN_UPDATED)
-                            // 清空缓存
-                            this@paginatedComponent.clearCache()
+                            // 刷新组件
+                            line = plugin.stationStorage.getLineById(lineId)!!
+                            this@paginatedComponent.refresh()
                         } catch (e: Exception) {
                             plugin.logger.error("Failed to update line", e)
                             plugin.messager.printf(player, LanguageKeys.Input.RailLine.SAVE_FAILED, e.message ?: "Unknown error")
                         }
-                        this@paginatedComponent.update()
                     }
                     "rightReturn" -> {
                         if (!editable) return@onLeftClick
                         try {
                             plugin.stationStorage.updateLine(line.copy(rightReturn = !line.rightReturn))
                             plugin.messager.printf(player, LanguageKeys.Gui.RailLine.RIGHT_RETURN_UPDATED)
-                            // 清空缓存
-                            this@paginatedComponent.clearCache()
+                            // 刷新组件
+                            line = plugin.stationStorage.getLineById(lineId)!!
+                            this@paginatedComponent.refresh()
                         } catch (e: Exception) {
                             plugin.logger.error("Failed to update line", e)
                             plugin.messager.printf(player, LanguageKeys.Input.RailLine.SAVE_FAILED, e.message ?: "Unknown error")
                         }
-                        this@paginatedComponent.update()
                     }
                     is Station -> {
                         if (editable) {
@@ -158,7 +160,7 @@ fun openRailLineGui(
 
             if (editable) {
                 // 右键 - 移除站点
-                onRightClick { context, index, item ->
+                onRightClick { _, _, item ->
                     if (item is Station) {
                         val confirmMessage = formatPlain(
                             LanguageKeys.Gui.RailLine.REMOVE_STATION_CONFIRM,
@@ -169,33 +171,35 @@ fun openRailLineGui(
                                 try {
                                     plugin.stationStorage.updateLine(line.copy(stationIds = line.stationIds.filter { it != item.id }))
                                     plugin.messager.printf(player, LanguageKeys.Gui.RailLine.STATION_REMOVED, item.name)
-                                    // 清空缓存
-                                    this@paginatedComponent.clearCache()
+                                    // 刷新组件
+                                    line = plugin.stationStorage.getLineById(lineId)!!
+                                    this@paginatedComponent.refresh()
                                 } catch (e: Exception) {
                                     plugin.logger.error("Failed to remove station from line", e)
                                     plugin.messager.printf(player, LanguageKeys.Input.Station.SAVE_FAILED, e.message ?: "Unknown error")
                                 }
                             }
-                            // 重新渲染
-                            this@paginatedComponent.update()
+                            // 显示界面
+                            this@openPage.show()
                         }
                     }
                 }
 
                 // Shift+左键 - 向左移动站点
-                onShiftLeftClick { context, index, item ->
-                    if (item is Station && ((line.isCycle && index > 0) || (!line.isCycle && index > 1))) {
+                onShiftLeftClick { _, index, item ->
+                    if (item is Station && index > 1) {
                         try {
                             plugin.stationStorage.updateLine(line.copy(
                                 stationIds = line.stationIds.toMutableList().apply {
-                                    remove(item.id)
-                                    add(index - 1, item.id)
+                                    // 交换 index <-> index-1
+                                    val temp = this[index - 1]
+                                    this[index - 1] = this[index]
+                                    this[index] = temp
                                 }
                             ))
-                            // 清空缓存
-                            this@paginatedComponent.clearCache()
-                            // 重新渲染
-                            this@paginatedComponent.update()
+                            // 刷新组件
+                            line = plugin.stationStorage.getLineById(lineId)!!
+                            this@paginatedComponent.refresh()
                         } catch (e: Exception) {
                             plugin.logger.error("Failed to shift station left in line", e)
                             plugin.messager.printf(player, LanguageKeys.Input.Station.SAVE_FAILED, e.message ?: "Unknown error")
@@ -204,19 +208,20 @@ fun openRailLineGui(
                 }
 
                 // Shift+右键 - 向右移动站点
-                onShiftRightClick { context, index, item ->
-                    if (item is Station && ((line.isCycle && index < line.stations.size - 1) || (!line.isCycle && index < line.stations.size - 2))) {
+                onShiftRightClick { _, index, item ->
+                    if (item is Station && index < line.stations.size - 2) {
                         try {
                             plugin.stationStorage.updateLine(line.copy(
                                 stationIds = line.stationIds.toMutableList().apply {
-                                    remove(item.id)
-                                    add(index + 1, item.id)
+                                    // 交换 index <-> index+1
+                                    val temp = this[index + 1]
+                                    this[index + 1] = this[index]
+                                    this[index] = temp
                                 }
                             ))
-                            // 清空缓存
-                            this@paginatedComponent.clearCache()
-                            // 重新渲染
-                            this@paginatedComponent.update()
+                            // 刷新组件
+                            line = plugin.stationStorage.getLineById(lineId)!!
+                            this@paginatedComponent.refresh()
                         } catch (e: Exception) {
                             plugin.logger.error("Failed to shift station right in line", e)
                             plugin.messager.printf(player, LanguageKeys.Input.Station.SAVE_FAILED, e.message ?: "Unknown error")
@@ -242,14 +247,15 @@ fun openRailLineGui(
                                 add(stationId)
                             }.toList()))
                             plugin.messager.printf(player, LanguageKeys.Gui.RailLine.STATION_ADDED, plugin.stationStorage.getStationById(stationId)!!.name)
-                            // 清空缓存
-                            paginatedComponent.clearCache()
+                            // 刷新组件
+                            line = plugin.stationStorage.getLineById(lineId)!!
+                            paginatedComponent.refresh()
                         } catch (e: Exception) {
                             plugin.logger.error("Failed to add station to line", e)
                             plugin.messager.printf(player, LanguageKeys.Input.Station.SAVE_FAILED, e.message ?: "Unknown error")
                         }
-                        // 重新渲染
-                        paginatedComponent.update()
+                        // 显示界面
+                        this@openPage.show()
                     }
                 }
             }

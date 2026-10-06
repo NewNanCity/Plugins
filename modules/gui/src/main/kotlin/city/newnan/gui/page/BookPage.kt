@@ -13,6 +13,7 @@ import net.kyori.adventure.text.Component as AdventureComponent
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.Material
 import org.bukkit.entity.Player
+import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryType
 import org.bukkit.event.player.PlayerEditBookEvent
 import org.bukkit.inventory.ItemStack
@@ -92,7 +93,7 @@ open class BookPage(
      * 添加页面内容
      */
     fun addPage(content: AdventureComponent) {
-        checkNotClosed()
+        if (closed) return
         _pages.add(content)
     }
 
@@ -107,7 +108,7 @@ open class BookPage(
      * 设置所有页面内容
      */
     fun setPages(pages: List<AdventureComponent>) {
-        checkNotClosed()
+        if (closed) return
         _pages.clear()
         _pages.addAll(pages)
         currentPageIndex = 0
@@ -124,7 +125,7 @@ open class BookPage(
      * 清空所有页面
      */
     fun clearPages() {
-        checkNotClosed()
+        if (closed) return
         _pages.clear()
         currentPageIndex = 0
     }
@@ -143,7 +144,7 @@ open class BookPage(
      * 跳转到指定页
      */
     fun goToPage(pageIndex: Int): Boolean {
-        checkNotClosed()
+        if (closed) return false
         val newIndex = pageIndex.coerceIn(0, _pages.size - 1)
         if (newIndex != currentPageIndex && _pages.isNotEmpty()) {
             currentPageIndex = newIndex
@@ -237,7 +238,7 @@ open class BookPage(
      * Page不应该直接调用此方法
      */
     override fun showInternal() {
-        checkNotClosed()
+        if (closed) return
         checkInitialized()
 
         if (!_isVisible) {
@@ -292,7 +293,7 @@ open class BookPage(
     }
 
     override fun update() {
-        checkNotClosed()
+        if (closed) return
         checkInitialized()
         if (_isVisible) {
             showBook()
@@ -374,7 +375,7 @@ open class BookPage(
         if (item != null && (item.type == Material.WRITTEN_BOOK || item.type == Material.WRITABLE_BOOK)) {
             val bookMeta = item.itemMeta as? BookMeta ?: return false
 
-            val isNextPage = context.isRightClick
+            val isNextPage = context.clickType == ClickType.RIGHT
             val bookPageTurnContext = BookPageTurnEventContext(
                 event = context.event,
                 player = context.player,
@@ -484,16 +485,6 @@ open class BookPage(
     }
 
     // ==================== 检查方法 ====================
-
-    /**
-     * 检查页面是否未关闭
-     */
-    private fun checkNotClosed() {
-        if (closed) {
-            throw IllegalStateException("BookPage is already closed")
-        }
-    }
-
     /**
      * 检查页面是否已初始化
      */

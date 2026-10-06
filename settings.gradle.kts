@@ -29,7 +29,8 @@ include(
     ":plugins:powertools",
     ":plugins:createarea",
     ":plugins:newnanmain",
-    ":plugins:dynamiceconomy"
+    ":plugins:dynamiceconomy",
+    ":plugins:logintitle"
 )
 
 // 设置子项目目录
@@ -55,3 +56,6 @@ project(":plugins:better-command-block").projectDir = file("plugins/better-comma
 project(":plugins:mc-patch").projectDir = file("plugins/mc-patch")
 project(":plugins:powertools").projectDir = file("plugins/powertools")
 project(":plugins:createarea").projectDir = file("plugins/createarea")
+project(":plugins:newnanmain").projectDir = file("plugins/newnanmain")
+project(":plugins:dynamiceconomy").projectDir = file("plugins/dynamiceconomy")
+project(":plugins:logintitle").projectDir = file("plugins/logintitle")

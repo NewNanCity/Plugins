@@ -490,8 +490,9 @@ class StationStorage(val plugin: RailAreaPlugin) {
             }
             plugin.configManager.save(railsConfig, "rails.yml")
         } catch (e: Exception) {
-            backupFile?.copyTo(railFile, true)
             plugin.logger.error("Failed to save stations and lines", e)
+            e.printStackTrace()
+            backupFile?.copyTo(railFile, true)
         } finally {
             // 删除备份文件
             backupFile?.delete()

@@ -34,8 +34,11 @@ GUI 模块与 Core 的 Message 模块深度集成，支持：
 
 ## 📚 文档导航
 
+> 命名规范说明：由于历史原因，GUI 顶层存在部分大写文件名（如 `GETTING_STARTED.md`、`CONCEPTS.md`）。
+> 新增文档统一使用小写 kebab-case；对外入口优先使用 `quick-start.md` 这类统一命名页面。
+
 ### 🚀 快速开始
-- [快速入门](GETTING_STARTED.md) - 5分钟上手GUI模块
+- [快速入门](quick-start.md) - 5分钟上手GUI模块
 - [核心概念](CONCEPTS.md) - 理解设计理念和架构
 
 ### 📖 教程指南
@@ -122,7 +125,7 @@ gui:
 
 ## 🚀 开始使用
 
-1. **快速上手**：阅读 [快速入门](GETTING_STARTED.md) 在5分钟内创建第一个GUI
+1. **快速上手**：阅读 [快速入门](quick-start.md) 在5分钟内创建第一个GUI
 2. **理解概念**：学习 [核心概念](CONCEPTS.md) 掌握设计理念
 3. **跟随教程**：按顺序完成 [教程指南](tutorials/) 中的内容
 4. **查阅参考**：使用 [API文档](api/) 查找具体接口

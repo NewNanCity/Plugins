@@ -69,7 +69,7 @@ commands:
     uuid_label: '<gray>UUID: </gray><white>{0}</white>'
     cash_label: '<gray>金币: </gray><white>{0}</white>'
     bed_spawn_label: '<gray>重生点: </gray><white>{0}</white>'
-    bed_spawn_none: <gray>未设置</gray>
+    bed_spawn_none: '<gray>重生点: </gray><gray>未设置</gray>'
     first_played_label: '<gray>首次游戏: </gray><white>{0}</white>'
     last_played_label: '<gray>最后游戏: </gray><white>{0}</white>'
     play_time_label: '<gray>游戏时长: </gray><white>{0}</white>'

@@ -9,8 +9,8 @@ gui:
     cycle_line: Loop Line
     no_cycle_line: Shuttle Line
   rail_lines:
-    title_edit: <gray>[<dark_aqua><bold>NewNan Railway<reset><gray>]<reset> All Lines</gray>
-    title_select: <gray>[<gold><bold>NewNan Railway<reset><gray>]<reset> Select Line</gray>
+    title_edit: <gray>[<dark_aqua><bold>NewNan Railway<reset><gray>]<reset> All Lines
+    title_select: <gray>[<gold><bold>NewNan Railway<reset><gray>]<reset> Select Line
     add_line: Add Line
     line_name: <color:{0}>{1}</color:{0}>
     line_lore: |-
@@ -38,8 +38,8 @@ gui:
 
       <green>Left Click: Open free area management</green>
   rail_line:
-    title_edit: <gray>[<dark_aqua><bold>NewNan Railway<reset><gray>]<reset> <gray>[<bold><color:{0}>{1}</color:{0}><reset><gray>]<reset> All Stations</gray>
-    title_select: <gray>[<gold><bold>NewNan Railway<reset><gray>]<reset> Select Station</gray>
+    title_edit: <gray>[<dark_aqua><bold>NewNan Railway<reset><gray>]<reset> <gray>[<bold><color:{0}>{1}</color:{0}><reset><gray>]<reset> All Stations
+    title_select: <gray>[<gold><bold>NewNan Railway<reset><gray>]<reset> Select Station
     add_station: Add Station
     add_station_lore: |-
       Click to add a new station to this line
@@ -73,7 +73,7 @@ gui:
     left_return_updated: <green>Left return setting has been updated!</green>
     right_return_updated: <green>Right return setting has been updated!</green>
   station:
-    title: <gray>[<dark_aqua><bold>NewNan Railway<reset><gray>]<reset> All Available Stations</gray>
+    title: <gray>[<dark_aqua><bold>NewNan Railway<reset><gray>]<reset> All Available Stations
     create_station: Create Station
     create_station_lore: |-
       Click to create a new station
@@ -94,7 +94,7 @@ gui:
     delete_operation: Delete Station
     delete_operation_in_use: <red>Cannot delete station in use</red>
   rail_area:
-    title: <gray>[<dark_aqua><bold>NewNan Railway<reset><gray>]<reset> <color:{0}>{1}-{2}</color:{0}> Railway Areas</gray>
+    title: <gray>[<dark_aqua><bold>NewNan Railway<reset><gray>]<reset> <color:{0}>{1}-{2}</color:{0}> Railway Areas
     add_area: Add Area
     add_area_lore: |-
       <green>Show blocked players</green>
@@ -127,7 +127,7 @@ gui:
     end_station: <purple>This is the terminal station</purple>
     next_station: '<gray>Next Station: <purple>{0}</purple></gray>'
   free_area:
-    title: <gray>[<dark_aqua><bold>NewNan Railway<reset><gray>]<reset> Free Areas</gray>
+    title: <gray>[<dark_aqua><bold>NewNan Railway<reset><gray>]<reset> Free Areas
     area_lore: |-
       <gray>World: {0}
       <gray>Range: ({1}, {2}, {3}) - ({4}, {5}, {6})
@@ -147,7 +147,7 @@ gui:
     update_failed: '<red>Free area update failed: {0}</red>'
     delete_failed: '<red>Free area deletion failed: {0}</red>'
   reverse:
-    title: <gray>[<dark_aqua><bold>NewNan Railway<reset><gray>]<reset> Select Direction</gray>
+    title: <gray>[<dark_aqua><bold>NewNan Railway<reset><gray>]<reset> Select Direction
     selection_name: Towards <gold>{0}</gold>
 input:
   common:
@@ -232,7 +232,7 @@ input:
       <gold>=== Area Configuration Commands ===</gold>
       Enter commands directly in chat, no / symbol needed.
       <yellow>station: Set station</yellow>
-      <yellow>area: Set area range</yellow>
+      <yellow>box: Set box range</yellow>
       <yellow>stop: Set stop point</yellow>
       <yellow>dir: Set direction</yellow>
       <yellow>preview: Preview current settings</yellow>

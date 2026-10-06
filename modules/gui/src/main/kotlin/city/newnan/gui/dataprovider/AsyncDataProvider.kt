@@ -18,8 +18,7 @@ open class AsyncDataProvider<T>(
                 onFailure = { callback(Result.success(false)) }
             )
         }
-    },
-    private val cacheStrategy: CacheStrategy = CacheStrategy.CURRENT_PAGE_ONLY
+    }
 ) : IDataProvider<T> {
     override fun getSize(callback: DataProviderCallback<Int>) {
         sizeProvider(callback)
@@ -32,6 +31,4 @@ open class AsyncDataProvider<T>(
     override fun canFetchMore(offset: Int, callback: DataProviderCallback<Boolean>) {
         hasMoreProvider(offset, callback)
     }
-
-    override fun getCacheStrategy(): CacheStrategy = cacheStrategy
 }

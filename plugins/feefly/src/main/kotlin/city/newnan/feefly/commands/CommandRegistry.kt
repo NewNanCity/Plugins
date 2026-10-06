@@ -69,7 +69,7 @@ class CommandRegistry(val plugin: FeeFlyPlugin) {
         ).forEach { commandAnnotationParser.parse(it) }
 
         // 生成帮助指令
-        help = MinecraftHelp.createNative("/feefly", commandManager)
+        help = MinecraftHelp.createNative("/feefly help", commandManager)
     }
 
     // 为help的查询提供补全
@@ -88,7 +88,7 @@ class CommandRegistry(val plugin: FeeFlyPlugin) {
     @Permission("feefly.self")
     fun helpCommand(
         sender: CommandSender,
-        @Greedy @Default("") @Argument(value = "help-query", description = LanguageKeys.Commands.Help.QUERY)
+        @Greedy @Default("1") @Argument(value = "help-query", description = LanguageKeys.Commands.Help.QUERY)
         query: String
     ) {
         help.queryCommands(query, sender)

@@ -47,33 +47,7 @@ class ClickEventContext(
     val slot: Int,
     val clickType: ClickType,
     val item: ItemStack?
-) : EventContext<InventoryClickEvent>(event, player) {
-
-    /**
-     * 是否为左键点击
-     */
-    val isLeftClick: Boolean = clickType == ClickType.LEFT
-
-    /**
-     * 是否为右键点击
-     */
-    val isRightClick: Boolean = clickType == ClickType.RIGHT
-
-    /**
-     * 是否为Shift点击
-     */
-    val isShiftClick: Boolean = clickType == ClickType.SHIFT_LEFT || clickType == ClickType.SHIFT_RIGHT
-
-    /**
-     * 是否为中键点击
-     */
-    val isMiddleClick: Boolean = clickType == ClickType.MIDDLE
-
-    /**
-     * 是否为双击
-     */
-    val isDoubleClick: Boolean = clickType == ClickType.DOUBLE_CLICK
-}
+) : EventContext<InventoryClickEvent>(event, player)
 
 /**
  * 拖拽事件上下文

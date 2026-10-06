@@ -6,7 +6,7 @@
 
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Java](https://img.shields.io/badge/Java-17%2B-orange.svg)](https://adoptium.net/)
-[![Kotlin](https://img.shields.io/badge/Kotlin-1.9.22-purple.svg)](https://kotlinlang.org/)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.2.0-purple.svg)](https://kotlinlang.org/)
 [![Paper](https://img.shields.io/badge/Paper-1.20.1-green.svg)](https://papermc.io/)
 [![Gradle](https://img.shields.io/badge/Gradle-8.5-blue.svg)](https://gradle.org/)
 

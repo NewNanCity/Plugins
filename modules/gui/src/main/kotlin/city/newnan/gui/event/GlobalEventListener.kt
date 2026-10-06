@@ -115,22 +115,14 @@ object GlobalEventListener {
     }
 
     fun onInventoryClick(event: InventoryClickEvent) {
-        Bukkit.getLogger().info("InventoryClickEvent catch, type: ${event.click}")
-
         // 检查玩家
         val player = event.whoClicked as? Player ?: return
-
-        Bukkit.getLogger().info("whoClicked is player ${player.name}")
 
         // 查找对应的Page
         val page = findPageByInventory(player, event.inventory) ?: return
 
-        Bukkit.getLogger().info("findPageByInventory success: ${page.title.toPlain()}")
-
         // 查找对应的Component
         val component = page.getComponentBySlot(event.slot)
-
-        Bukkit.getLogger().info("getComponentBySlot success: ${component?.javaClass?.simpleName}")
 
         // 创建事件上下文
         val context = ClickEventContext(

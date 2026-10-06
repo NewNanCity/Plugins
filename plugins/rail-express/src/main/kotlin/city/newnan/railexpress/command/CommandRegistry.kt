@@ -68,7 +68,7 @@ class CommandRegistry(val plugin: RailExpressPlugin) {
         ).forEach { commandAnnotationParser.parse(it) }
 
         // 生成帮助指令 /railexpress 是插件的指令前缀
-        help = MinecraftHelp.createNative("/railexpress", commandManager)
+        help = MinecraftHelp.createNative("/railexpress help", commandManager)
     }
 
     // 为help的查询提供补全
@@ -84,7 +84,7 @@ class CommandRegistry(val plugin: RailExpressPlugin) {
     // 帮助指令
     @Command("railexpress help [help-query]")
     @CommandDescription(LanguageKeys.Commands.Help.DESCRIPTION)
-    fun helpCommand(sender: CommandSender, @Greedy @Default("") @Argument(value = "help-query", description = LanguageKeys.Commands.Help.QUERY) query: String) {
+    fun helpCommand(sender: CommandSender, @Greedy @Default("1") @Argument(value = "help-query", description = LanguageKeys.Commands.Help.QUERY) query: String) {
         help.queryCommands(query, sender) // 所有插件的帮助命令都这样写
     }
 

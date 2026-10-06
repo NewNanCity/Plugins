@@ -81,7 +81,7 @@ class CommandRegistry(val plugin: DynamicEconomyPlugin) {
     @CommandDescription(LanguageKeys.Commands.Help.DESCRIPTION)
     fun helpCommand(
         sender: CommandSender,
-        @Default("") @Argument(value = "help-query", description = LanguageKeys.Commands.Help.QUERY) query: String
+        @Default("1") @Argument(value = "help-query", description = LanguageKeys.Commands.Help.QUERY) query: String
     ) {
         help.queryCommands(query, sender)
     }

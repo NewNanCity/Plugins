@@ -66,7 +66,7 @@ class CommandRegistry(val plugin: BetterCommandBlockPlugin) {
             }
 
             // 初始化帮助系统
-            help = MinecraftHelp.createNative("/cb", commandManager)
+            help = MinecraftHelp.createNative("/cb help", commandManager)
 
             plugin.logger.info(LanguageKeys.Log.Info.COMMAND_REGISTERED, "CommandRegistry")
 
@@ -131,7 +131,7 @@ class CommandRegistry(val plugin: BetterCommandBlockPlugin) {
     @Permission("better-command-block.firewall.stats")
     fun firewallStatsCommand(
         sender: CommandSender,
-        @Argument(value = "reset", description = "重置统计信息") @Default("") reset: String
+        @Argument(value = "reset", description = "重置统计信息") @Default("no-reset") reset: String
     ) {
         try {
             if (reset.equals("reset", ignoreCase = true)) {
@@ -226,7 +226,7 @@ class CommandRegistry(val plugin: BetterCommandBlockPlugin) {
     @CommandDescription(LanguageKeys.Commands.Help.DESCRIPTION)
     fun helpCommand(
         sender: CommandSender,
-        @Greedy @Default("") @Argument(value = "help-query", description = LanguageKeys.Commands.Help.QUERY) query: String
+        @Greedy @Default("1") @Argument(value = "help-query", description = LanguageKeys.Commands.Help.QUERY) query: String
     ) {
         help.queryCommands(query, sender) // 所有插件的帮助命令都这样写
     }

@@ -1,10 +1,8 @@
 package city.newnan.gui.component.scrollable
 
-import city.newnan.core.cache.LRUCache
 import city.newnan.core.utils.text.toMiniMessage
 import city.newnan.gui.component.base.BaseComponent
 import city.newnan.gui.component.base.BaseRenderContext
-import city.newnan.gui.dataprovider.CacheStrategy
 import city.newnan.gui.dataprovider.IDataProvider
 import city.newnan.gui.dataprovider.ListDataProvider
 import city.newnan.gui.dataprovider.SyncDataProvider
@@ -25,35 +23,6 @@ typealias ScrollChangeHandler = (context: ScrollChangeContext) -> Unit
  * 四元组数据类（用于内部多返回值）
  */
 private data class Tuple4<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
-
-/**
- * 行缓存条目
- * 包含行数据和状态，作为统一的缓存单元
- * 
- * @param T 数据项类型
- * @param data 行数据列表
- * @param state 行状态
- */
-data class RowCacheEntry<T>(
-    val data: List<T>,
-    val state: RowState
-) {
-    companion object {
-        fun <T> loading(): RowCacheEntry<T> = RowCacheEntry(emptyList(), RowState.LOADING)
-        fun <T> error(): RowCacheEntry<T> = RowCacheEntry(emptyList(), RowState.ERROR)
-        fun <T> loaded(data: List<T>): RowCacheEntry<T> = RowCacheEntry(data, RowState.LOADED)
-    }
-}
-
-/**
- * 行状态枚举
- */
-enum class RowState {
-    NOT_LOADED,  // 未加载
-    LOADING,     // 正在加载
-    LOADED,      // 已加载
-    ERROR        // 加载失败
-}
 
 /**
  * 可滚动组件
@@ -141,12 +110,13 @@ class ScrollableComponent<T>(
     @Volatile
     private var totalDataSize: Int = -1
 
-    // 行缓存（使用 LRUCache 统一管理数据和状态）
-    private var rowCache: LRUCache<Int, RowCacheEntry<T>>
+    // 当前可见区域的数据
+    @Volatile
+    private var visibleData: Map<Int, List<T>> = emptyMap()
 
     // 是否为无限滚动模式
     private val isInfiniteMode: Boolean get() = totalDataSize < 0
-    
+
     // 操作锁，确保异步操作的原子性
     private val operationLock = ReentrantLock()
 
@@ -196,53 +166,9 @@ class ScrollableComponent<T>(
             )
         }
 
-        // 根据缓存策略初始化缓存
-        rowCache = createRowCache()
-        bind(rowCache) // 绑定到组件生命周期
-
         // 初始化数据
         refreshData()
     }
-
-    /**
-     * 根据缓存策略创建行缓存
-     */
-    private fun createRowCache(): LRUCache<Int, RowCacheEntry<T>> {
-        val strategy = dataProvider.getCacheStrategy()
-        val capacity = when (strategy) {
-            CacheStrategy.NO_CACHE -> 0
-            CacheStrategy.CURRENT_PAGE_ONLY -> visibleRows
-            CacheStrategy.MULTI_PAGE -> visibleRows * 3
-            CacheStrategy.AGGRESSIVE -> visibleRows * 10
-        }
-        return LRUCache(capacity)
-    }
-
-    /**
-     * 根据缓存策略应用清理逻辑
-     * 只在必要时调用，避免重复清理
-     */
-    private fun applyCacheStrategy() {
-        val strategy = dataProvider.getCacheStrategy()
-        
-        when (strategy) {
-            CacheStrategy.NO_CACHE -> {
-                // 不缓存，立即清空所有缓存
-                rowCache.clear()
-            }
-            CacheStrategy.CURRENT_PAGE_ONLY -> {
-                // 只保留当前可见区域的行
-                val visibleRowRange = scrollOffset until (scrollOffset + visibleRows)
-                val keysToRemove = rowCache.keys.filter { it !in visibleRowRange }
-                keysToRemove.forEach { row -> rowCache.remove(row) }
-            }
-            // MULTI_PAGE 和 AGGRESSIVE 由 LRUCache 自动管理
-            else -> {
-                // LRUCache 会自动管理缓存大小，无需手动处理
-            }
-        }
-    }
-
 
     /**
      * 刷新数据
@@ -256,8 +182,6 @@ class ScrollableComponent<T>(
             sizeResult.fold(
                 onSuccess = { size ->
                     totalDataSize = size
-                    // 根据缓存策略清理缓存（只在数据源变更时）
-                    applyCacheStrategy()
                     // 设置组件状态为就绪
                     componentState.set(ComponentState.READY)
                     // 加载当前可见区域的数据
@@ -266,7 +190,7 @@ class ScrollableComponent<T>(
                 onFailure = { error ->
                     // 处理数据加载错误
                     totalDataSize = 0
-                    rowCache.clear()
+                    visibleData = emptyMap()
                     componentState.set(ComponentState.ERROR)
                     update()
                 }
@@ -287,81 +211,24 @@ class ScrollableComponent<T>(
      * 加载指定行数据
      */
     private fun loadRowData(row: Int) {
-        val strategy = dataProvider.getCacheStrategy()
-
-        // NO_CACHE策略：每次都重新加载
-        if (strategy == CacheStrategy.NO_CACHE) {
-            loadRowDataInternal(row, forceReload = true)
-            return
-        }
-
-        val currentEntry = rowCache[row]
-        if (currentEntry != null && (currentEntry.state == RowState.LOADING || currentEntry.state == RowState.LOADED)) {
-            // 缓存命中，直接返回
-            return
-        }
-
-        loadRowDataInternal(row, forceReload = false)
-    }
-
-    // NO_CACHE策略的临时数据存储
-    @Volatile
-    private var noCacheTemporaryData: MutableMap<Int, List<T>> = mutableMapOf()
-
-    /**
-     * 内部行数据加载方法
-     */
-    private fun loadRowDataInternal(row: Int, forceReload: Boolean) {
-        val strategy = dataProvider.getCacheStrategy()
-
-        // 如果强制重新加载或者是NO_CACHE策略，清除现有缓存
-        if (forceReload || strategy == CacheStrategy.NO_CACHE) {
-            rowCache.remove(row)
-        }
-
-        // 非NO_CACHE策略才设置loading状态到缓存
-        if (strategy != CacheStrategy.NO_CACHE) {
-            rowCache[row] = RowCacheEntry.loading()
-        }
-
         val offset = row * itemsPerRow
         dataProvider.fetchItems(offset, itemsPerRow) { dataResult ->
             dataResult.fold(
                 onSuccess = { data ->
-                    // 根据缓存策略决定是否缓存
-                    if (strategy != CacheStrategy.NO_CACHE) {
-                        rowCache[row] = RowCacheEntry.loaded(data)
-                        // LRU缓存会自动管理大小，无需手动调用
-                    } else {
-                        // NO_CACHE策略：真正不缓存，只用临时变量存储可见行数据
-                        if (row >= scrollOffset && row < scrollOffset + visibleRows) {
-                            synchronized(noCacheTemporaryData) {
-                                noCacheTemporaryData[row] = data
-                                // 清理不可见行的临时数据
-                                val visibleRange = scrollOffset until (scrollOffset + visibleRows)
-                                noCacheTemporaryData.keys.removeAll { it !in visibleRange }
-                            }
-                        }
-                    }
-
-                    // 如果是当前可见区域，立即更新显示
+                    // 如果是当前可见区域，更新数据并刷新显示
                     if (row >= scrollOffset && row < scrollOffset + visibleRows) {
+                        val newVisibleData = visibleData.toMutableMap()
+                        newVisibleData[row] = data
+                        visibleData = newVisibleData
                         update()
                     }
                 },
                 onFailure = { error ->
-                    if (strategy != CacheStrategy.NO_CACHE) {
-                        rowCache[row] = RowCacheEntry.error()
-                    } else {
-                        // NO_CACHE策略：不缓存错误状态，清空临时数据
-                        if (row >= scrollOffset && row < scrollOffset + visibleRows) {
-                            synchronized(noCacheTemporaryData) {
-                                noCacheTemporaryData.remove(row)
-                            }
-                        }
-                    }
-
+                    // 如果是当前可见区域，清空数据并刷新显示
                     if (row >= scrollOffset && row < scrollOffset + visibleRows) {
+                        val newVisibleData = visibleData.toMutableMap()
+                        newVisibleData.remove(row)
+                        visibleData = newVisibleData
                         update()
                     }
                 }
@@ -376,23 +243,16 @@ class ScrollableComponent<T>(
         synchronized(this) {
             // 暂停组件状态更新
             componentState.set(ComponentState.LOADING)
-            
-            // 保存旧缓存的引用
-            val oldCache = this.rowCache
-            
-            // 创建新缓存
-            val newCache = createRowCache()
-            bind(newCache)
-            
+
             // 原子性地更新所有状态
             this.dataProvider = newDataProvider
             this.scrollOffset = 0
             this.totalDataSize = -1
-            this.rowCache = newCache
-            
-            // 关闭旧缓存
-            oldCache.close()
-            
+            this.visibleData = emptyMap()
+
+            // 立即更新显示加载状态
+            update()
+
             // 刷新数据
             refreshData()
         }
@@ -413,26 +273,15 @@ class ScrollableComponent<T>(
     }
 
     /**
-     * 清空缓存
-     */
-    fun clearCache() {
-        rowCache.clear()
-    }
-
-    /**
      * 刷新当前可见区域
      */
     fun refresh() {
-        val strategy = dataProvider.getCacheStrategy()
+        // 清空当前可见数据并立即更新显示
+        visibleData = emptyMap()
+        update()
+        // 重新加载所有可见行数据
         for (row in scrollOffset until scrollOffset + visibleRows) {
-            if (strategy == CacheStrategy.NO_CACHE) {
-                // NO_CACHE策略：强制重新加载
-                loadRowDataInternal(row, forceReload = true)
-            } else {
-                // 其他策略：清除行缓存后重新加载
-                rowCache.remove(row)
-                loadRowData(row)
-            }
+            loadRowData(row)
         }
     }
 
@@ -440,67 +289,18 @@ class ScrollableComponent<T>(
      * 刷新指定行
      */
     fun refreshRow(row: Int) {
-        val strategy = dataProvider.getCacheStrategy()
-        if (strategy == CacheStrategy.NO_CACHE) {
-            // NO_CACHE策略：强制重新加载
-            loadRowDataInternal(row, forceReload = true)
-        } else {
-            // 其他策略：清除指定行缓存后重新加载
-            rowCache.remove(row)
-            loadRowData(row)
+        // 如果是可见行，先清空数据并更新显示
+        if (row >= scrollOffset && row < scrollOffset + visibleRows) {
+            val newVisibleData = visibleData.toMutableMap()
+            newVisibleData.remove(row)
+            visibleData = newVisibleData
+            update()
         }
+        // 重新加载数据
+        loadRowData(row)
     }
 
-    /**
-     * 预加载指定行
-     */
-    fun preloadRow(row: Int) {
-        if (row >= 0) {
-            val strategy = dataProvider.getCacheStrategy()
 
-            // NO_CACHE策略：不进行预加载
-            if (strategy == CacheStrategy.NO_CACHE) {
-                return
-            }
-
-            val entry = rowCache[row]
-            if (entry == null || (entry.state != RowState.LOADING && entry.state != RowState.LOADED)) {
-                loadRowData(row)
-            }
-        }
-    }
-
-    /**
-     * 根据缓存策略预加载邻近行
-     */
-    private fun preloadAdjacentRows() {
-        val strategy = dataProvider.getCacheStrategy()
-
-        when (strategy) {
-            CacheStrategy.NO_CACHE, CacheStrategy.CURRENT_PAGE_ONLY -> {
-                // 不预加载
-                return
-            }
-            CacheStrategy.MULTI_PAGE -> {
-                // 预加载前后各2行
-                for (i in -2..2) {
-                    val targetRow = scrollOffset + visibleRows / 2 + i
-                    if (targetRow >= 0) {
-                        preloadRow(targetRow)
-                    }
-                }
-            }
-            CacheStrategy.AGGRESSIVE -> {
-                // 预加载前后各5行
-                for (i in -5..5) {
-                    val targetRow = scrollOffset + visibleRows / 2 + i
-                    if (targetRow >= 0) {
-                        preloadRow(targetRow)
-                    }
-                }
-            }
-        }
-    }
 
     /**
      * 设置渲染函数
@@ -565,14 +365,12 @@ class ScrollableComponent<T>(
             val previousOffset = scrollOffset
             scrollOffset = newOffset
 
+            // 清空旧的可见数据并立即更新显示
+            visibleData = emptyMap()
+            update()
+
             // 加载新的可见区域数据
             loadVisibleData()
-
-            // 根据缓存策略预加载邻近行
-            preloadAdjacentRows()
-
-            // 立即更新显示
-            update()
 
             // 触发滚动变更事件
             scrollChangeHandler?.invoke(
@@ -611,7 +409,7 @@ class ScrollableComponent<T>(
                 val nextRowOffset = (scrollOffset + lines) * itemsPerRow
                 val semaphore = Semaphore(0)
                 var canScroll = false
-                
+
                 dataProvider.canFetchMore(nextRowOffset) { canFetchResult ->
                     canFetchResult.fold(
                         onSuccess = { canFetch ->
@@ -623,7 +421,7 @@ class ScrollableComponent<T>(
                     )
                     semaphore.release()
                 }
-                
+
                 // 等待异步操作完成
                 semaphore.acquire()
                 canScroll
@@ -692,82 +490,14 @@ class ScrollableComponent<T>(
     }
 
     /**
-     * 检查行是否正在加载
-     */
-    fun isRowLoading(row: Int): Boolean = rowCache[row]?.state == RowState.LOADING
-
-    /**
-     * 检查行是否已缓存
-     */
-    fun isRowCached(row: Int): Boolean = rowCache[row]?.state == RowState.LOADED
-
-    /**
      * 获取指定行的数据
      */
-    fun getRowData(row: Int): List<T> = rowCache[row]?.data ?: emptyList()
-
-    /**
-     * 获取行状态
-     */
-    fun getRowState(row: Int): RowState = rowCache[row]?.state ?: RowState.NOT_LOADED
+    fun getRowData(row: Int): List<T> = visibleData[row] ?: emptyList()
 
     /**
      * 获取组件状态
      */
     fun getComponentState(): ComponentState = componentState.get()
-
-    /**
-     * 获取当前缓存策略
-     */
-    fun getCacheStrategy(): CacheStrategy = dataProvider.getCacheStrategy()
-
-    /**
-     * 获取滚动组件缓存统计信息
-     */
-    fun getScrollableCacheStats(): String {
-        val stats = getCacheStatsDetailed()
-        return "ScrollableComponent Cache - Strategy: ${stats.strategy}, Rows: ${stats.cachedRows}/${stats.maxCacheSize}, Hit Rate: ${"%.2f".format(stats.cacheHitRate * 100)}%, Cached Rows: ${stats.cachedRowNumbers}"
-    }
-
-    /**
-     * 获取详细的缓存统计信息
-     */
-    fun getCacheStatsDetailed(): ScrollableCacheStats {
-        return ScrollableCacheStats(
-            strategy = getCacheStrategy(),
-            cachedRows = rowCache.size,
-            maxCacheSize = rowCache.capacity,
-            cacheHitRate = calculateCacheHitRate(),
-            cachedRowNumbers = rowCache.keys.toList(),
-            visibleRows = visibleRows
-        )
-    }
-
-    /**
-     * 计算缓存命中率（简化实现）
-     */
-    private fun calculateCacheHitRate(): Double {
-        return if (rowCache.capacity == 0) 0.0
-               else rowCache.size.toDouble() / rowCache.capacity.coerceAtLeast(1)
-    }
-
-    /**
-     * 强制清理缓存（除了当前可见区域）
-     */
-    fun forceClearCache(keepVisibleRows: Boolean = true) {
-        if (keepVisibleRows) {
-            val visibleRowData = mutableMapOf<Int, RowCacheEntry<T>>()
-
-            for (row in scrollOffset until scrollOffset + visibleRows) {
-                rowCache[row]?.let { visibleRowData[row] = it }
-            }
-
-            rowCache.clear()
-            rowCache.putAll(visibleRowData)
-        } else {
-            clearCache()
-        }
-    }
 
     override fun getSlots(): List<Int> {
         return _slots
@@ -790,24 +520,7 @@ class ScrollableComponent<T>(
         val dataIndex = dataRow * itemsPerRow + relativeX
 
         // 获取行数据
-        val strategy = dataProvider.getCacheStrategy()
-        val (rowData, rowState, isLoading, isRowCached) = if (strategy == CacheStrategy.NO_CACHE) {
-            // NO_CACHE策略：从临时数据获取
-            val tempData = synchronized(noCacheTemporaryData) { noCacheTemporaryData[dataRow] }
-            if (tempData != null) {
-                Tuple4(tempData, RowState.LOADED, false, true)
-            } else {
-                Tuple4(emptyList<T>(), RowState.NOT_LOADED, false, false)
-            }
-        } else {
-            // 其他策略：从缓存获取
-            val rowEntry = rowCache[dataRow]
-            val data = rowEntry?.data ?: emptyList()
-            val state = rowEntry?.state ?: RowState.NOT_LOADED
-            val loading = state == RowState.LOADING
-            val cached = state == RowState.LOADED
-            Tuple4(data, state, loading, cached)
-        }
+        val rowData = visibleData[dataRow] ?: emptyList()
         val item = if (relativeX < rowData.size) rowData[relativeX] else null
 
         return ScrollableRenderContext(
@@ -822,10 +535,7 @@ class ScrollableComponent<T>(
             dataIndex = dataIndex,
             scrollOffset = scrollOffset,
             item = item,
-            isLoading = isLoading,
-            isRowCached = isRowCached,
             isInfiniteMode = isInfiniteMode,
-            rowState = rowState,
             componentState = componentState.get()
         )
     }
@@ -837,13 +547,9 @@ class ScrollableComponent<T>(
                 // 可以显示错误图标或空槽位
                 emptySlotRenderFunction?.invoke(context)
             }
-            // 行正在加载且没有数据时显示加载中
-            context.rowState == RowState.LOADING && context.item == null -> {
+            // 组件正在加载且没有数据时显示加载中
+            context.componentState == ComponentState.LOADING && context.item == null -> {
                 loadingSlotRenderFunction?.invoke(context)
-            }
-            // 行加载失败
-            context.rowState == RowState.ERROR -> {
-                emptySlotRenderFunction?.invoke(context)
             }
             // 有数据时正常渲染
             context.item != null -> {
@@ -859,7 +565,7 @@ class ScrollableComponent<T>(
     override fun toString(): String {
         return "ScrollableComponent(startX=$startX, startY=$startY, width=$width, height=$height, scrollOffset=$scrollOffset, maxOffset=${
             if(isInfiniteMode) "∞" else maxScrollOffset}, mode=${if(isInfiniteMode) "infinite" else "finite"}, totalRows=${
-                if(isInfiniteMode) "∞" else totalRows}, dataSize=$totalDataSize, cachedRows=${rowCache.size}, page=${page.title.toMiniMessage()})"
+                if(isInfiniteMode) "∞" else totalRows}, dataSize=$totalDataSize, visibleDataRows=${visibleData.size}, page=${page.title.toMiniMessage()})"
     }
 
     override fun close() {
@@ -882,10 +588,7 @@ data class ScrollableRenderContext<T>(
     val dataIndex: Int,
     val scrollOffset: Int,
     val item: T?,
-    val isLoading: Boolean = false,
-    val isRowCached: Boolean = false,
     val isInfiniteMode: Boolean = false,
-    val rowState: RowState = RowState.NOT_LOADED,
     val componentState: ScrollableComponent.ComponentState = ScrollableComponent.ComponentState.INIT
 ) : BaseRenderContext()
 
@@ -920,15 +623,3 @@ data class ScrollChangeContext(
  * 渲染函数类型别名
  */
 typealias RenderFunction<T> = (T) -> ItemStack?
-
-/**
- * 滚动组件缓存统计信息
- */
-data class ScrollableCacheStats(
-    val strategy: CacheStrategy,
-    val cachedRows: Int,
-    val maxCacheSize: Int,
-    val cacheHitRate: Double,
-    val cachedRowNumbers: List<Int>,
-    val visibleRows: Int
-)

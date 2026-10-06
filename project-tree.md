@@ -11,7 +11,7 @@ NewNanPlugins/
 │       ├── Versions.kt
 │       ├── Dependencies.kt
 │       └── newnancity-plugin.gradle.kts
-├── docs/                           # 文档中心（core/config/gui/i18n/network/...）
+├── docs/                           # 文档中心（core/config/gui/i18n/network/development/...）
 ├── modules/                        # 可选功能模块（均依赖 core）
 │   ├── core/                       # 核心框架（BasePlugin/BaseModule/调度器/事件/消息/缓存等）
 │   ├── config/                     # 多格式配置管理（Jackson）
@@ -43,4 +43,3 @@ NewNanPlugins/
 - 子项目清单以 settings.gradle.kts 为准；本树定期更新
 - 统一使用构建约定插件（newnancity-plugin）管理仓库级配置
 - 全部插件与模块统一依赖版本（见 buildSrc/Versions.kt）
-

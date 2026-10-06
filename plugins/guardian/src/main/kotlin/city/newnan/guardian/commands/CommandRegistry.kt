@@ -10,6 +10,7 @@ import city.newnan.guardian.commands.user.LookupCommand
 import city.newnan.guardian.commands.user.TownCommand
 import city.newnan.guardian.i18n.LanguageKeys
 import org.bukkit.command.CommandSender
+import org.incendo.cloud.CommandTree
 import org.incendo.cloud.annotation.specifier.Greedy
 import org.incendo.cloud.annotations.AnnotationParser
 import org.incendo.cloud.annotations.Argument
@@ -79,7 +80,7 @@ class CommandRegistry(val plugin: GuardianPlugin) {
         ).forEach { commandAnnotationParser.parse(it) }
 
         // 生成帮助指令
-        help = MinecraftHelp.createNative("/guardian", commandManager)
+        help = MinecraftHelp.createNative("/guardian help", commandManager)
     }
 
     // 为help的查询提供补全
@@ -95,7 +96,7 @@ class CommandRegistry(val plugin: GuardianPlugin) {
     // 帮助指令
     @Command("guardian help [help-query]")
     @CommandDescription(LanguageKeys.Commands.Help.DESCRIPTION)
-    fun helpCommand(sender: CommandSender, @Greedy @Default("") @Argument(value = "help-query", description = LanguageKeys.Commands.Help.QUERY) query: String) {
+    fun helpCommand(sender: CommandSender, @Greedy @Default("1") @Argument(value = "help-query", description = LanguageKeys.Commands.Help.QUERY) query: String) {
         help.queryCommands(query, sender) // 所有插件的帮助命令都这样写
     }
 

@@ -1020,7 +1020,7 @@ class CommandRegistry(val plugin: MyPlugin) {
         commands.forEach { commandManager.command(it) }
 
         // 生成帮助指令
-        help = MinecraftHelp.createNative("/myplugin", commandManager)
+        help = MinecraftHelp.createNative("/myplugin help", commandManager)
     }
 }
 ```
@@ -1070,7 +1070,7 @@ class CommandRegistry(val plugin: MyPlugin) {
     @CommandDescription(LanguageKeys.Commands.Help.Description)
     fun helpCommand(
         sender: CommandSender,
-        @Greedy @Default("") @Argument(value = "query", description = LanguageKeys.Commands.Help.Query)
+        @Greedy @Default("1") @Argument(value = "query", description = LanguageKeys.Commands.Help.Query)
         query: String
     ) {
         help.queryCommands(query, sender)

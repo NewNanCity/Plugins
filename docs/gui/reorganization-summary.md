@@ -1,0 +1,5 @@
+# GUI 重组总结
+
+本页面为统一命名入口，请阅读：
+
+- [REORGANIZATION_SUMMARY.md](REORGANIZATION_SUMMARY.md)

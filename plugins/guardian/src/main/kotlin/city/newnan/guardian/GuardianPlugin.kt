@@ -6,9 +6,10 @@ import city.newnan.core.config.CorePluginConfig
 import city.newnan.guardian.commands.CommandRegistry
 import city.newnan.guardian.config.GuardianConfig
 import city.newnan.guardian.i18n.LanguageKeys
+import city.newnan.guardian.modules.HeartbeatManager
 import city.newnan.guardian.modules.JudgementalManager
-import city.newnan.guardian.modules.PlayerDB
 import city.newnan.guardian.modules.PlayerManager
+import city.newnan.guardian.sdk.NewNanManagerClient
 import city.newnan.i18n.extensions.setupLanguageManager
 import net.milkbowl.vault.economy.Economy
 import net.milkbowl.vault.permission.Permission
@@ -22,13 +23,17 @@ class GuardianPlugin : BasePlugin() {
     }
 
     lateinit var permission: Permission
-    lateinit var economy: Economy
+    var economy: Economy? = null
 
     lateinit var judgementalManager: JudgementalManager
         private set
-    lateinit var playerDB: PlayerDB
+    lateinit var nnmClient: NewNanManagerClient
         private set
     lateinit var playerManager: PlayerManager
+        private set
+    lateinit var heartbeatManager: HeartbeatManager
+        private set
+    lateinit var commandRegistry: CommandRegistry
         private set
 
     override fun getCoreConfig(): CorePluginConfig {
@@ -44,20 +49,23 @@ class GuardianPlugin : BasePlugin() {
         INSTANCE = this
     }
 
-    private lateinit var commandRegistry: CommandRegistry
-
     override fun onPluginEnable() {
         try {
             // 语言设置前使用英文日志
             logger.info("Guardian Plugin enabling...")
 
+            nnmClient = NewNanManagerClient(
+                token = getPluginConfig().token,
+                baseUrl = getPluginConfig().baseUrl,
+            )
+
             if (!isPluginPresent("Vault")) throw Exception("Vault not found!")
             permission = getService(Permission::class.java) ?: throw Exception("Vault permission service not found!")
-            economy = getService(Economy::class.java) ?: throw Exception("Vault economy service not found!")
+            economy = getService(Economy::class.java)
 
-            playerDB = PlayerDB(this)
             playerManager = PlayerManager(this)
             judgementalManager = JudgementalManager(this)
+            heartbeatManager = HeartbeatManager(this)
 
             // 调用重载方法处理可重载的功能
             reloadPlugin()
@@ -76,6 +84,7 @@ class GuardianPlugin : BasePlugin() {
 
     override fun onPluginDisable() {
         // 所有绑定的资源会自动清理
+        nnmClient.close()
     }
 
     override fun reloadPlugin() {
@@ -85,6 +94,11 @@ class GuardianPlugin : BasePlugin() {
 
             // 1. 清理配置缓存（必需，否则无法从磁盘加载最新的文件）
             configManager.clearCache()
+
+            val config = getPluginConfig()
+            if (config.serverId > 0) {
+                nnmClient.ensureServerSession(config.serverId)
+            }
 
             // 2. 重新设置语言管理器（必需）
             setupLanguageManager(

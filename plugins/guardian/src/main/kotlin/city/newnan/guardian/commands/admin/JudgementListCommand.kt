@@ -18,7 +18,7 @@ import org.incendo.cloud.annotations.Permission
  */
 class JudgementListCommand(private val plugin: GuardianPlugin) {
 
-    @Command("guardian|gd judgement list|ls")
+    @Command("guardian judgement list|ls")
     @CommandDescription(LanguageKeys.Commands.JudgementList.DESCRIPTION)
     @Permission("guardian.judgemental.edit")
     fun judgementListCommand(sender: CommandSender) {

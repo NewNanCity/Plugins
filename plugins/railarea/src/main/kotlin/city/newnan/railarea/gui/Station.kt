@@ -78,21 +78,21 @@ fun openStationGui(
             }
 
             // 普通点击 - 选择站点
-            onLeftClick { context, index, station ->
+            onLeftClick { _, _, station ->
                 if (station != null) {
                     setStation(station.id)
                 }
             }
 
             // Shift+左键 - 编辑站点名称
-            onShiftLeftClick { context, index, station ->
+            onShiftLeftClick { _, _, station ->
                 if (station != null) {
                     handleStationInput(plugin, player, station) { newStation ->
                         if (newStation != null) {
                             plugin.messager.printf(player, LanguageKeys.Gui.Station.STATION_UPDATED, newStation.name)
                             plugin.stationStorage.updateStation(newStation)
-                            // 清除缓存
-                            this@paginatedComponent.clearCache()
+                            // 刷新组件
+                            this@paginatedComponent.refresh()
                         }
                         // 重新打开GUI
                         this@openPage.show()
@@ -101,7 +101,7 @@ fun openStationGui(
             }
 
             // Shift+右键 - 删除站点 (仅当站点未被任何线路使用时)
-            onShiftRightClick { context, index, station ->
+            onShiftRightClick { _, _, station ->
                 if (station != null) {
                     if (station.lines.isNotEmpty()) {
                         plugin.messager.printf(
@@ -120,8 +120,8 @@ fun openStationGui(
                                 try {
                                     plugin.stationStorage.removeStation(station.id)
                                     plugin.messager.printf(player, LanguageKeys.Gui.Station.STATION_DELETED, station.name)
-                                    // 清除缓存
-                                    this@paginatedComponent.clearCache()
+                                    // 刷新组件
+                                    this@paginatedComponent.refresh()
                                 } catch (e: Exception) {
                                     plugin.logger.error("Failed to delete station", e)
                                     plugin.messager.printf(player, LanguageKeys.Input.Station.SAVE_FAILED, e.message ?: "Unknown error")
@@ -148,8 +148,8 @@ fun openStationGui(
                     if (station != null) {
                         plugin.messager.printf(player, LanguageKeys.Gui.Station.STATION_CREATED, station.name)
                         plugin.stationStorage.addStation(station.name)
-                        // 清除缓存
-                        paginatedComponent.clearCache()
+                        // 刷新组件
+                        paginatedComponent.refresh()
                     }
                     // 重新打开GUI
                     this@openPage.show()

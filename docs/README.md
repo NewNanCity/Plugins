@@ -2,6 +2,26 @@
 
 欢迎来到现代化 Minecraft 插件框架的文档中心！这里包含了所有模块的完整文档和使用指南。
 
+## 下一代框架重写设计
+
+**[Framework Next 设计包](framework-next/README.md)** 是后续全新干净项目的事实源。它不以当前旧 `modules/*` 和 `plugins/*` 实现为约束，而是从最佳实践开发者写法反推总架构、痛点分析、关键技术取舍、各模块内部方案和实现清单。
+
+阅读入口：
+
+- [背景与边界](framework-next/00-background.md)
+- [痛点和关键技术分析](framework-next/01-pain-points-and-technical-analysis.md)
+- [总架构与最佳实践代码](framework-next/02-architecture-and-best-practice.md)
+- [新项目启动蓝图](framework-next/03-new-project-bootstrap.md)
+- [从 0 到 1 路线图 Outline](framework-next/04-roadmap-outline.md)
+- [Public API 契约](framework-next/api-contracts.md)
+- [样例治理](framework-next/samples-policy.md)
+- [各部分实现文档](framework-next/implementation/README.md)
+- [相关工作调研和取舍](framework-next/research-and-tradeoffs.md)
+- [验证矩阵](framework-next/verification-matrix.md)
+- [反模式清单](framework-next/anti-patterns.md)
+- [决策表](framework-next/decisions.md)
+- [实现清单](framework-next/implementation-checklist.md)
+
 ## 📚 模块文档
 
 ### 🔧 Core 模块（核心）
@@ -58,6 +78,10 @@
 - **适用场景**: 复杂用户界面、多页面导航、动态内容展示
 - **学习时间**: 30分钟快速上手，2小时深入掌握
 
+### 🧾 审查与评估
+
+- [框架审查文档索引](reviews/README.md)
+
 ## 🚀 快速开始
 
 ### 1. 选择您需要的模块
@@ -80,7 +104,8 @@
 - [Database 快速开始](database/quick-start.md)
 - [I18n 快速开始](i18n/quick-start.md)
 - [Network 快速开始](network/quick-start.md)
-- [GUI 快速开始](gui/quick-start.md)
+- [GUI 快速开始](gui/GETTING_STARTED.md)
+- [GUI 快速开始（统一入口）](gui/quick-start.md)
 
 ### 3. 参考最佳实践
 
@@ -88,10 +113,22 @@
 
 - [Core 最佳实践](core/best-practices.md)
 - [Config 最佳实践](config/best-practices.md)
-- [Database 最佳实践](database/best-practices.md)
-- [I18n 最佳实践](i18n/best-practices.md)
-- [Network 最佳实践](network/best-practices.md)
-- [GUI 最佳实践](gui/best-practices.md)
+- [Database 示例实践](database/examples.md)
+- [I18n 命名规范](i18n/naming-conventions.md)
+- [Network 基础概念](network/concepts.md)
+- [GUI 最佳实践](gui/guides/best-practices.md)
+
+## 🛠️ 开发指南
+
+面向插件开发者和 AI 编码助手的开发规范与参考文档：
+
+- [开发指南总览](development/README.md)
+- [插件开发规范](development/plugin-conventions.md) — 配置、重载、生命周期、Manager 模式
+- [构建系统详解](development/build-system.md) — BuildSrc、Shadow JAR、Gradle 优化
+- [迁移指南](development/migration-guide.md) — 从 violet 框架迁移到 BasePlugin + Cloud
+- [迁移记录](development/migration-records.md) — 各插件迁移状态
+- [质量检查清单](development/quality-checklist.md) — 开发、测试、部署阶段
+- [国际化管理](development/i18n-management.md) — 语言键分析工具和规范
 
 ## 🔧 故障排除
 
@@ -99,10 +136,10 @@
 
 - [Core 故障排除](core/troubleshooting.md)
 - [Config 故障排除](config/troubleshooting.md)
-- [Database 故障排除](database/troubleshooting.md)
-- [I18n 故障排除](i18n/troubleshooting.md)
-- [Network 故障排除](network/troubleshooting.md)
-- [GUI 故障排除](gui/troubleshooting.md)
+- [Database 常见示例与排查](database/examples.md)
+- [I18n 概念与排查入口](i18n/concepts.md)
+- [Network 概念与排查入口](network/concepts.md)
+- [GUI 故障排除](gui/guides/troubleshooting.md)
 
 ## 📖 文档特色
 

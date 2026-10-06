@@ -104,7 +104,7 @@ abstract class BasePage(
      * Page不应该直接调用此方法
      */
     override fun showInternal() {
-        checkNotClosed()
+        if (closed) return
         checkInitialized()
 
         if (!_isVisible) {
@@ -158,7 +158,7 @@ abstract class BasePage(
     }
 
     override fun update() {
-        checkNotClosed()
+        if (closed) return
         checkInitialized()
         lock.write {
             // 清空inventory
@@ -171,7 +171,7 @@ abstract class BasePage(
     }
 
     override fun renderSlots(slots: List<Int>) {
-        checkNotClosed()
+        if (closed) return
         checkInitialized()
         // 在同步任务中获取物品
         runSync {
@@ -213,7 +213,7 @@ abstract class BasePage(
     }
 
     override fun addComponent(component: IComponent<*>) {
-        checkNotClosed()
+        if (closed) return
         checkInitialized()
         lock.write {
             if (!_components.contains(component)) {
@@ -301,7 +301,7 @@ abstract class BasePage(
     }
 
     override fun chatInput(hide: Boolean, handler: (input: String) -> Boolean): Boolean {
-        checkNotClosed()
+        if (closed) return false
         checkInitialized()
 
         val previousHandler = SessionStorage.getChatInputHandler(player)
@@ -369,15 +369,6 @@ abstract class BasePage(
     }
 
     // ==================== 检查方法 ====================
-
-    /**
-     * 检查页面是否未关闭
-     */
-    private fun checkNotClosed() {
-        if (closed) {
-            throw IllegalStateException("Page is closed")
-        }
-    }
 
     /**
      * 检查页面是否已初始化

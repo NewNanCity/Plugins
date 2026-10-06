@@ -107,7 +107,7 @@ class CommandRegistry(val plugin: MyPlugin) {
         ).forEach { commandAnnotationParser.parse(it) }
 
         // 生成帮助指令 /myplugin 是插件的指令前缀
-        help = MinecraftHelp.createNative("/myplugin", commandManager)
+        help = MinecraftHelp.createNative("/myplugin help", commandManager)
     }
 
     // 为help的查询提供补全
@@ -123,7 +123,7 @@ class CommandRegistry(val plugin: MyPlugin) {
     // 帮助指令
     @Command("myplugin|pluginalias help [help-query]")
     @CommandDescription(LanguageKeys.Commands.Help.DESCRIPTION)
-    fun helpCommand(sender: CommandSender, @Greedy @Default("") @Argument(value = "help-query", description = LanguageKeys.Commands.Help.Query) query: String) {
+    fun helpCommand(sender: CommandSender, @Greedy @Default("1") @Argument(value = "help-query", description = LanguageKeys.Commands.Help.Query) query: String) {
         help.queryCommands(query, sender) // 所有插件的帮助命令都这样写
     }
 
@@ -174,6 +174,8 @@ fun deathcost(
 ) {
     sender.sendMessage("DeathCost")
 }
+
+// 警告：@Default不能够设置空串，否则会出现无限递归问题
 
 // 支持的参数类型举例
 @Command("...")

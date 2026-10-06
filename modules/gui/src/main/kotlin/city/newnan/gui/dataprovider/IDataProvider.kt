@@ -32,9 +32,4 @@ interface IDataProvider<T> {
      * @param callback 结果回调
      */
     fun canFetchMore(offset: Int, callback: DataProviderCallback<Boolean>)
-
-    /**
-     * 获取建议的缓存策略
-     */
-    fun getCacheStrategy(): CacheStrategy
 }

@@ -81,7 +81,7 @@ fun handleAreaInput(
                 // 打开GUI选择流程: 线路 → 站点 → 方向
                 openRailLinesGui(plugin, player, false) { selectedLineId ->
                     // 进入线路详情页面选择站点
-                    openRailLineGui(plugin, player, false, plugin.stationStorage.getLineById(selectedLineId)!!) { selectedStationId ->
+                    openRailLineGui(plugin, player, false, selectedLineId) { selectedStationId ->
                         // 选择方向
                         openReverseGui(plugin, player, plugin.stationStorage.getLineById(selectedLineId)!!) { selectedReverse ->
                             // 设置所有选择的值
@@ -100,7 +100,7 @@ fun handleAreaInput(
                 }
                 false
             }
-            "area" -> {
+            "box" -> {
                 if (argv.size < 2) {
                     if (!isWorldEditAvailable()) {
                         plugin.messager.printf(player, LanguageKeys.Input.Area.WORLDEDIT_NOT_INSTALLED)

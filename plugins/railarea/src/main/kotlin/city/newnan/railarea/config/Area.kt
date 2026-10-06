@@ -8,9 +8,6 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.bukkit.Bukkit
 import org.bukkit.Location
-import org.bukkit.entity.Entity
-import org.bukkit.entity.Player
-import org.bukkit.util.Vector
 
 /**
  * 铁路区域配置
@@ -23,13 +20,6 @@ data class AreaConfig(
     @JsonProperty("station") val station: Int,
     @JsonProperty("line") val line: Int,
     @JsonProperty("reverse") val reverse: Boolean
-)
-
-private val directions = listOf(
-    Vector(1, 0, 0),
-    Vector(-1, 0, 0),
-    Vector(0, 0, 1),
-    Vector(0, 0, -1),
 )
 
 /**
@@ -119,30 +109,6 @@ data class RailArea(
 
     override fun toString(): String {
         return "RailArea(station=${station.name}, line=${line.name}, reverse=$reverse)"
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as RailArea
-
-        if (world != other.world) return false
-        if (range3D != other.range3D) return false
-        if (station != other.station) return false
-        if (line != other.line) return false
-        if (reverse != other.reverse) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = world.hashCode()
-        result = 31 * result + range3D.hashCode()
-        result = 31 * result + station.hashCode()
-        result = 31 * result + line.hashCode()
-        result = 31 * result + reverse.hashCode()
-        return result
     }
 }
 

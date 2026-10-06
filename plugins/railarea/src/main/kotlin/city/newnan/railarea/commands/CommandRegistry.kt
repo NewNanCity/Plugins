@@ -1,5 +1,7 @@
 package city.newnan.railarea.commands
 
+import city.newnan.core.utils.text.ComponentParseMode
+import city.newnan.core.utils.text.toComponent
 import city.newnan.railarea.RailAreaPlugin
 import city.newnan.railarea.gui.input.handleAreaInput
 import city.newnan.railarea.gui.openRailLinesGui
@@ -36,9 +38,9 @@ import java.util.concurrent.CompletableFuture
  * @since 2.0.0
  */
 class CommandRegistry(val plugin: RailAreaPlugin) {
-    
+
     // ====== 从这里开始是固定模板 ======
-    
+
     // 创建命令管理器
     val commandManager = LegacyPaperCommandManager.createNative(
         plugin,
@@ -61,11 +63,9 @@ class CommandRegistry(val plugin: RailAreaPlugin) {
 
     init {
         // 解析注解 - 只注册当前类，因为所有命令都在这里实现
-        val commands = commandAnnotationParser.parse(this)
-        commands.forEach { commandManager.command(it) }
-
+        commandAnnotationParser.parse(this)
         // 生成帮助指令
-        help = MinecraftHelp.createNative("/railarea", commandManager)
+        help = MinecraftHelp.createNative("/railarea help", commandManager)
     }
 
     // ====== 固定模板结束 ======
@@ -84,8 +84,8 @@ class CommandRegistry(val plugin: RailAreaPlugin) {
     @Command("railarea|rail help [help-query]")
     @CommandDescription(LanguageKeys.Commands.Help.DESCRIPTION)
     fun helpCommand(
-        sender: CommandSender, 
-        @Greedy @Default("") @Argument(value = "help-query", description = LanguageKeys.Commands.Help.QUERY) query: String
+        sender: CommandSender,
+        @Greedy @Default("1") @Argument(value = "help-query", description = LanguageKeys.Commands.Help.QUERY) query: String
     ) {
         help.queryCommands(query, sender)
     }

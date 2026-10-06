@@ -1,7 +1,5 @@
 package city.newnan.guardian.commands.user
 
-import city.newnan.core.scheduler.runAsync
-import city.newnan.core.scheduler.runSync
 import city.newnan.guardian.GuardianPlugin
 import city.newnan.guardian.gui.openTownGui
 import city.newnan.guardian.i18n.LanguageKeys
@@ -21,13 +19,11 @@ import org.incendo.cloud.annotations.Default
  * @since 2.0.0
  */
 class TownCommand(private val plugin: GuardianPlugin) {
-
-    @Command("guardian|gd town [town-name]")
-    @Command("town [town-name]")
+    @Command("guardian town [town-name]")
     @CommandDescription(LanguageKeys.Commands.Town.DESCRIPTION)
     fun townCommand(
         sender: CommandSender,
-        @Argument(value = "town-name", description = LanguageKeys.Commands.Town.TOWN_NAME) @Default("") townName: String
+        @Argument(value = "town-name", description = LanguageKeys.Commands.Town.TOWN_NAME) @Default("#") townName: String
     ) {
         // 1. 玩家检查
         if (sender !is Player) {
@@ -36,7 +32,7 @@ class TownCommand(private val plugin: GuardianPlugin) {
         }
 
         // 2. 权限检查和参数处理
-        val targetTownName = if (townName.isEmpty()) {
+        val targetTownName = if (townName.isEmpty() || townName == "#") {
             null // 让GUI查询玩家自己的小镇
         } else {
             // 检查是否有权限查看其他小镇

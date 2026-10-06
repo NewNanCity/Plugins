@@ -11,8 +11,7 @@ open class SyncDataProvider<T>(
     private val hasMoreProvider: (offset: Int) -> Boolean = { offset ->
         val size = sizeProvider()
         if (size == -1) true else offset < size
-    },
-    private val cacheStrategy: CacheStrategy = CacheStrategy.CURRENT_PAGE_ONLY
+    }
 ) : IDataProvider<T> {
     // 便利构造函数：从同步List提供函数构造
     constructor(itemsProvider: () -> List<T>) : this(
@@ -50,9 +49,5 @@ open class SyncDataProvider<T>(
         callback: DataProviderCallback<Boolean>
     ) {
         callback(Result.success(hasMoreProvider(offset)))
-    }
-
-    override fun getCacheStrategy(): CacheStrategy {
-        return cacheStrategy
     }
 }

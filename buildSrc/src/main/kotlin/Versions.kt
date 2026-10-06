@@ -49,6 +49,7 @@ object Versions {
 
     // 网络库版本
     const val ktor = "2.3.12"
+    const val okHttp = "5.1.0"
 
     // UI库版本
     const val adventure = "4.14.0"
@@ -60,6 +61,7 @@ object Versions {
     const val essentialsX = "2.21.1"
     const val xConomy = "2.25.1"
     const val dynmap = "3.7-beta-6"
+    const val protocolLib = "5.4.0"
 
     // 协程版本
     const val coroutines = "1.10.2"

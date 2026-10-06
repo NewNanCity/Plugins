@@ -17,7 +17,8 @@ fun <T> ScrollableComponent<T>.onClick(handler: (ClickEventContext, Int, Int, T?
     eventHandlers.onClickHandler = { context ->
         val renderContext = getRenderContext(context.slot) as? ScrollableRenderContext<T>
         if (renderContext != null) {
-            handler.invoke(context, renderContext.visibleIndex, renderContext.dataIndex, renderContext.item, renderContext.isLoading)
+            val isLoading = renderContext.componentState == ScrollableComponent.ComponentState.LOADING
+            handler.invoke(context, renderContext.visibleIndex, renderContext.dataIndex, renderContext.item, isLoading)
         }
     }
 }
@@ -30,7 +31,8 @@ fun <T> ScrollableComponent<T>.onLeftClick(handler: (ClickEventContext, Int, Int
     eventHandlers.onLeftClickHandler = { context ->
         val renderContext = getRenderContext(context.slot) as? ScrollableRenderContext<T>
         if (renderContext != null) {
-            handler.invoke(context, renderContext.visibleIndex, renderContext.dataIndex, renderContext.item, renderContext.isLoading)
+            val isLoading = renderContext.componentState == ScrollableComponent.ComponentState.LOADING
+            handler.invoke(context, renderContext.visibleIndex, renderContext.dataIndex, renderContext.item, isLoading)
         }
     }
 }
@@ -43,7 +45,8 @@ fun <T> ScrollableComponent<T>.onRightClick(handler: (ClickEventContext, Int, In
     eventHandlers.onRightClickHandler = { context ->
         val renderContext = getRenderContext(context.slot) as? ScrollableRenderContext<T>
         if (renderContext != null) {
-            handler.invoke(context, renderContext.visibleIndex, renderContext.dataIndex, renderContext.item, renderContext.isLoading)
+            val isLoading = renderContext.componentState == ScrollableComponent.ComponentState.LOADING
+            handler.invoke(context, renderContext.visibleIndex, renderContext.dataIndex, renderContext.item, isLoading)
         }
     }
 }
@@ -56,7 +59,8 @@ fun <T> ScrollableComponent<T>.onShiftClick(handler: (ClickEventContext, Int, In
     eventHandlers.onShiftClickHandler = { context ->
         val renderContext = getRenderContext(context.slot) as? ScrollableRenderContext<T>
         if (renderContext != null) {
-            handler.invoke(context, renderContext.visibleIndex, renderContext.dataIndex, renderContext.item, renderContext.isLoading)
+            val isLoading = renderContext.componentState == ScrollableComponent.ComponentState.LOADING
+            handler.invoke(context, renderContext.visibleIndex, renderContext.dataIndex, renderContext.item, isLoading)
         }
     }
 }
@@ -69,7 +73,8 @@ fun <T> ScrollableComponent<T>.onShiftLeftClick(handler: (ClickEventContext, Int
     eventHandlers.onShiftLeftClickHandler = { context ->
         val renderContext = getRenderContext(context.slot) as? ScrollableRenderContext<T>
         if (renderContext != null) {
-            handler.invoke(context, renderContext.visibleIndex, renderContext.dataIndex, renderContext.item, renderContext.isLoading)
+            val isLoading = renderContext.componentState == ScrollableComponent.ComponentState.LOADING
+            handler.invoke(context, renderContext.visibleIndex, renderContext.dataIndex, renderContext.item, isLoading)
         }
     }
 }
@@ -82,7 +87,8 @@ fun <T> ScrollableComponent<T>.onShiftRightClick(handler: (ClickEventContext, In
     eventHandlers.onShiftRightClickHandler = { context ->
         val renderContext = getRenderContext(context.slot) as? ScrollableRenderContext<T>
         if (renderContext != null) {
-            handler.invoke(context, renderContext.visibleIndex, renderContext.dataIndex, renderContext.item, renderContext.isLoading)
+            val isLoading = renderContext.componentState == ScrollableComponent.ComponentState.LOADING
+            handler.invoke(context, renderContext.visibleIndex, renderContext.dataIndex, renderContext.item, isLoading)
         }
     }
 }
@@ -95,7 +101,8 @@ fun <T> ScrollableComponent<T>.onMiddleClick(handler: (ClickEventContext, Int, I
     eventHandlers.onMiddleClickHandler = { context ->
         val renderContext = getRenderContext(context.slot) as? ScrollableRenderContext<T>
         if (renderContext != null) {
-            handler.invoke(context, renderContext.visibleIndex, renderContext.dataIndex, renderContext.item, renderContext.isLoading)
+            val isLoading = renderContext.componentState == ScrollableComponent.ComponentState.LOADING
+            handler.invoke(context, renderContext.visibleIndex, renderContext.dataIndex, renderContext.item, isLoading)
         }
     }
 }
@@ -108,7 +115,8 @@ fun <T> ScrollableComponent<T>.onDoubleClick(handler: (ClickEventContext, Int, I
     eventHandlers.onDoubleClickHandler = { context ->
         val renderContext = getRenderContext(context.slot) as? ScrollableRenderContext<T>
         if (renderContext != null) {
-            handler.invoke(context, renderContext.visibleIndex, renderContext.dataIndex, renderContext.item, renderContext.isLoading)
+            val isLoading = renderContext.componentState == ScrollableComponent.ComponentState.LOADING
+            handler.invoke(context, renderContext.visibleIndex, renderContext.dataIndex, renderContext.item, isLoading)
         }
     }
 }
@@ -124,7 +132,8 @@ fun <T> ScrollableComponent<T>.onDrag(handler: (DragEventContext, Int, Int, T?, 
         if (relevantSlot != null) {
             val renderContext = getRenderContext(relevantSlot) as? ScrollableRenderContext<T>
             if (renderContext != null) {
-                handler.invoke(context, renderContext.visibleIndex, renderContext.dataIndex, renderContext.item, renderContext.isLoading)
+                val isLoading = renderContext.componentState == ScrollableComponent.ComponentState.LOADING
+                handler.invoke(context, renderContext.visibleIndex, renderContext.dataIndex, renderContext.item, isLoading)
             }
         }
     }
@@ -140,7 +149,8 @@ fun <T> ScrollableComponent<T>.onDragSingle(handler: (DragEventContext, Int, Int
         if (relevantSlot != null) {
             val renderContext = getRenderContext(relevantSlot) as? ScrollableRenderContext<T>
             if (renderContext != null) {
-                handler.invoke(context, renderContext.visibleIndex, renderContext.dataIndex, renderContext.item, renderContext.isLoading)
+                val isLoading = renderContext.componentState == ScrollableComponent.ComponentState.LOADING
+                handler.invoke(context, renderContext.visibleIndex, renderContext.dataIndex, renderContext.item, isLoading)
             }
         }
     }
@@ -156,7 +166,8 @@ fun <T> ScrollableComponent<T>.onDragEven(handler: (DragEventContext, Int, Int, 
         if (relevantSlot != null) {
             val renderContext = getRenderContext(relevantSlot) as? ScrollableRenderContext<T>
             if (renderContext != null) {
-                handler.invoke(context, renderContext.visibleIndex, renderContext.dataIndex, renderContext.item, renderContext.isLoading)
+                val isLoading = renderContext.componentState == ScrollableComponent.ComponentState.LOADING
+                handler.invoke(context, renderContext.visibleIndex, renderContext.dataIndex, renderContext.item, isLoading)
             }
         }
     }

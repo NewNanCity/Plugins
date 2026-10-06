@@ -93,6 +93,9 @@ object Dependencies {
 
         // 网络和HTTP
         object Network {
+            const val okHttp = "com.squareup.okhttp3:okhttp:${Versions.okHttp}"
+            const val okHttpBom = "com.squareup.okhttp3:okhttp-bom:${Versions.okHttp}"
+            const val okHttpMock = "com.squareup.okhttp3:mockwebserver:${Versions.okHttp}"
             const val ktor = "io.ktor:ktor-client-core:${Versions.ktor}"
             const val ktorOkHttp = "io.ktor:ktor-client-okhttp:${Versions.ktor}"
             const val ktorContentNegotiation = "io.ktor:ktor-client-content-negotiation:${Versions.ktor}"
@@ -119,6 +122,7 @@ object Dependencies {
             const val xConomy = "com.github.YiC200333:XConomyAPI:${Versions.xConomy}"
             const val worldEdit = "com.sk89q.worldedit:worldedit-bukkit:7.0.0"
             const val dynmapApi = "us.dynmap:DynmapCoreAPI:${Versions.dynmap}"
+            const val protocolLib = "net.dmulloy2:ProtocolLib:${Versions.protocolLib}"
         }
     }
 }

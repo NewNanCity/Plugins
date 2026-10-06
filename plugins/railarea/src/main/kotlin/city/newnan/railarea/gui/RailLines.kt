@@ -76,11 +76,11 @@ fun openRailLinesGui(
             }
 
             // 普通点击 - 选择线路进入下一级
-            onLeftClick { context, index, line ->
+            onLeftClick { _, _, line ->
                 if (line != null) {
                     if (editable) {
                         // 编辑模式：进入线路详情页面
-                        openRailLineGui(plugin, player, true, line)
+                        openRailLineGui(plugin, player, true, line.id)
                     } else {
                         // 选择模式：直接选择线路
                         onLineSelect(line.id)
@@ -90,20 +90,19 @@ fun openRailLinesGui(
 
             // 右键 - 切换环线/往返线模式（仅编辑模式）
             if (editable) {
-                onRightClick { context, index, line ->
+                onRightClick { _, _, line ->
                     if (line != null) {
                         plugin.stationStorage.updateLine(line.copy(isCycle = !line.isCycle))
                         plugin.messager.printf(player, LanguageKeys.Gui.RailLines.LINE_UPDATED, line.color.toHexString(), line.name)
-                        // 刷新缓存
-                        this@paginatedComponent.clearCache()
-                        this@paginatedComponent.update()
+                        // 刷新组件
+                        this@paginatedComponent.refresh()
                     }
                 }
             }
 
             // Shift+左键 - 编辑线路（仅编辑模式）
             if (editable) {
-                onShiftLeftClick { context, index, line ->
+                onShiftLeftClick { _, _, line ->
                     if (line != null) {
                         handleRailLineInput(plugin, player, line) { updatedLine ->
                             if (updatedLine != null) {
@@ -113,8 +112,8 @@ fun openRailLinesGui(
                                     LanguageKeys.Gui.RailLines.LINE_UPDATED,
                                     updatedLine.color.toHexString(), updatedLine.name
                                 )
-                                // 刷新缓存
-                                this@paginatedComponent.clearCache()
+                                // 刷新组件
+                                this@paginatedComponent.refresh()
                             }
                             // 重新打开GUI
                             this@openPage.show()
@@ -125,14 +124,9 @@ fun openRailLinesGui(
 
             // Shift+右键 - 删除线路（仅编辑模式）
             if (editable) {
-                onShiftRightClick { context, index, line ->
+                onShiftRightClick { _, _, line ->
+                    plugin.logger.info("Shift right clicked $line")
                     if (line != null) {
-                        plugin.messager.printf(
-                            player,
-                            LanguageKeys.Gui.RailLines.DELETE_CONFIRM,
-                            line.color.toHexString(), line.name
-                        )
-
                         val confirmMessage = formatPlain(
                             LanguageKeys.Gui.RailLines.DELETE_CONFIRM,
                             line.color.toHexString(), line.name
@@ -141,9 +135,9 @@ fun openRailLinesGui(
                             if (confirmed) {
                                 try {
                                     plugin.stationStorage.removeLine(line.id)
-                                    plugin.messager.printf(player, LanguageKeys.Gui.RailLines.LINE_DELETED, line.name)
-                                    // 刷新缓存
-                                    this@paginatedComponent.clearCache()
+                                    plugin.messager.printf(player, LanguageKeys.Gui.RailLines.LINE_DELETED, line.color.toHexString(), line.name)
+                                    // 刷新组件
+                                    this@paginatedComponent.refresh()
                                 } catch (e: Exception) {
                                     plugin.logger.error("Failed to delete line", e)
                                     plugin.messager.printf(player, LanguageKeys.Input.RailLine.SAVE_FAILED, e.message ?: "Unknown error")
@@ -179,8 +173,8 @@ fun openRailLinesGui(
                                 LanguageKeys.Gui.RailLines.LINE_ADDED,
                                 line.color.toHexString(), line.name
                             )
-                            // 刷新缓存
-                            paginatedComponent.clearCache()
+                            // 刷新组件
+                            paginatedComponent.refresh()
                         }
                         // 重新打开GUI
                         this@openPage.show()
@@ -194,12 +188,7 @@ fun openRailLinesGui(
                 slotComponent(5, 5) {
                     render {
                         urlSkull("b0253144515d14243cd176cf7a9c4ff1af49010e5716ca88a7adfd13d9bee165") {
-                            name(LanguageKeys.Gui.RailLines.FREE_AREA_MANAGEMENT) // <yellow>游离区域</yellow>
-                            // 多行，使用 |
-                            // <gray>这些区域由于其所在的线路或站点被删除,</gray>
-                            // <gray>处于游离状态, 等待分配</gray>
-                            //
-                            // <green>左键: 打开游离区域管理</green>
+                            name(LanguageKeys.Gui.RailLines.FREE_AREA_MANAGEMENT)
                             lore(LanguageKeys.Gui.RailLines.FREE_AREA_MANAGEMENT_LORE)
                         }
                     }

@@ -101,8 +101,8 @@ fun openFreeAreaGui(
                             try {
                                 plugin.stationStorage.updateArea(newArea)
                                 plugin.messager.printf(player, LanguageKeys.Gui.FreeArea.AREA_UPDATED)
-                                // 清空缓存
-                                this@paginatedComponent.clearCache()
+                                // 刷新组件
+                                this@paginatedComponent.refresh()
                             } catch (e: Exception) {
                                 plugin.logger.error("Failed to update free area", e)
                                 plugin.messager.printf(player, LanguageKeys.Gui.FreeArea.UPDATE_FAILED, e.message ?: "Unknown error")
@@ -125,8 +125,8 @@ fun openFreeAreaGui(
                             try {
                                 plugin.stationStorage.removeArea(area.id)
                                 plugin.messager.printf(player, LanguageKeys.Gui.FreeArea.AREA_DELETED)
-                                // 清空缓存
-                                this@paginatedComponent.clearCache()
+                                // 刷新组件
+                                this@paginatedComponent.refresh()
                             } catch (e: Exception) {
                                 plugin.logger.error("Failed to delete free area", e)
                                 plugin.messager.printf(player, LanguageKeys.Gui.FreeArea.DELETE_FAILED, e.message ?: "Unknown error")
